@@ -54,6 +54,16 @@
       ]
     },
     {
+      "name": "DOWNLOADER",
+      "items": [
+        {
+          "name": "ytmp3",
+          "desc": "ytmp3 download",
+          "path": "/dl/ytmp3"
+        }
+      ]
+    },
+    {
       "name": "Search Tools",
       "items": [
         {
