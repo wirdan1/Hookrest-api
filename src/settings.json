@@ -59,7 +59,7 @@
         {
           "name": "ytmp3",
           "desc": "ytmp3 download",
-          "path": "/dl/ytmp3"
+          "path": "/dl/ytmp3?q="
         }
       ]
     },
