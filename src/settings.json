@@ -68,13 +68,6 @@
         }
       ]
     },
-        {
-          "name": "Ytmp3",
-          "desc": "Ytmp3 Download by Danz-dev",
-          "path": "/dl/ytmp3?url="
-        }
-      ]
-    },
     {
       "name": "Search Tools",
       "items": [
