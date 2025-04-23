@@ -74,7 +74,7 @@
         {
           "name": "PlayCloud",
           "desc": "Play Cloud",
-          "path": "/search/cloud?query="
+          "path": "/search/cloud?q="
         },
         {
           "name": "YouTube",
