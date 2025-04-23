@@ -54,29 +54,27 @@
       ]
     },
         {
-      "name": "Search",
-      "items": [
-        {
-          "name": "Lyrics Search",
-          "desc": "Cari Lirik Lagu Kesukaan kamu",
-          "path": "/search/lyrics?q="
-        }
-      ]
-    },
-    {
-          "name": "YT search",
-          "desc": "YT SEARCH BY DANZ",
-          "path": "/search/youtube?q=="
-        }
-      ]
-    },
-    {
       "name": "Download",
       "items": [
         {
           "name": "Douyin",
-          "desc": "Douyin download",
+          "desc": "Douyin Download by Danz-dev",
           "path": "/dl/douyin?q="
+        }
+      ]
+    },
+    {
+      "name": "Search Tools",
+      "items": [
+        {
+          "name": "lyrics",
+          "desc": "Lyrics search",
+          "path": "/search/lyrics?q="
+        },
+        {
+          "name": "YouTube",
+          "desc": "Video search",
+          "path": "/search/youtube?q="
         }
       ]
     }
