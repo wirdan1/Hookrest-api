@@ -1,40 +1,20 @@
+const axios = require('axios');
+
 module.exports = function(app) {
-    const fetch = require('node-fetch');
-    const cheerio = require('cheerio');
+    async function getDouyin(url) {
+        try {
+            const api = `https://api.siputzx.my.id/api/d/douyin?url=${encodeURIComponent(url)}`;
+            const res = await axios.get(api);
+            const data = res.data;
 
-    async function douyinDownloader(url) {
-        const apiUrl = "https://lovetik.app/api/ajaxSearch";
-        const formBody = new URLSearchParams();
-        formBody.append("q", url);
-        formBody.append("lang", "id");
+            if (!data?.status || !data?.data) {
+                throw new Error('Video tidak ditemukan.');
+            }
 
-        const res = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "Accept": "*/*",
-                "X-Requested-With": "XMLHttpRequest"
-            },
-            body: formBody.toString()
-        });
-
-        const data = await res.json();
-        if (data.status !== "ok") throw new Error("Gagal mengambil data Douyin.");
-
-        const $ = cheerio.load(data.data);
-        const title = $("h3").text();
-        const thumbnail = $(".image-tik img").attr("src");
-        const duration = $(".content p").text();
-        const dl = [];
-
-        $(".dl-action a").each((i, el) => {
-            dl.push({
-                text: $(el).text().trim(),
-                url: $(el).attr("href")
-            });
-        });
-
-        return { title, thumbnail, duration, dl };
+            return data.data;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     }
 
     app.get('/dl/douyin', async (req, res) => {
@@ -44,10 +24,13 @@ module.exports = function(app) {
         }
 
         try {
-            const result = await douyinDownloader(url);
+            const result = await getDouyin(url);
             res.status(200).json({
                 status: true,
-                result
+                creator: 'Danz-dev',
+                title: result.title,
+                thumbnail: result.thumbnail,
+                downloads: result.downloads,
             });
         } catch (error) {
             res.status(500).json({ status: false, error: error.message });
