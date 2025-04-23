@@ -1,7 +1,7 @@
 {
   "name": "Hookrest Api's",
   "version": "Hookrest UI",
-  "description": "Rest api Hookrest yang dibuat oleh Danz-dev. Mohon untuk kerjasamanya jika ada fitur yang tidak berfungsi dengan selayaknya untuk contact admin & jika kamu bisa mengoding jangan sungkan chat admin untuk bergabung sebagai Developer website Rest api Resmi ini.",
+  "description": "Simple and Easy-to-Use API Documentation",
   "header": {
     "status": "Online!",
     "imageSrc": [
@@ -57,19 +57,19 @@
       "name": "Download",
       "items": [
         {
+          "name": "Ytmp3",
+          "desc": "Ytmp3 Download by Danz-dev",
+          "path": "/dl/ytmp3?url="
+        },
+        {
           "name": "Douyin",
           "desc": "Douyin Download by Danz-dev",
-          "path": "/dl/douyin?url="
+          "path": "/dl/douyin?q="
         },
         {
           "name": "Sound Cloud",
           "desc": "Sound Cloud Download by Danz-dev",
           "path": "/dl/soundcloud?url="
-        },
-        {
-          "name": "Ytmp3",
-          "desc": "Ytmp3 Download by Danz-dev",
-          "path": "/dl/ytmp3?url="
         }
       ]
     },
