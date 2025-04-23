@@ -57,14 +57,14 @@
       "name": "Download",
       "items": [
         {
-          "name": "Ytmp3",
-          "desc": "Ytmp3 Download by Danz-dev",
-          "path": "/dl/ytmp3?url="
-        },
-        {
           "name": "Douyin",
           "desc": "Douyin Download by Danz-dev",
           "path": "/dl/douyin?url="
+        },
+        {
+          "name": "Ytmp3",
+          "desc": "Ytmp3 Download by Danz-dev",
+          "path": "/dl/ytmp3?url="
         },
         {
           "name": "Sound Cloud",
