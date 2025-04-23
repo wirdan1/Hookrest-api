@@ -44,16 +44,6 @@
       ]
     },
     {
-      "name": "Douwnloader",
-      "items": [
-        {
-          "name": "Douyin",
-          "desc": "Douyin downloader",
-          "path": "/dl/douyin?q="
-        }
-      ]
-    },
-    {
       "name": "Random",
       "items": [
         {
@@ -63,13 +53,23 @@
         }
       ]
     },
+        {
+      "name": "Download",
+      "items": [
+        {
+          "name": "Douyin",
+          "desc": "Douyin Download by Danz-dev",
+          "path": "/dl/douyin?q="
+        }
+      ]
+    },
     {
       "name": "Search Tools",
       "items": [
-                {
-          "name": "Lyrics",
-          "desc": "Cari lirik lagu favorit kamu",
-          "path": "/search/lyrics?q=",
+        {
+          "name": "lyrics",
+          "desc": "Lyrics search",
+          "path": "/search/lyrics?q="
         },
         {
           "name": "YouTube",
