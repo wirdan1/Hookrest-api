@@ -66,6 +66,11 @@
     {
       "name": "Search Tools",
       "items": [
+                {
+          "name": "Lyrics",
+          "desc": "Cari lirik lagu favorit kamu",
+          "path": "/search/lyrics?q=",
+        },
         {
           "name": "YouTube",
           "desc": "Video search",
