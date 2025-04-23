@@ -72,9 +72,9 @@
           "path": "/search/lyrics?q="
         },
         {
-          "name": "Spotify",
-          "desc": "Play Spotify",
-          "path": "/search/spotify?text="
+          "name": "PlayCloud",
+          "desc": "Play Cloud",
+          "path": "/search/cloud?query="
         },
         {
           "name": "YouTube",
