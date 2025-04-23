@@ -60,6 +60,11 @@
           "name": "YouTube",
           "desc": "Video search",
           "path": "/search/youtube?q="
+        },
+        {
+          "name": "lyrics",
+          "desc": "Lyrics search by danz",
+          "path": "/search/lyrics?q="
         }
       ]
     }
