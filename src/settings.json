@@ -57,13 +57,6 @@
       "name": "Download",
       "items": [
         {
-          "name": "Sound Cloud",
-          "desc": "Sound Cloud Download by Danz-dev",
-          "path": "/dl/soundcloud?url="
-        }
-      ]
-    },
-    {
           "name": "Douyin",
           "desc": "Douyin Download by Danz-dev",
           "path": "/dl/douyin?q="
