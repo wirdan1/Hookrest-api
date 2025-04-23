@@ -54,12 +54,17 @@
       ]
     },
     {
-      "name": "Download",
+      "name": "Downloader",
       "items": [
         {
           "name": "Douyin",
           "desc": "Douyin Download by Danz-dev",
           "path": "/dl/douyin?q="
+        },
+        {
+          "name": "Ytmp3",
+          "desc": "Download Audio YouTube by Danz-dev",
+          "path": "/dl/ytmp3?q="
         },
         {
           "name": "Sound Cloud",
