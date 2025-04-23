@@ -33,7 +33,7 @@ module.exports = function(app) {
             throw error; 
         } 
     } 
-    app.get('/search/playcloud', async (req, res) => { 
+    app.get('/search/cloud', async (req, res) => { 
         const { q } = req.query; 
         if (!q) return res.status(400).json({ status: false, error: 'Query is required' }); 
         try { 
