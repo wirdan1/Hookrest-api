@@ -10,7 +10,7 @@ module.exports = function(app) {
             throw new Error(error.response?.data?.message || error.message); 
         } 
     } 
-    app.get('/download/playcloud', async (req, res) => { 
+    app.get('/dl/soundcloud', async (req, res) => { 
         const { url } = req.query; 
         if (!url) return res.status(400).json({ status: false, error: 'URL is required' }); 
         try { 
