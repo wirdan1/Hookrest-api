@@ -69,16 +69,6 @@
           "path": "/search/youtube?q=="
         }
       ]
-    },
-    {
-      "name": "Download",
-      "items": [
-        {
-          "name": "Douyin",
-          "desc": "Douyin download",
-          "path": "/dl/douyin?q="
-        }
-      ]
     }
   ]
 }
