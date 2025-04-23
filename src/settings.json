@@ -67,6 +67,11 @@
           "path": "/dl/ytmp3?url="
         },
         {
+          "name": "ytmp4",
+          "desc": "Ytmp4 Download by Danz-dev",
+          "path": "/dl/ytmp4?url="
+        },
+        {
           "name": "Sound Cloud",
           "desc": "Sound Cloud Download by Danz-dev",
           "path": "/dl/soundcloud?url="
