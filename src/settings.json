@@ -59,7 +59,7 @@
         {
           "name": "Douyin",
           "desc": "Douyin Download by Danz-dev",
-          "path": "/dl/douyin?q="
+          "path": "/dl/douyin?url="
         },
         {
           "name": "ytmp3",
