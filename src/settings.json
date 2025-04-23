@@ -63,6 +63,13 @@
         }
       ]
     },
+            {
+          "name": "Spotify",
+          "desc": "Douyin Download by Danz-dev",
+          "path": "/dl/spotify?q="
+        }
+      ]
+    },
     {
       "name": "Search Tools",
       "items": [
