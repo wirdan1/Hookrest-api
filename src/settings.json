@@ -54,6 +54,16 @@
       ]
     },
     {
+      "name": "Info",
+      "items": [
+        {
+          "name": "Jadwal TV",
+          "desc": "Jadwal TV Indonesia",
+          "path": "/info/jadwatv"
+        }
+      ]
+    },
+    {
       "name": "Download",
       "items": [
         {
