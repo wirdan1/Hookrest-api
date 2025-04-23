@@ -64,6 +64,13 @@
       ]
     },
     {
+          "name": "Sound Cloud",
+          "desc": "Sound Cloud Download by Danz-dev",
+          "path": "/dl/soundcloud?q="
+        }
+      ]
+    },
+    {
       "name": "Search Tools",
       "items": [
         {
@@ -72,8 +79,8 @@
           "path": "/search/lyrics?q="
         },
         {
-          "name": "PlayCloud",
-          "desc": "Play Cloud",
+          "name": "Sound Cloud",
+          "desc": "Sound Cloud Search",
           "path": "/search/cloud?q="
         },
         {
