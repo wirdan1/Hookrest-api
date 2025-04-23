@@ -53,20 +53,13 @@
         }
       ]
     },
-        {
+    {
       "name": "Download",
       "items": [
         {
           "name": "Douyin",
           "desc": "Douyin Download by Danz-dev",
           "path": "/dl/douyin?q="
-        }
-      ]
-    },
-            {
-          "name": "Spotify",
-          "desc": "Douyin Download by Danz-dev",
-          "path": "/dl/spotify?q="
         }
       ]
     },
