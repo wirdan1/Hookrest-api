@@ -54,6 +54,13 @@
       ]
     },
     {
+          "name": "Sound Cloud",
+          "desc": "Sound Cloud downloader",
+          "path": "/dl/soundcloud?q="
+        }
+      ]
+    },
+    {
       "name": "Random",
       "items": [
         {
