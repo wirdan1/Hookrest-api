@@ -1,27 +1,22 @@
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 module.exports = function(app) {
     async function getYTMP3(url) {
         try {
             if (!url.includes('youtu')) throw new Error('URL harus berupa link YouTube');
 
-            const api = `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(url)}`;
-            const response = await fetch(api, {
+            const apiUrl = `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(url)}`;
+            const { data } = await axios.get(apiUrl, {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
                 }
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!data?.status || !data?.data?.dl) throw new Error('Audio tidak ditemukan.');
 
-            const data = await response.json();
-
-            if (!data?.result?.audio) throw new Error('Audio tidak ditemukan.');
-
-            return data.result;
+            return data.data; // { title, dl }
         } catch (error) {
-            console.error('Gagal fetch YTMP3:', error.message);
-            throw error;
+            throw new Error(error.response?.data?.error || error.message);
         }
     }
 
