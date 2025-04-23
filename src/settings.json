@@ -72,6 +72,11 @@
           "path": "/search/lyrics?q="
         },
         {
+          "name": "Spotify",
+          "desc": "Play Spotify",
+          "path": "/search/spotify?text="
+        },
+        {
           "name": "YouTube",
           "desc": "Video search",
           "path": "/search/youtube?q="
