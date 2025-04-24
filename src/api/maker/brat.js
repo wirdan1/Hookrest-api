@@ -8,7 +8,7 @@ module.exports = function(app) {
                 headers: {
                     'User-Agent': 'Mozilla/5.0'
                 },
-                validateStatus: () => true // untuk handle error sendiri
+                validateStatus: () => true
             });
 
             if (!res.data?.status || !res.data?.result) {
