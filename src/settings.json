@@ -42,7 +42,7 @@
         },
         {
           "name": "Dukun",
-          "desc": "Dukun Abal-abal",
+          "desc": "Dukun Sakti",
           "path": "/ai/dukun?content="
         },
         {
@@ -103,7 +103,7 @@
         },
         {
           "name": "YouTube",
-          "desc": "Video search",
+          "desc": "Youtube search",
           "path": "/search/youtube?q="
         }
       ]
