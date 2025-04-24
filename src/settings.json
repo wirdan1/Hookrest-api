@@ -72,11 +72,6 @@
           "path": "/dl/ytmp4?url="
         },
         {
-          "name": "Tiktok",
-          "desc": "Tiktok Download by Danz-dev",
-          "path": "/dl/tiktok?url="
-        },
-        {
           "name": "Sound Cloud",
           "desc": "Sound Cloud Download by Danz-dev",
           "path": "/dl/soundcloud?url="
