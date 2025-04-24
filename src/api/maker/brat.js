@@ -21,7 +21,7 @@ module.exports = function(app) {
         }
     }
 
-    app.get('/api/brat', async (req, res) => {
+    app.get('/maker/brat', async (req, res) => {
         const { text } = req.query;
         if (!text) return res.status(400).json({ status: false, error: 'Text is required' });
 
