@@ -1,34 +1,40 @@
 const axios = require('axios');
 
 module.exports = function(app) {
-    async function getBrat(text) {
-        const apiUrl = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}`;
+    async function getBratText(text) {
         try {
-            const res = await axios.get(apiUrl, {
-                validateStatus: () => true
-            });
+            const url = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}`;
+            const res = await axios.get(url);
+            const data = res.data;
 
-            if (!res.data?.status || !res.data?.result) {
-                throw new Error(res.data?.message || 'Gagal generate brat.');
+            if (!data?.status || !data?.data) {
+                throw new Error('Data tidak tersedia.');
             }
 
-            return res.data.result;
+            return data.data;
         } catch (error) {
-            throw new Error(error.message || 'Gagal mengambil data.');
+            throw new Error(error.message);
         }
     }
 
     app.get('/maker/brat', async (req, res) => {
         const { text } = req.query;
-        if (!text) return res.status(400).json({ status: false, error: 'Text is required' });
+
+        if (!text) {
+            return res.status(400).json({
+                status: false,
+                message: 'Text parameter is required'
+            });
+        }
 
         try {
-            const result = await getBrat(text);
-
-            res.setHeader('Content-Type', 'image/png');
-            res.send(result);
+            const bratResult = await getBratText(text);
+            res.status(200).send(bratResult);
         } catch (error) {
-            res.status(500).json({ status: false, error: error.message });
+            res.status(500).json({
+                status: false,
+                message: error.message
+            });
         }
     });
 };
