@@ -8,20 +8,20 @@ module.exports = function(app) {
                 headers: {
                     'User-Agent': 'Mozilla/5.0'
                 },
-                validateStatus: () => true // biar bisa handle error sendiri
+                validateStatus: () => true
             });
 
             if (!res.data?.status || !res.data?.result) {
                 throw new Error(res.data?.message || 'Gagal generate brat.');
             }
 
-            return res.data.result;
+            return { imageUrl: res.data.result };
         } catch (error) {
             throw new Error(error.message || 'Gagal mengambil data.');
         }
     }
 
-    app.get('/maker/brat', async (req, res) => {
+    app.get('/api/brat', async (req, res) => {
         const { text } = req.query;
         if (!text) return res.status(400).json({ status: false, error: 'Text is required' });
 
