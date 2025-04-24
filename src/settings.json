@@ -64,6 +64,16 @@
       ]
     },
     {
+      "name": "Tools",
+      "items": [
+        {
+          "name": "Kodepos",
+          "desc": "Cari nomor tempat tinggal anda",
+          "path": "/tools/kodepos?form="
+        }
+      ]
+    },
+    {
       "name": "Download",
       "items": [
         {
