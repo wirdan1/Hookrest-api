@@ -49,7 +49,7 @@
         {
           "name": "Brat",
           "desc": "Brat Images",
-          "path": "/maker/brat"
+          "path": "/maker/brat?text="
         }
       ]
     },
