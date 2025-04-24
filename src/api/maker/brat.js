@@ -5,9 +5,6 @@ module.exports = function(app) {
         const apiUrl = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}`;
         try {
             const res = await axios.get(apiUrl, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0'
-                },
                 validateStatus: () => true
             });
 
@@ -15,7 +12,7 @@ module.exports = function(app) {
                 throw new Error(res.data?.message || 'Gagal generate brat.');
             }
 
-            return { imageUrl: res.data.result };
+            return res.data.result;
         } catch (error) {
             throw new Error(error.message || 'Gagal mengambil data.');
         }
@@ -27,7 +24,9 @@ module.exports = function(app) {
 
         try {
             const result = await getBrat(text);
-            res.status(200).json({ status: true, creator: 'Danz-dev', result });
+
+            res.setHeader('Content-Type', 'image/png');
+            res.send(result);
         } catch (error) {
             res.status(500).json({ status: false, error: error.message });
         }
