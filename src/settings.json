@@ -82,6 +82,11 @@
           "path": "/dl/douyin?url="
         },
         {
+          "name": "Tiktok",
+          "desc": "Tiktok Download by Danz-dev",
+          "path": "/dl/tiktok?url="
+        },
+        {
           "name": "ytmp3",
           "desc": "Ytmp3 Download by Danz-dev",
           "path": "/dl/ytmp3?url="
