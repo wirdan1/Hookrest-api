@@ -2,13 +2,13 @@ const axios = require('axios');
 
 module.exports = function(app) {
     async function getBrat(text) {
-        const apiUrl = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}&isVideo=false&delay=500`;
+        const apiUrl = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}`;
         try {
             const res = await axios.get(apiUrl, {
                 headers: {
                     'User-Agent': 'Mozilla/5.0'
                 },
-                validateStatus: () => true
+                validateStatus: () => true // untuk handle error sendiri
             });
 
             if (!res.data?.status || !res.data?.result) {
