@@ -8,11 +8,11 @@ module.exports = function(app) {
                 validateStatus: () => true
             });
 
-            if (!res.data?.status || !res.data?.result) {
+            if (!res.data?.status || !res.data?.data) {
                 throw new Error(res.data?.message || 'Gagal mendapatkan ramalan.');
             }
 
-            return { response: res.data.result };
+            return { message: res.data.data };
         } catch (error) {
             throw new Error(error.message || 'Gagal mengambil data.');
         }
