@@ -41,6 +41,11 @@
           "path": "/ai/llama?text="
         },
         {
+          "name": "Dukun",
+          "desc": "Dukun Abal-abal",
+          "path": "/ai/dukun?content="
+        },
+        {
           "name": "HydroMind",
           "desc": "Talk with hydromind",
           "path": "/ai/hydromind?text=&model=",
