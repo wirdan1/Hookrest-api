@@ -99,6 +99,16 @@
       ]
     },
     {
+      "name": "maker",
+      "items": [
+        {
+          "name": "Brat",
+          "desc": "Brat Image",
+          "path": "/maker/brat?text="
+        }
+      ]
+    },
+    {
       "name": "Download",
       "items": [
         {
