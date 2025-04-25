@@ -60,6 +60,11 @@
           "name": "PlayStore",
           "desc": "Cari aplikasi dari PlayStore dengan mudah",
           "path": "/apk/playstore?query="
+        },
+        {
+          "name": "Happy Mod",
+          "desc": "Cari aplikasi ddari Happy Mod dengan mudah",
+          "path": "/apk/happymod?search="
         }
       ]
     },
