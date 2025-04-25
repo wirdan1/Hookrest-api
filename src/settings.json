@@ -57,6 +57,11 @@
       "name": "Random",
       "items": [
         {
+          "name": "Loli",
+          "desc": "Loli Random Images",
+          "path": "/random/loli"
+        },
+        {
           "name": "Blue Archive",
           "desc": "Blue Archive Random Images",
           "path": "/random/ba"
