@@ -75,6 +75,11 @@
           "name": "Tahukah Kamu",
           "desc": "Temukan apa yang belum kamu ketahui disini",
           "path": "/fun/tahukahkamu"
+        },
+        {
+          "name": "Cek Khodam",
+          "desc": "Analisis Khodam kamu",
+          "path": "/fun/cekkhodam?nama="
         }
       ]
     },
