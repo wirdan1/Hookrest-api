@@ -11,7 +11,7 @@ module.exports = function(app) {
 
             const data = res.data;
 
-            if (!data || !data.status || !data.result) {
+            if (!data || data.status !== true || !Array.isArray(data.result)) {
                 throw new Error('Gagal mendapatkan jadwal TV.');
             }
 
@@ -23,11 +23,15 @@ module.exports = function(app) {
 
     app.get('/search/jadwaltv', async (req, res) => {
         const { text } = req.query;
-        if (!text) return res.status(400).json({ status: false, error: 'Text query is required' });
+        if (!text) return res.status(400).json({ status: false, error: 'Text is required' });
 
         try {
             const result = await getJadwalTV(text);
-            res.status(200).json({ status: true, creator: 'Danz-dev', result });
+            res.status(200).json({
+                status: true,
+                creator: 'Danz-dev',
+                result
+            });
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
         }
