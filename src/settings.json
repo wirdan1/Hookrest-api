@@ -54,6 +54,16 @@
       ]
     },
     {
+      "name": "Apk",
+      "items": [
+        {
+          "name": "PlayStore",
+          "desc": "Download aplikasi dari PlayStore dengan mudah",
+          "path": "/apk/playstore?query="
+        }
+      ]
+    },
+    {
       "name": "Random",
       "items": [
         {
@@ -99,7 +109,7 @@
       ]
     },
     {
-      "name": "maker",
+      "name": "Maker",
       "items": [
         {
           "name": "Brat",
