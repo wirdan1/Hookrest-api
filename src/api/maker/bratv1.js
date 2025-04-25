@@ -1,23 +1,25 @@
 const axios = require('axios');
+const fs = require('fs');
 
-module.exports = function(app) {
-    async function getBratImageUrl(text) {
+module.exports = function (app) {
+    async function downloadBratImage(text) {
         const apiUrl = `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(text)}`;
+        const filePath = 'brat_image.png';
 
         try {
-            const res = await axios.get(apiUrl, {
+            const response = await axios.get(apiUrl, {
+                responseType: 'arraybuffer',
                 validateStatus: () => true
             });
 
-            const data = res.data;
-
-            if (!data || data.status !== true || !data.result?.url) {
-                throw new Error('Gagal mendapatkan URL gambar.');
+            if (response.status !== 200) {
+                throw new Error(`Gagal mengambil gambar. Status: ${response.status}`);
             }
 
-            return data.result.url;
+            fs.writeFileSync(filePath, response.data);
+            return filePath;
         } catch (err) {
-            throw new Error(err.message || 'Gagal mengambil data dari API.');
+            throw new Error(err.message || 'Gagal mengambil data dari API brat.');
         }
     }
 
@@ -26,15 +28,12 @@ module.exports = function(app) {
         if (!text) return res.status(400).json({ status: false, error: 'Text is required' });
 
         try {
-            const imageUrl = await getBratImageUrl(text);
-            const imageStream = await axios({
-                url: imageUrl,
-                method: 'GET',
-                responseType: 'stream'
+            const imagePath = await downloadBratImage(text);
+            res.sendFile(imagePath, err => {
+                if (!err) {
+                    fs.unlinkSync(imagePath);
+                }
             });
-
-            res.setHeader('Content-Type', 'image/png');
-            imageStream.data.pipe(res);
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
         }
