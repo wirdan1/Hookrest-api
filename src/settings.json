@@ -71,6 +71,11 @@
           "desc": "Cari nomor tempat tinggal anda",
           "path": "/tools/kodepos?form="
         }
+        {
+          "name": "Cek Cuaca",
+          "desc": "Cek cuaca di tempat tinggal anda",
+          "path": "/tools/cuaca?kota="
+        }
       ]
     },
     {
