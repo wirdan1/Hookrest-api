@@ -58,7 +58,7 @@
       "items": [
         {
           "name": "PlayStore",
-          "desc": "Download aplikasi dari PlayStore dengan mudah",
+          "desc": "Cari aplikasi dari PlayStore dengan mudah",
           "path": "/apk/playstore?query="
         }
       ]
