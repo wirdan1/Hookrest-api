@@ -87,6 +87,11 @@
           "path": "/dl/tiktok?url="
         },
         {
+          "name": "Pinterest",
+          "desc": "Pinterest Download by Danz-dev",
+          "path": "/dl/pinterest?q="
+        },
+        {
           "name": "ytmp3",
           "desc": "Ytmp3 Download by Danz-dev",
           "path": "/dl/ytmp3?url="
