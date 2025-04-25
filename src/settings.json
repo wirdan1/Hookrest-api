@@ -147,6 +147,11 @@
           "path": "/search/lyrics?q="
         },
         {
+          "name": "Jadwal TV",
+          "desc": "Lihat jadwal saluran tv hari ini",
+          "path": "/search/jadwaltv?text="
+        },
+        {
           "name": "Google Search",
           "desc": "Google search by Danz-dev",
           "path": "/search/google?q="
