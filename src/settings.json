@@ -174,7 +174,7 @@
         {
           "name": "lyrics",
           "desc": "Lyrics search",
-          "path": "/search/lyrics?q="
+          "path": "/search/lyrics?title="
         },
         {
           "name": "Google Search",
