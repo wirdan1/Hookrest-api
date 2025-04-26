@@ -1,31 +1,38 @@
-module.exports = function(app) {
-    const fetch = require('node-fetch');
-    
-    app.get('/search/lyrics', async (req, res) => {
-        const { q } = req.query;
-        if (!q) {
-            return res.status(400).json({ status: false, error: 'Query is required' });
-        }
-        try {
-            const response = await fetch(`https://some-random-api.com/lyrics?title=${encodeURIComponent(q)}`);
-            const json = await response.json();
-            const data = json.result;
+const axios = require('axios');
 
-            if (!data || !data.status || !data.lirik) {
-                return res.status(404).json({ status: false, error: 'Lyrics not found' });
+module.exports = function(app) {
+    async function getLyrics(title) {
+        const apiUrl = `https://some-random-api.com/lyrics?title=${encodeURIComponent(title)}`;
+
+        try {
+            const res = await axios.get(apiUrl, {
+                validateStatus: () => true
+            });
+
+            const data = res.data;
+
+            if (!data || !data.title || !data.lyrics) {
+                throw new Error('Lirik tidak ditemukan.');
             }
 
-            res.status(200).json({
+            return data;
+        } catch (err) {
+            throw new Error(err.message || 'Gagal mengambil data dari API lirik.');
+        }
+    }
+
+    app.get('/search/lyrics', async (req, res) => {
+        const { title } = req.query;
+        if (!title) return res.status(400).json({ status: false, error: 'Title is required' });
+
+        try {
+            const lyricsData = await getLyrics(title);
+            res.json({
                 status: true,
-                result: {
-                    title: data.judul,
-                    artist: data.artis,
-                    album: data.album,
-                    lyrics: data.lirik
-                }
+                result: lyricsData
             });
-        } catch (error) {
-            res.status(500).json({ status: false, error: error.message });
+        } catch (err) {
+            res.status(500).json({ status: false, error: err.message });
         }
     });
 };
