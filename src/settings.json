@@ -147,13 +147,18 @@
           "path": "/dl/ytmp3?url="
         },
         {
+          "name": "Plays",
+          "desc": "Play spotify by Danz-dev",
+          "path": "/dl/plays?q="
+        },
+        {
           "name": "ytmp4",
           "desc": "Ytmp4 Download by Danz-dev",
           "path": "/dl/ytmp4?url="
         },
         {
           "name": "Play",
-          "desc": "Yt Play by Danz-dev",
+          "desc": "YouTube Play by Danz-dev",
           "path": "/dl/play?q="
         },
         {
