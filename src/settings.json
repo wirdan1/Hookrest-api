@@ -43,7 +43,7 @@
         {
           "name": "Pantun Ai",
           "desc": "Ciptakan Pantun Bersama AI",
-          "path": "/ai/pantun?text="
+          "path": "/ai/tokdalang?prompt="
         },
         {
           "name": "Dukun",
