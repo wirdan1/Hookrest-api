@@ -41,9 +41,9 @@
           "path": "/ai/llama?text="
         },
         {
-          "name": "Pantun Ai",
-          "desc": "Ciptakan Pantun Bersama AI",
-          "path": "/ai/tokdalang?prompt="
+          "name": "Gemini Ai",
+          "desc": "Ciptakan Pantun Bersama Gemini AI",
+          "path": "/api/gemini?prompt="
         },
         {
           "name": "Dukun",
