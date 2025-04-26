@@ -7,7 +7,7 @@ module.exports = function(app) {
             return res.status(400).json({ status: false, error: 'Query is required' });
         }
         try {
-            const response = await fetch(`https://api.vreden.my.id/api/lirik?lagu=${encodeURIComponent(q)}`);
+            const response = await fetch(`https://some-random-api.com/lyrics?title=${encodeURIComponent(q)}`);
             const json = await response.json();
             const data = json.result;
 
