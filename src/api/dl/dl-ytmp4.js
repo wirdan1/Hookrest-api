@@ -1,35 +1,45 @@
 const axios = require('axios');
 
 module.exports = function(app) {
-    async function getYTMP4(url) {
-        const apiUrl = `https://api.siputzx.my.id/api/d/ytmp4?url=${encodeURIComponent(url)}`;
+    async function getYtmp4Download(url) {
+        const apiUrl = `https://www.velyn.biz.id/api/downloader/ytmp4?url=${encodeURIComponent(url)}`;
+
         try {
             const res = await axios.get(apiUrl, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0'
-                },
-                validateStatus: () => true // biar kita bisa handle 404 sendiri
+                validateStatus: () => true
             });
 
-            if (!res.data?.status || !res.data?.data?.dl) {
-                throw new Error(res.data?.message || 'Video tidak ditemukan.');
+            const data = res.data;
+
+            if (!data || !data.status || !data.data || !data.data.url) {
+                throw new Error('Gagal mendapatkan data dari API YTMP4.');
             }
 
-            return res.data.data;
-        } catch (error) {
-            throw new Error(error.message || 'Gagal mengambil data.');
+            return data;
+        } catch (err) {
+            throw new Error(err.message || 'Gagal mengambil data dari API YTMP4.');
         }
     }
 
-    app.get('/api/ytmp4', async (req, res) => {
+    app.get('/dl/ytmp4', async (req, res) => {
         const { url } = req.query;
-        if (!url) return res.status(400).json({ status: false, error: 'URL is required' });
+        if (!url) {
+            return res.status(400).json({ status: false, error: 'URL is required' });
+        }
 
         try {
-            const result = await getYTMP4(url);
-            res.status(200).json({ status: true, creator: 'Danz-dev', result });
-        } catch (error) {
-            res.status(500).json({ status: false, error: error.message });
+            const ytmp4Data = await getYtmp4Download(url);
+            res.json({
+                status: true,
+                creator: "Danz-dev",
+                data: {
+                    format: ytmp4Data.data.format,
+                    title: ytmp4Data.data.title,
+                    url: ytmp4Data.data.url
+                }
+            });
+        } catch (err) {
+            res.status(500).json({ status: false, error: err.message });
         }
     });
 };
