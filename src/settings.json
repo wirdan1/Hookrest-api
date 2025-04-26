@@ -31,7 +31,7 @@
       "name": "AI (Artificial Intelligence)",
       "items": [
         {
-          "name": "LuminAI",
+          "name": "Lumin AI",
           "desc": "Talk with luminai",
           "path": "/ai/luminai?text="
         },
@@ -39,6 +39,11 @@
           "name": "Llama",
           "desc": "Talk with Llama",
           "path": "/ai/llama?text="
+        },
+        {
+          "name": "Pantun Ai",
+          "desc": "Ciptakan Pantun Bersama AI",
+          "path": "/ai/pantun?text="
         },
         {
           "name": "Dukun",
