@@ -1,22 +1,23 @@
 const axios = require('axios');
 
 module.exports = function(app) {
-    async function getYTMP3(url) {
-        try {
-            if (!url.includes('youtu')) throw new Error('URL harus berupa link YouTube');
+    async function getYtmp3Download(url) {
+        const apiUrl = `https://www.velyn.biz.id/api/downloader/ytmp3?url=${encodeURIComponent(url)}`;
 
-            const apiUrl = `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(url)}`;
-            const { data } = await axios.get(apiUrl, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-                }
+        try {
+            const res = await axios.get(apiUrl, {
+                validateStatus: () => true
             });
 
-            if (!data?.status || !data?.data?.dl) throw new Error('Audio tidak ditemukan.');
+            const data = res.data;
 
-            return data.data; // { title, dl }
-        } catch (error) {
-            throw new Error(error.response?.data?.error || error.message);
+            if (!data || !data.status || !data.output) {
+                throw new Error('Gagal mendapatkan data dari API YTMP3.');
+            }
+
+            return data;
+        } catch (err) {
+            throw new Error(err.message || 'Gagal mengambil data dari API YTMP3.');
         }
     }
 
@@ -27,10 +28,15 @@ module.exports = function(app) {
         }
 
         try {
-            const result = await getYTMP3(url);
-            res.status(200).json({ status: true, creator: 'Danz-dev', result });
-        } catch (error) {
-            res.status(500).json({ status: false, error: error.message });
+            const ytmp3Data = await getYtmp3Download(url);
+            res.json({
+                status: true,
+                creator: "Danz-dev",
+                input: ytmp3Data.input,
+                output: ytmp3Data.output
+            });
+        } catch (err) {
+            res.status(500).json({ status: false, error: err.message });
         }
     });
 };
