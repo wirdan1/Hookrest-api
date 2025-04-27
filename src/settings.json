@@ -192,6 +192,11 @@
           "path": "/search/cloud?q="
         },
         {
+          "name": "Jadwal Sholat",
+          "desc": "Jadwal sholat dunia",
+          "path": "/danz/city?q="
+        },
+        {
           "name": "YouTube",
           "desc": "Youtube search",
           "path": "/search/youtube?q="
