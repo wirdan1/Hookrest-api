@@ -194,7 +194,7 @@
         {
           "name": "Jadwal Sholat",
           "desc": "Jadwal sholat dunia",
-          "path": "/danz/city?q="
+          "path": "/danz/jadwalsholat?city="
         },
         {
           "name": "YouTube",
