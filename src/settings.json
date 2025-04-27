@@ -112,11 +112,6 @@
           "path": "/tools/kodepos?form="
         },
         {
-          "name": "Remini",
-          "desc": "Jernihkan gambar kamu menggunakan remini",
-          "path": "/tools/remini?image="
-        },
-        {
           "name": "Cek Cuaca",
           "desc": "Cek cuaca di tempat tinggal anda",
           "path": "/tools/cuaca?kota="
