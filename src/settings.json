@@ -212,6 +212,16 @@
           "path": "/search/youtube?q="
         }
       ]
+    },
+    {
+      "name": "Info",
+      "items": [
+        {
+          "name": "List Api",
+          "desc": "Menampilkan semua nama api yang terdaftar",
+          "path": "/info/listapi"
+        }
+      ]
     }
   ]
 }
