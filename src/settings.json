@@ -74,6 +74,21 @@
       ]
     },
     {
+      "name": "Islmani",
+      "items": [
+        {
+          "name": "Jadwal Sholat",
+          "desc": "Jadwal sholat seluruh dunia",
+          "path": "/islami/jadwalsholat?city="
+        },
+        {
+          "name": "Asmaul Husna",
+          "desc": "Asmaul husna random",
+          "path": "/islami/asmaulhusna"
+        }
+      ]
+    },
+    {
       "name": "Random",
       "items": [
         {
@@ -190,11 +205,6 @@
           "name": "Sound Cloud",
           "desc": "Sound Cloud Search",
           "path": "/search/cloud?q="
-        },
-        {
-          "name": "Jadwal Sholat",
-          "desc": "Jadwal sholat dunia",
-          "path": "/danz/jadwalsholat?city="
         },
         {
           "name": "YouTube",
