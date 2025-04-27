@@ -1,7 +1,4 @@
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid'); // Buat nama file random
 
 module.exports = function(app) {
     app.get('/tools/remini', async (req, res) => {
@@ -13,33 +10,19 @@ module.exports = function(app) {
         const apiUrl = `https://api.siputzx.my.id/api/iloveimg/upscale?image=${encodeURIComponent(image)}`;
 
         try {
-            const tmpFilename = path.join(__dirname, '../tmp', `${uuidv4()}.jpg`);
-
             const response = await axios.get(apiUrl, {
-                responseType: 'stream',
+                responseType: 'arraybuffer', // Karena mau ambil file/gambar langsung
                 validateStatus: () => true
             });
 
+            // Cek kalo gagal
             if (response.status !== 200) {
                 throw new Error('Gagal mengambil gambar dari API Upscale.');
             }
 
-            const writer = fs.createWriteStream(tmpFilename);
-            response.data.pipe(writer);
-
-            writer.on('finish', () => {
-                res.sendFile(tmpFilename, (err) => {
-                    fs.unlinkSync(tmpFilename); // Hapus file tmp setelah kirim
-                    if (err) {
-                        console.error('Gagal kirim file:', err);
-                    }
-                });
-            });
-
-            writer.on('error', (err) => {
-                throw new Error('Gagal menulis file sementara.');
-            });
-
+            // Set header agar browser tahu ini gambar
+            res.set('Content-Type', 'image/jpeg');
+            res.send(response.data);
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
         }
