@@ -31,8 +31,8 @@ module.exports = function(app) {
             "Asmaul Husna",
             "Gemini AI",
             "Spotify Downloader",
-            "Lyrics Finder"
-            "Hytamkan",
+            "Lyrics Finder",
+            "Hytamkan"
         ];
 
         res.json({
