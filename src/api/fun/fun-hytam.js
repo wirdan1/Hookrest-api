@@ -2,12 +2,12 @@ const axios = require('axios');
 
 module.exports = function(app) {
     app.get('/fun/hytam', async (req, res) => {
-        const { url, type } = req.query;
+        const { url } = req.query;
         if (!url || !type) {
             return res.status(400).json({ status: false, error: 'URL dan type diperlukan' });
         }
 
-        const apiUrl = `https://www.abella.icu/penghitam?url=${encodeURIComponent(url)}&type=${encodeURIComponent(type)}`;
+        const apiUrl = `https://www.abella.icu/penghitam?url=${encodeURIComponent(url)}&type=hitam`;
 
         try {
             const response = await axios.get(apiUrl, {
