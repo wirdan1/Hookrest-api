@@ -112,6 +112,11 @@
           "path": "/fun/tahukahkamu"
         },
         {
+          "name": "Hytamkan",
+          "desc": "Hitamkan waifu disini",
+          "path": "/fun/hytam?url="
+        },
+        {
           "name": "Cek Khodam",
           "desc": "Analisis Khodam kamu",
           "path": "/fun/cekkhodam?nama="
