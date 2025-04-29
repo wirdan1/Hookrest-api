@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports = function(app) {
     app.get('/fun/hytam', async (req, res) => {
         const { url } = req.query;
-        if (!url || !type) {
+        if (!url) {
             return res.status(400).json({ status: false, error: 'URL dan type diperlukan' });
         }
 
