@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = function(app) {
     async function getYtmp3Download(url) {
-        const apiUrl = `https://www.velyn.biz.id/api/downloader/ytmp3?url=${encodeURIComponent(url)}`;
+        const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?quality=128kbps&server=auto&url=${encodeURIComponent(url)}`;
 
         try {
             const res = await axios.get(apiUrl, {
