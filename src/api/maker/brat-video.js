@@ -1,15 +1,16 @@
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const { pipeline } = require('stream');
+const stream = require('stream');
 
 module.exports = function (app) {
     async function downloadBratVideo(text) {
         const apiUrl = `https://api.nekorinn.my.id/maker/bratvid?text=${encodeURIComponent(text)}`;
-        const filePath = path.join(__dirname, 'brat_video.bin');
 
         try {
             const response = await axios.get(apiUrl, {
-                responseType: 'arraybuffer',
+                responseType: 'stream', // Mendapatkan data sebagai stream
                 validateStatus: () => true
             });
 
@@ -17,8 +18,7 @@ module.exports = function (app) {
                 throw new Error(`Gagal mengambil video. Status: ${response.status}`);
             }
 
-            fs.writeFileSync(filePath, response.data);
-            return filePath;
+            return response.data; // Mengembalikan stream video
         } catch (err) {
             throw new Error(err.message || 'Gagal mengambil video dari API bratvid.');
         }
@@ -31,13 +31,13 @@ module.exports = function (app) {
         }
 
         try {
-            const videoPath = await downloadBratVideo(text);
-            res.setHeader('Content-Type', 'video/mp4');
-            res.sendFile(videoPath, err => {
-                if (!err) {
-                    fs.unlinkSync(videoPath);
-                }
-            });
+            const videoStream = await downloadBratVideo(text);
+
+            res.setHeader('Content-Type', 'video/mp4'); // Atur sesuai format video yang diberikan oleh API
+            res.setHeader('Content-Disposition', 'inline; filename="bratvid.vid"'); // Menggunakan .vid
+
+            // Pipe stream video ke response
+            await pipeline(videoStream, res);
         } catch (err) {
             res.status(500).json({ status: false, creator: 'Danz-dev', error: err.message });
         }
