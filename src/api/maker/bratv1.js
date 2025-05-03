@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = function (app) {
     async function downloadBratImage(text) {
-        const apiUrl = `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(text)}`;
+        const apiUrl = `https://api.nekorinn.my.id/maker/brat?text=${encodeURIComponent(text)}&theme=White`;
         const filePath = '/tmp/brat_image.png'; // Menggunakan direktori /tmp di Vercel
 
         try {
