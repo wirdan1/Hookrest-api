@@ -15,6 +15,12 @@ module.exports = function(app) {
                 throw new Error('Gagal mendapatkan data dari API SpotifyPlay.');
             }
 
+            // Kalau result-nya berupa array, ambil acak
+            if (Array.isArray(data.result)) {
+                const random = data.result[Math.floor(Math.random() * data.result.length)];
+                return { ...data, result: random };
+            }
+
             return data;
         } catch (err) {
             throw new Error(err.message || 'Gagal mengambil data dari API SpotifyPlay.');
