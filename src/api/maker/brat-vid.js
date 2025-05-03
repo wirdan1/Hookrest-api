@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = function (app) {
     async function downloadBratVideo(text) {
         const apiUrl = `https://api.nekorinn.my.id/maker/bratvid?text=${encodeURIComponent(text)}`;
-        const filePath = '/tmp/brat_video.mp4';
+        const filePath = path.join(__dirname, 'brat_video.bin');
 
         try {
             const response = await axios.get(apiUrl, {
@@ -32,6 +32,7 @@ module.exports = function (app) {
 
         try {
             const videoPath = await downloadBratVideo(text);
+            res.setHeader('Content-Type', 'video/mp4');
             res.sendFile(videoPath, err => {
                 if (!err) {
                     fs.unlinkSync(videoPath);
