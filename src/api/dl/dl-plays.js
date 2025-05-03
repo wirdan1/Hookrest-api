@@ -11,25 +11,35 @@ module.exports = function(app) {
 
             const data = res.data;
 
-            if (!data || data.status !== true || !data.result?.downloadUrl) {
-                throw new Error('Gagal mendapatkan data Spotify.');
+            if (!data || !data.status || !data.result || !data.result.downloadUrl) {
+                throw new Error('Gagal mendapatkan data dari API SpotifyPlay.');
             }
 
-            return data.result;
+            return data;
         } catch (err) {
-            throw new Error(err.message || 'Gagal mengambil data dari API Spotify.');
+            throw new Error(err.message || 'Gagal mengambil data dari API SpotifyPlay.');
         }
     }
 
     app.get('/dl/plays', async (req, res) => {
         const { q } = req.query;
-        if (!q) return res.status(400).json({ status: false, error: 'Query parameter (q) is required' });
+        if (!q) {
+            return res.status(400).json({ status: false, error: 'Query parameter (q) is required' });
+        }
 
         try {
-            const result = await getSpotifyPlay(q);
+            const spotifyData = await getSpotifyPlay(q);
             res.json({
                 status: true,
-                result
+                creator: "Danz-dev",
+                result: {
+                    title: spotifyData.result.metadata.title,
+                    artist: spotifyData.result.metadata.artist,
+                    duration: spotifyData.result.metadata.duration,
+                    image: spotifyData.result.metadata.imageUrl,
+                    link: spotifyData.result.metadata.link,
+                    audio: spotifyData.result.downloadUrl
+                }
             });
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
