@@ -146,6 +146,11 @@
           "desc": "Brat Image",
           "path": "/maker/brat?text="
         }
+        {
+          "name": "Brat Vid",
+          "desc": "Brat Video",
+          "path": "/maker/bratvid?text="
+        }
       ]
     },
     {
