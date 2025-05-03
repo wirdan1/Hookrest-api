@@ -34,7 +34,7 @@ module.exports = function (app) {
             const videoPath = await downloadBratVideo(text);
             res.sendFile(videoPath, err => {
                 if (!err) {
-                    fs.unlinkSync(videoPath); // hapus setelah dikirim
+                    fs.unlinkSync(videoPath);
                 }
             });
         } catch (err) {
