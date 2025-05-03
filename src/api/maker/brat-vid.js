@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = function (app) {
     async function downloadBratVideo(text) {
         const apiUrl = `https://api.nekorinn.my.id/maker/bratvid?text=${encodeURIComponent(text)}`;
-        const filePath = '/tmp/brat_video.mp4'; // Lokasi penyimpanan sementara di Vercel
+        const filePath = '/tmp/brat_video.mp4';
 
         try {
             const response = await axios.get(apiUrl, {
@@ -20,19 +20,21 @@ module.exports = function (app) {
             fs.writeFileSync(filePath, response.data);
             return filePath;
         } catch (err) {
-            throw new Error(err.message || 'Gagal mengambil data dari API brat video.');
+            throw new Error(err.message || 'Gagal mengambil video dari API bratvid.');
         }
     }
 
     app.get('/maker/bratvid', async (req, res) => {
         const { text } = req.query;
-        if (!text) return res.status(400).json({ status: false, creator: 'Danz-dev', error: 'Text is required' });
+        if (!text) {
+            return res.status(400).json({ status: false, creator: 'Danz-dev', error: 'Text is required' });
+        }
 
         try {
             const videoPath = await downloadBratVideo(text);
             res.sendFile(videoPath, err => {
                 if (!err) {
-                    fs.unlinkSync(videoPath); // Hapus file setelah dikirim
+                    fs.unlinkSync(videoPath); // hapus setelah dikirim
                 }
             });
         } catch (err) {
