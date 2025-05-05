@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 module.exports = function(app) {
-    async function getYtmp4Download(url) {
+    async function getSaveTubeMP4(url) {
         const apiUrl = `https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`;
 
         try {
@@ -11,13 +11,13 @@ module.exports = function(app) {
 
             const data = res.data;
 
-            if (!data || !data.status || !data.data || !data.data.url) {
-                throw new Error('Gagal mendapatkan data dari API YTMP4.');
+            if (!data || !data.status || !data.result || !data.result.download) {
+                throw new Error('Gagal mendapatkan data dari API SaveTube.');
             }
 
             return data;
         } catch (err) {
-            throw new Error(err.message || 'Gagal mengambil data dari API YTMP4.');
+            throw new Error(err.message || 'Gagal mengambil data dari API SaveTube.');
         }
     }
 
@@ -28,14 +28,18 @@ module.exports = function(app) {
         }
 
         try {
-            const ytmp4Data = await getYtmp4Download(url);
+            const saveTubeData = await getSaveTubeMP4(url);
             res.json({
                 status: true,
                 creator: "Danz-dev",
-                data: {
-                    format: ytmp4Data.data.format,
-                    title: ytmp4Data.data.title,
-                    url: ytmp4Data.data.url
+                result: {
+                    title: saveTubeData.result.title,
+                    type: saveTubeData.result.type,
+                    format: saveTubeData.result.format,
+                    quality: saveTubeData.result.quality,
+                    duration: saveTubeData.result.duration,
+                    thumbnail: saveTubeData.result.thumbnail,
+                    download: saveTubeData.result.download
                 }
             });
         } catch (err) {
