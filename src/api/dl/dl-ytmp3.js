@@ -21,7 +21,7 @@ module.exports = function(app) {
         }
     }
 
-    app.get('/api/savetube/mp3', async (req, res) => {
+    app.get('/dl/ytmp3', async (req, res) => {
         const { url } = req.query;
         if (!url) {
             return res.status(400).json({ status: false, error: 'URL is required' });
