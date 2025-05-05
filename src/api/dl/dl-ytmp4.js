@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = function(app) {
     async function getYtmp4Download(url) {
-        const apiUrl = `https://www.velyn.biz.id/api/downloader/ytmp4?url=${encodeURIComponent(url)}`;
+        const apiUrl = `https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`;
 
         try {
             const res = await axios.get(apiUrl, {
