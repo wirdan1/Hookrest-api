@@ -391,14 +391,15 @@ body.no-scroll {
 }
 
 .api-item {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .hero-section {
   background-color: var(--bg-card);
   border-radius: var(--radius);
-  padding: 1.5rem;
-  height: 100%;
+  padding: 1rem;
+  height: auto;
+  min-height: 80px;
   box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
   transition: var(--transition);
   display: flex;
@@ -412,16 +413,17 @@ body.no-scroll {
 }
 
 .hero-section h5 {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   color: var(--text-color);
 }
 
 .hero-section p {
   color: var(--text-muted);
   margin-bottom: 0;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
 }
 
 .get-api-btn {
@@ -429,7 +431,8 @@ body.no-scroll {
   color: white;
   border: none;
   border-radius: var(--radius);
-  padding: 0.5rem 1rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
   font-weight: 500;
   transition: var(--transition);
 }
