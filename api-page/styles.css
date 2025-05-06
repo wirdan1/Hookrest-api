@@ -397,9 +397,10 @@ body.no-scroll {
 .hero-section {
   background-color: var(--bg-card);
   border-radius: var(--radius);
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   height: auto;
-  min-height: 80px;
+  min-height: 60px;
+  max-height: 70px;
   box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
   transition: var(--transition);
   display: flex;
@@ -642,8 +643,30 @@ footer {
   font-size: 0.875rem;
   white-space: pre-wrap;
   word-wrap: break-word;
-  max-height: 300px;
+  overflow-wrap: break-word;
+  max-height: 200px;
+  overflow-x: auto;
   overflow-y: auto;
+  width: 100%;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+@media (max-width: 768px) {
+  #apiEndpoint,
+  #apiResponseContent {
+    max-height: 150px;
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #apiEndpoint,
+  #apiResponseContent {
+    max-height: 120px;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
 }
 
 #apiQueryInputContainer {
