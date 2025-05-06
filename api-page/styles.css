@@ -397,10 +397,9 @@ body.no-scroll {
 .hero-section {
   background-color: var(--bg-card);
   border-radius: var(--radius);
-  padding: 0.75rem 1rem;
+  padding: 1rem;
   height: auto;
-  min-height: 60px;
-  max-height: 70px;
+  min-height: 80px;
   box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
   transition: var(--transition);
   display: flex;
