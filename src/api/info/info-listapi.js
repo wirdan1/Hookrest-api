@@ -6,6 +6,7 @@ module.exports = function(app) {
             "YTMP3",
             "YTMP4",
             "Playstore",
+            "Brat Video",
             "Happymod",
             "Jadwal sholat",
             "Llama AI",
