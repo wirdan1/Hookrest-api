@@ -13,6 +13,7 @@ module.exports = function(app) {
             "LuminAI",
             "Dukun Sakti",
             "Play",
+            "Search Surah",
             "Google Search",
             "Sound Cloud search",
             "Sound Cloud Download",
