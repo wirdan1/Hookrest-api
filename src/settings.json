@@ -217,6 +217,11 @@
           "path": "/search/lyrics?title="
         },
         {
+          "name": "Surah",
+          "desc": "Cari Surah",
+          "path": "/search/surah?no="
+        },
+        {
           "name": "Google Search",
           "desc": "Google search by Danz-dev",
           "path": "/search/google?q="
