@@ -10,19 +10,65 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       // Extract the base path without query parameters
       const basePath = apiPath.split("?")[0]
-      const testUrl = `${window.location.origin}${basePath}?test=1`
 
+      // Create a proper test URL based on the API structure
+      // For endpoints that require parameters, we'll add dummy values
+      let testUrl = `${window.location.origin}${basePath}`
+
+      // Add minimal required parameters based on the endpoint pattern
+      if (apiPath.includes("?")) {
+        const params = new URLSearchParams(apiPath.split("?")[1])
+        const newParams = new URLSearchParams()
+
+        // Add minimal valid test values for common parameter types
+        params.forEach((_, key) => {
+          if (key === "url") newParams.append(key, "https://example.com")
+          else if (key === "q" || key === "query" || key === "text" || key === "content" || key === "prompt")
+            newParams.append(key, "test")
+          else if (key === "nama" || key === "name") newParams.append(key, "test")
+          else if (key === "city" || key === "kota") newParams.append(key, "jakarta")
+          else if (key === "no") newParams.append(key, "1")
+          else if (key === "count") newParams.append(key, "1")
+          else if (key === "form") newParams.append(key, "test")
+          else if (key === "model") newParams.append(key, "gpt")
+          else if (key === "delay") newParams.append(key, "100")
+          else newParams.append(key, "test")
+        })
+
+        if (newParams.toString()) {
+          testUrl += `?${newParams.toString()}`
+        }
+      }
+
+      // Create a controller for timeout
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout (increased from 5)
 
+      // Try a GET request instead of HEAD (more universally supported)
       const response = await fetch(testUrl, {
-        method: "HEAD",
+        method: "GET",
         signal: controller.signal,
+        headers: {
+          Accept: "application/json, text/plain, */*",
+        },
       })
 
       clearTimeout(timeoutId)
-      return { status: response.ok, message: response.ok ? "Online" : "Offline" }
+
+      // Consider 2xx and 3xx status codes as "online"
+      const isOnline = response.status >= 200 && response.status < 400
+
+      return {
+        status: isOnline,
+        message: isOnline ? "Online" : `Offline (${response.status})`,
+        statusCode: response.status,
+      }
     } catch (error) {
+      console.log(`API check error for ${apiPath}:`, error.message)
+      // Check if it's a timeout error
+      if (error.name === "AbortError") {
+        return { status: false, message: "Timeout" }
+      }
       return { status: false, message: "Offline" }
     }
   }
@@ -83,6 +129,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       indicator.style.backgroundColor = "var(--warning-color)"
       statusText.textContent = `Some APIs Offline (${onlineApis}/${totalApis})`
     }
+  }
+
+  // Add this function after the updateMobileStatusBar function (around line 60)
+  const showStatusToast = (status, message) => {
+    const toast = document.getElementById("statusToast")
+    const toastTitle = document.getElementById("toastTitle")
+    const toastMessage = document.getElementById("toastMessage")
+    const statusIndicator = document.getElementById("toastStatusIndicator")
+
+    if (!toast) return
+
+    // Set toast content
+    toastTitle.textContent = status ? "API Online" : "API Offline"
+    toastMessage.textContent = message
+    statusIndicator.className = `status-indicator ${status ? "status-online" : "status-offline"}`
+
+    // Show the toast
+    const bsToast = new bootstrap.Toast(toast)
+    bsToast.show()
   }
 
   // Check for saved theme preference
@@ -370,6 +435,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           statusIndicator.className = `status-indicator me-2 ${status ? "status-online" : "status-offline"}`
           statusText.textContent = `API Status: ${message}`
 
+          // Show toast with status
+          showStatusToast(status, `${apiName}: ${message}`)
+
           // If API is offline, disable the submit button
           if (!status) {
             modalRefs.submitBtn.disabled = true
@@ -429,6 +497,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           statusIndicator.className = `status-indicator me-2 ${status ? "status-online" : "status-offline"}`
           statusText.textContent = `API Status: ${message}`
 
+          // Show toast with status
+          showStatusToast(status, `${apiName}: ${message}`)
+
           if (status) {
             // If API is online, automatically fetch data
             handleApiRequest(baseApiUrl, modalRefs, apiName)
@@ -478,7 +549,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       modalRefs.responseContainer.classList.add("d-none")
 
       try {
-        const response = await fetch(apiUrl)
+        // Create a controller for timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout for actual requests
+
+        const response = await fetch(apiUrl, {
+          signal: controller.signal,
+          headers: {
+            Accept: "application/json, text/plain, image/*, */*",
+          },
+        })
+
+        clearTimeout(timeoutId)
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -499,11 +581,21 @@ document.addEventListener("DOMContentLoaded", async () => {
           modalRefs.content.innerHTML = ""
           modalRefs.content.appendChild(img)
         } else {
-          const data = await response.json()
-          modalRefs.content.textContent = JSON.stringify(data, null, 2)
+          try {
+            const data = await response.json()
+            modalRefs.content.textContent = JSON.stringify(data, null, 2)
+          } catch (jsonError) {
+            // If not JSON, try to get text
+            const text = await response.text()
+            modalRefs.content.textContent = text
+          }
         }
       } catch (error) {
-        modalRefs.content.textContent = `Error: ${error.message}`
+        if (error.name === "AbortError") {
+          modalRefs.content.textContent = `Error: Request timed out after 15 seconds`
+        } else {
+          modalRefs.content.textContent = `Error: ${error.message}`
+        }
       } finally {
         modalRefs.spinner.classList.add("d-none")
         modalRefs.responseContainer.classList.remove("d-none")
