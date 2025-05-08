@@ -3,6 +3,88 @@ document.addEventListener("DOMContentLoaded", async () => {
   const body = document.body
   body.classList.add("no-scroll")
 
+  // API Status checking functionality
+  const checkApiStatus = async (apiPath) => {
+    if (!apiPath) return { status: false, message: "Invalid API path" }
+
+    try {
+      // Extract the base path without query parameters
+      const basePath = apiPath.split("?")[0]
+      const testUrl = `${window.location.origin}${basePath}?test=1`
+
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+      const response = await fetch(testUrl, {
+        method: "HEAD",
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+      return { status: response.ok, message: response.ok ? "Online" : "Offline" }
+    } catch (error) {
+      return { status: false, message: "Offline" }
+    }
+  }
+
+  // Update API status indicators
+  const updateApiStatusIndicators = async () => {
+    const apiItems = document.querySelectorAll(".api-item")
+
+    for (const item of apiItems) {
+      const apiPath = item.querySelector(".get-api-btn")?.dataset.apiPath
+      if (!apiPath) continue
+
+      const statusElement = item.querySelector(".api-status")
+      if (statusElement) {
+        const indicator = statusElement.querySelector(".status-indicator")
+        const statusText = statusElement.querySelector(".api-status-text")
+
+        indicator.className = "status-indicator status-checking"
+        statusText.textContent = "Checking..."
+
+        const { status, message } = await checkApiStatus(apiPath)
+
+        indicator.className = `status-indicator ${status ? "status-online" : "status-offline"}`
+        statusText.textContent = message
+      }
+    }
+  }
+
+  // Update mobile status bar
+  const updateMobileStatusBar = () => {
+    const mobileStatusBar = document.getElementById("mobileStatusBar")
+    if (!mobileStatusBar) return
+
+    const indicator = mobileStatusBar.querySelector(".mobile-status-indicator")
+    const statusText = mobileStatusBar.querySelector(".mobile-status-text")
+
+    // Count online and total APIs
+    const apiItems = document.querySelectorAll(".api-item")
+    let totalApis = 0
+    let onlineApis = 0
+
+    apiItems.forEach((item) => {
+      totalApis++
+      const statusIndicator = item.querySelector(".status-indicator")
+      if (statusIndicator && statusIndicator.classList.contains("status-online")) {
+        onlineApis++
+      }
+    })
+
+    // Update the status bar
+    if (onlineApis === totalApis) {
+      indicator.style.backgroundColor = "var(--success-color)"
+      statusText.textContent = `All APIs Online (${onlineApis}/${totalApis})`
+    } else if (onlineApis === 0) {
+      indicator.style.backgroundColor = "var(--danger-color)"
+      statusText.textContent = `All APIs Offline (0/${totalApis})`
+    } else {
+      indicator.style.backgroundColor = "var(--warning-color)"
+      statusText.textContent = `Some APIs Offline (${onlineApis}/${totalApis})`
+    }
+  }
+
   // Check for saved theme preference
   const savedTheme = localStorage.getItem("theme")
   if (savedTheme === "dark") {
@@ -121,6 +203,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         contentDiv.appendChild(heading)
         contentDiv.appendChild(description)
 
+        // Add API status indicator
+        const statusDiv = document.createElement("div")
+        statusDiv.className = "api-status"
+
+        const statusIndicator = document.createElement("span")
+        statusIndicator.className = "status-indicator status-checking"
+
+        const statusText = document.createElement("span")
+        statusText.className = "api-status-text"
+        statusText.textContent = "Checking..."
+
+        statusDiv.appendChild(statusIndicator)
+        statusDiv.appendChild(statusText)
+
         const button = document.createElement("button")
         button.className = "get-api-btn"
         button.textContent = "GET"
@@ -129,6 +225,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         button.dataset.apiDesc = item.desc
 
         heroSection.appendChild(contentDiv)
+        heroSection.appendChild(statusDiv)
         heroSection.appendChild(button)
 
         colDiv.appendChild(heroSection)
@@ -159,7 +256,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       })
     })
 
-    // API request handling
+    // Start checking API statuses after page load
+    setTimeout(() => {
+      updateApiStatusIndicators().then(() => {
+        updateMobileStatusBar()
+      })
+
+      // Refresh status every 5 minutes
+      setInterval(() => {
+        updateApiStatusIndicators().then(() => {
+          updateMobileStatusBar()
+        })
+      }, 300000)
+    }, 2000)
+
+    // Enhance the API modal to automatically test endpoints when opened
+    // Modify the API request handling section (around line 130)
+    // Replace the document.addEventListener("click", (event) => { ... }) block with:
+
     document.addEventListener("click", (event) => {
       if (!event.target.classList.contains("get-api-btn")) return
 
@@ -230,8 +344,38 @@ document.addEventListener("DOMContentLoaded", async () => {
           paramContainer.appendChild(innerDescDiv)
         }
 
+        // Add API status indicator in modal
+        const statusDiv = document.createElement("div")
+        statusDiv.className = "d-flex align-items-center mt-3 mb-2"
+
+        const statusIndicator = document.createElement("span")
+        statusIndicator.className = "status-indicator status-checking me-2"
+        statusIndicator.style.width = "10px"
+        statusIndicator.style.height = "10px"
+
+        const statusText = document.createElement("span")
+        statusText.className = "text-muted"
+        statusText.style.fontSize = "0.875rem"
+        statusText.textContent = "Checking API status..."
+
+        statusDiv.appendChild(statusIndicator)
+        statusDiv.appendChild(statusText)
+        paramContainer.appendChild(statusDiv)
+
         modalRefs.queryInputContainer.appendChild(paramContainer)
         modalRefs.submitBtn.classList.remove("d-none")
+
+        // Check API status when modal opens
+        checkApiStatus(apiPath).then(({ status, message }) => {
+          statusIndicator.className = `status-indicator me-2 ${status ? "status-online" : "status-offline"}`
+          statusText.textContent = `API Status: ${message}`
+
+          // If API is offline, disable the submit button
+          if (!status) {
+            modalRefs.submitBtn.disabled = true
+            modalRefs.submitBtn.title = "API is currently offline"
+          }
+        })
 
         modalRefs.submitBtn.onclick = async () => {
           const inputs = modalRefs.queryInputContainer.querySelectorAll("input")
@@ -261,7 +405,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } else {
         modalRefs.endpoint.textContent = baseApiUrl
-        handleApiRequest(baseApiUrl, modalRefs, apiName)
+
+        // For endpoints without parameters, automatically test them
+        const statusDiv = document.createElement("div")
+        statusDiv.className = "d-flex align-items-center mb-3"
+
+        const statusIndicator = document.createElement("span")
+        statusIndicator.className = "status-indicator status-checking me-2"
+        statusIndicator.style.width = "10px"
+        statusIndicator.style.height = "10px"
+
+        const statusText = document.createElement("span")
+        statusText.className = "text-muted"
+        statusText.style.fontSize = "0.875rem"
+        statusText.textContent = "Checking API status..."
+
+        statusDiv.appendChild(statusIndicator)
+        statusDiv.appendChild(statusText)
+        modalRefs.queryInputContainer.appendChild(statusDiv)
+
+        // Check API status and automatically fetch data if online
+        checkApiStatus(apiPath).then(({ status, message }) => {
+          statusIndicator.className = `status-indicator me-2 ${status ? "status-online" : "status-offline"}`
+          statusText.textContent = `API Status: ${message}`
+
+          if (status) {
+            // If API is online, automatically fetch data
+            handleApiRequest(baseApiUrl, modalRefs, apiName)
+          } else {
+            // If API is offline, show message
+            modalRefs.content.textContent = "This API endpoint is currently offline."
+            modalRefs.responseContainer.classList.remove("d-none")
+          }
+        })
       }
 
       modal.show()
