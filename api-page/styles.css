@@ -805,3 +805,243 @@ footer {
     padding: 1.5rem;
   }
 }
+
+/* Add these styles at the end of the file */
+
+/* Enhanced Mobile Responsiveness */
+@media (max-width: 767.98px) {
+  .hero-section {
+    padding: 2rem 0;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .hero-content .lead {
+    font-size: 1rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .section-header p {
+    font-size: 1rem;
+  }
+
+  .api-item {
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-section {
+    padding: 0.75rem;
+    min-height: 70px;
+  }
+
+  .hero-section h5 {
+    font-size: 0.9rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .hero-section p {
+    font-size: 0.7rem;
+  }
+
+  .get-api-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: 95%;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  #apiEndpoint,
+  #apiResponseContent {
+    font-size: 0.75rem;
+    max-height: 200px;
+  }
+
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .logo-img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .version-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .contact-method {
+    padding: 1rem;
+    min-width: 150px;
+  }
+
+  .contact-method i {
+    font-size: 2rem;
+  }
+
+  .contact-method h4 {
+    font-size: 1.1rem;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}
+
+/* API Status Indicator */
+.api-status {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.status-online {
+  background-color: var(--success-color);
+}
+
+.status-offline {
+  background-color: var(--danger-color);
+}
+
+.status-checking {
+  background-color: var(--warning-color);
+}
+
+.api-status-text {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+/* Mobile optimizations for API cards */
+@media (max-width: 575.98px) {
+  .api-item {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .hero-section {
+    flex-wrap: wrap;
+  }
+
+  .hero-section > div:first-child {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .api-status {
+    order: 2;
+    margin-right: auto;
+    margin-left: 0;
+  }
+
+  .get-api-btn {
+    order: 3;
+  }
+}
+
+/* Improved loading spinner for mobile */
+@media (max-width: 575.98px) {
+  .spinner {
+    width: 30px;
+    height: 30px;
+  }
+
+  .spinner-wrapper p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Add these styles for the mobile status bar */
+#mobileStatusBar {
+  position: sticky;
+  top: 56px;
+  z-index: 999;
+  background-color: var(--bg-secondary);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+  display: none;
+}
+
+.mobile-status-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.mobile-status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--warning-color);
+}
+
+.mobile-status-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+@media (max-width: 767.98px) {
+  #mobileStatusBar {
+    display: block;
+  }
+
+  .navbar {
+    padding: 0.5rem 0;
+  }
+
+  /* Improve mobile modal experience */
+  .modal-dialog {
+    margin: 0.5rem auto;
+    max-width: 95%;
+  }
+
+  .modal-content {
+    border-radius: 0.75rem;
+  }
+
+  .modal-header {
+    padding: 1rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    padding: 0.75rem;
+  }
+
+  /* Improve mobile search experience */
+  .search-box input {
+    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  }
+
+  .search-box i {
+    left: 0.75rem;
+  }
+}
