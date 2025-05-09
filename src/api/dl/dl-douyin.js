@@ -1,39 +1,42 @@
 const axios = require('axios');
 
-module.exports = function(app) {
-    async function getDouyin(url) {
-        try {
-            const api = `https://api.siputzx.my.id/api/d/douyin?url=${encodeURIComponent(url)}`;
-            const res = await axios.get(api);
-            const data = res.data;
+module.exports = function (app) {
+    async function fetchDouyin(url) {
+        const apiUrl = `https://ytdlpyton.nvlgroup.my.id/douyin?url=${encodeURIComponent(url)}`;
 
-            if (!data?.status || !data?.data) {
-                throw new Error('Video tidak ditemukan.');
+        try {
+            const res = await axios.get(apiUrl, {
+                validateStatus: () => true
+            });
+
+            const data = res.data;
+            if (!data || data.status !== 200 || !data.media) {
+                throw new Error('Gagal mengambil data dari Douyin API.');
             }
 
-            return data.data;
-        } catch (error) {
-            throw new Error(error.message);
+            return data;
+        } catch (err) {
+            throw new Error(err.message || 'Terjadi kesalahan saat memproses permintaan.');
         }
     }
 
     app.get('/dl/douyin', async (req, res) => {
         const { url } = req.query;
         if (!url) {
-            return res.status(400).json({ status: false, error: 'URL is required' });
+            return res.status(400).json({ status: false, error: 'Parameter "url" diperlukan' });
         }
 
         try {
-            const result = await getDouyin(url);
-            res.status(200).json({
+            const result = await fetchDouyin(url);
+            res.json({
                 status: true,
-                creator: 'Danz-dev',
-                title: result.title,
-                thumbnail: result.thumbnail,
-                downloads: result.downloads,
+                creator: "Danz-dev",
+                caption: result.caption,
+                slide: result.slide,
+                media: result.media
             });
-        } catch (error) {
-            res.status(500).json({ status: false, error: error.message });
+        } catch (err) {
+            res.status(500).json({ status: false, error: err.message });
         }
     });
 };
