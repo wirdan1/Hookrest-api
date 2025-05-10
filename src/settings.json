@@ -257,6 +257,11 @@
           "path": "/info/listapi"
         },
         {
+          "name": "Jadwal tv",
+          "desc": "Cari Jadwal Tv",
+          "path": "/info/jadwaltv?query"
+        },
+        {
           "name": "Jadwal Bola",
           "desc": "Info Tentang Bola",
           "path": "/info/bola"
