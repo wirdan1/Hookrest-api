@@ -82,6 +82,11 @@
           "path": "/islami/jadwalsholat?city="
         },
         {
+          "name": "Hadist",
+          "desc": "Get Hadist",
+          "path": "/islami/hadist?query="
+        },
+        {
           "name": "Asmaul Husna",
           "desc": "Asmaul husna random",
           "path": "/islami/asmaulhusna"
