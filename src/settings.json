@@ -187,6 +187,11 @@
           "path": "/dl/plays?q="
         },
         {
+          "name": "Twitter",
+          "desc": "Download Link Twitter by Danz-dev",
+          "path": "/dl/twitter?url="
+        },
+        {
           "name": "ytmp4",
           "desc": "Ytmp4 Download by Danz-dev",
           "path": "/dl/ytmp4?url="
