@@ -2,7 +2,6 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 module.exports = function (app) {
-
     async function hadist(hadist) {
         try {
             const { data: leet } = await axios.get(`https://www.hadits.id/tentang/${hadist}`);
@@ -75,36 +74,38 @@ module.exports = function (app) {
         }
     }
 
-    // Gabungkan kedua fungsi dalam satu route
+    // Define API routes
     app.get('/islami/hadist', async (req, res) => {
-        const { hadist, url } = req.query;
-
-        if (!hadist && !url) {
-            return res.status(400).json({ status: false, error: 'Parameter "hadist" atau "url" diperlukan' });
+        const { hadist } = req.query;
+        if (!hadist) {
+            return res.status(400).json({ status: false, error: 'Parameter "hadist" diperlukan' });
         }
 
         try {
-            let result;
+            const result = await hadist(hadist);
+            res.json({
+                status: true,
+                creator: "Danz-dev",
+                media: result
+            });
+        } catch (err) {
+            res.status(500).json({ status: false, error: err.message });
+        }
+    });
 
-            // Tentukan apakah akan menggunakan fungsi hadist atau detail
-            if (hadist) {
-                result = await hadist(hadist);
-                return res.json({
-                    status: true,
-                    creator: "Danz-dev",
-                    media: result
-                });
-            }
+    app.get('/api/detail', async (req, res) => {
+        const { url } = req.query;
+        if (!url) {
+            return res.status(400).json({ status: false, error: 'Parameter "url" diperlukan' });
+        }
 
-            if (url) {
-                result = await detail(url);
-                return res.json({
-                    status: true,
-                    creator: "Danz-dev",
-                    detail: result
-                });
-            }
-
+        try {
+            const result = await detail(url);
+            res.json({
+                status: true,
+                creator: "Danz-dev",
+                detail: result
+            });
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
         }
