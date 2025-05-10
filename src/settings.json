@@ -46,11 +46,6 @@
           "path": "/api/gemini?prompt="
         },
         {
-          "name": "Ghibli Style",
-          "desc": "Image To Ghibli",
-          "path": "/ai/ghibli?url="
-        },
-        {
           "name": "Dukun",
           "desc": "Dukun Sakti",
           "path": "/ai/dukun?content="
