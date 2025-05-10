@@ -257,11 +257,6 @@
       "name": "Info",
       "items": [
         {
-          "name": "List Api",
-          "desc": "Menampilkan semua nama api yang terdaftar",
-          "path": "/info/listapi"
-        },
-        {
           "name": "Jadwal tv",
           "desc": "Cari Jadwal Tv",
           "path": "/info/jadwaltv?channel="
