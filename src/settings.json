@@ -63,6 +63,11 @@
       "items": [
         {
           "name": "PlayStore",
+          "desc": "Cari aplikasi dari Hookrest-Mod dengan mudah",
+          "path": "/apk/hookmod?query="
+        },
+        {
+          "name": "Hook-Mod",
           "desc": "Cari aplikasi dari PlayStore dengan mudah",
           "path": "/apk/playstore?query="
         },
