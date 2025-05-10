@@ -26,54 +26,74 @@ module.exports = function (app) {
         validateStatus: status => status >= 200 && status < 300
     });
 
-    function generateHashPath(url, ext) {
-        const hash = Buffer.from(url).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
-        return `original/${hash}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    }
-
     async function getSignedUrl(hashx) {
-        const res = await axiosInstance.post(`${base}${endpoints.signed}`, {
-            "0": { "json": { path: hashx, bucket: "ghibli-image-generator" } }
-        }, { headers });
+        try {
+            const res = await axiosInstance.post(`${base}${endpoints.signed}`, {
+                "0": { "json": { path: hashx, bucket: "ghibli-image-generator" } }
+            }, { headers });
 
-        return res.data[0]?.result?.data?.json;
+            console.log('getSignedUrl response:', res.data);
+            return res.data[0]?.result?.data?.json;
+        } catch (err) {
+            console.error('[getSignedUrl ERROR]', err.message);
+            throw new Error('Gagal mendapatkan signed URL');
+        }
     }
 
     async function uploadFile(signedUrl, fileBuffer, mime) {
-        return await axios.put(signedUrl, fileBuffer, {
-            headers: { 'Content-Type': mime }
-        });
+        try {
+            const res = await axios.put(signedUrl, fileBuffer, {
+                headers: { 'Content-Type': mime }
+            });
+            console.log('uploadFile response:', res.status);
+            return res;
+        } catch (err) {
+            console.error('[uploadFile ERROR]', err.message);
+            throw new Error('Gagal mengupload file');
+        }
     }
 
     async function processImage(imageUrl, prompt = "restyle image in studio ghibli style, keep all details", size = "1:1") {
-        const res = await axiosInstance.post(`${base}${endpoints.create}`, {
-            "0": { "json": { imageUrl, prompt, size } }
-        }, { headers });
+        try {
+            const res = await axiosInstance.post(`${base}${endpoints.create}`, {
+                "0": { "json": { imageUrl, prompt, size } }
+            }, { headers });
 
-        const taskId = res.data[0]?.result?.data?.json?.data?.taskId;
-        if (!taskId) throw new Error('Gagal mendapatkan task ID.');
-        return taskId;
+            console.log('processImage response:', res.data);
+            const taskId = res.data[0]?.result?.data?.json?.data?.taskId;
+            if (!taskId) throw new Error('Gagal mendapatkan task ID.');
+            return taskId;
+        } catch (err) {
+            console.error('[processImage ERROR]', err.message);
+            throw new Error('Gagal memproses gambar');
+        }
     }
 
     async function waitForTask(taskId) {
         let attempts = 0;
         while (attempts < 30) {
-            const res = await axiosInstance.get(`${base}${endpoints.task}`, {
-                params: {
-                    input: JSON.stringify({ "0": { json: { taskId } } })
-                },
-                headers
-            });
+            try {
+                const res = await axiosInstance.get(`${base}${endpoints.task}`, {
+                    params: {
+                        input: JSON.stringify({ "0": { json: { taskId } } })
+                    },
+                    headers
+                });
 
-            const data = res.data[0]?.result?.data?.json?.data;
-            if (data.status === 'SUCCESS' && data.successFlag === 1) {
-                return data.response.resultUrls[0];
-            } else if (['FAILED', 'GENERATE_FAILED'].includes(data.status)) {
-                throw new Error('Generate gambar gagal.');
+                console.log('waitForTask response:', res.data);
+                const data = res.data[0]?.result?.data?.json?.data;
+                if (data.status === 'SUCCESS' && data.successFlag === 1) {
+                    return data.response.resultUrls[0];
+                } else if (['FAILED', 'GENERATE_FAILED'].includes(data.status)) {
+                    throw new Error('Generate gambar gagal.');
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                attempts++;
+            } catch (err) {
+                console.error('[waitForTask ERROR]', err.message);
+                throw new Error('Gagal menunggu task selesai');
             }
-
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            attempts++;
         }
         throw new Error('Timeout menunggu hasil generate.');
     }
@@ -85,32 +105,22 @@ module.exports = function (app) {
         }
 
         try {
-            console.log('[STEP] Fetching image from:', url);
             const response = await axios.get(url, { responseType: 'arraybuffer' });
-
             const ext = path.extname(url).replace('.', '').toLowerCase();
             const mime = `image/${ext}`;
-            console.log('[STEP] Image MIME:', mime);
+            const hashx = `original/${Math.random().toString(36).slice(2)}_${Date.now()}.${ext}`;
 
-            const hashx = generateHashPath(url, ext);
-            console.log('[STEP] Generated hash path:', hashx);
+            console.log('URL:', url);
+            console.log('Image hashx:', hashx);
 
             const signedUrl = await getSignedUrl(hashx);
-            console.log('[STEP] Signed URL:', signedUrl);
-
             if (!signedUrl) throw new Error('Gagal mendapatkan signed URL.');
 
             await uploadFile(signedUrl, response.data, mime);
-            console.log('[STEP] File uploaded.');
 
             const imageUrl = `${imageBase}/${hashx}`;
-            console.log('[STEP] Image URL:', imageUrl);
-
             const taskId = await processImage(imageUrl);
-            console.log('[STEP] Task ID:', taskId);
-
             const resultUrl = await waitForTask(taskId);
-            console.log('[STEP] Result image URL:', resultUrl);
 
             res.json({
                 status: true,
@@ -118,7 +128,7 @@ module.exports = function (app) {
                 image: resultUrl
             });
         } catch (err) {
-            console.error('[ERROR]', err.message);
+            console.error('[API ERROR]', err.message);
             res.status(500).json({ status: false, error: err.message });
         }
     });
