@@ -87,11 +87,6 @@
           "path": "/islami/jadwalsholat?city="
         },
         {
-          "name": "Hadist",
-          "desc": "Hadist random",
-          "path": "/islami/hadist?query="
-        },
-        {
           "name": "Asmaul Husna",
           "desc": "Asmaul husna random",
           "path": "/islami/asmaulhusna"
@@ -260,11 +255,6 @@
           "name": "List Api",
           "desc": "Menampilkan semua nama api yang terdaftar",
           "path": "/info/listapi"
-        },
-        {
-          "name": "Top Anime",
-          "desc": "Menampilkan anime teratas",
-          "path": "/anime/animeinfo"
         },
         {
           "name": "Jadwal Bola",
