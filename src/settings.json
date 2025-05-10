@@ -237,11 +237,6 @@
           "path": "/search/surah?no="
         },
         {
-          "name": "Samehadaku",
-          "desc": "Info anime new",
-          "path": "/search/samehadaku"
-        },
-        {
           "name": "Google Search",
           "desc": "Google search by Danz-dev",
           "path": "/search/google?q="
@@ -265,6 +260,11 @@
           "name": "Jadwal tv",
           "desc": "Cari Jadwal Tv",
           "path": "/info/jadwaltv?channel="
+        },
+        {
+          "name": "Samehadaku",
+          "desc": "Info anime new",
+          "path": "/search/samehadaku"
         },
         {
           "name": "Jadwal Bola",
