@@ -1,7 +1,6 @@
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const CryptoJS = require('crypto-js');
 
 module.exports = function (app) {
     const base = 'https://ghibli-image-generator.com';
@@ -74,7 +73,7 @@ module.exports = function (app) {
         throw new Error('Timeout menunggu hasil generate.');
     }
 
-    app.get('/ai/img/ghibli', async (req, res) => {
+    app.get('/api/img/ghibli', async (req, res) => {
         const { url } = req.query;
         if (!url) {
             return res.status(400).json({ status: false, error: 'Parameter "url" diperlukan' });
@@ -84,7 +83,8 @@ module.exports = function (app) {
             const response = await axios.get(url, { responseType: 'arraybuffer' });
             const ext = path.extname(url).replace('.', '').toLowerCase();
             const mime = `image/${ext}`;
-            const hashx = `original/${CryptoJS.SHA256(url).toString()}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+            const hashSimple = Buffer.from(url).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+            const hashx = `original/${hashSimple}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
             const signedUrl = await getSignedUrl(hashx);
             if (!signedUrl) throw new Error('Gagal mendapatkan signed URL.');
