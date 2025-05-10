@@ -259,16 +259,6 @@
       ]
     },
     {
-      "name": "Image",
-      "items": [
-        {
-          "name": "ghibli",
-          "desc": "Ghibli style",
-          "path": "/ai/img/ghibli?url="
-        }
-      ]
-    },
-    {
       "name": "Info",
       "items": [
         {
