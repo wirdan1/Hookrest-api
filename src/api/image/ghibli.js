@@ -26,6 +26,11 @@ module.exports = function (app) {
         validateStatus: status => status >= 200 && status < 300
     });
 
+    function generateHashPath(url, ext) {
+        const hash = Buffer.from(url).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+        return `original/${hash}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    }
+
     async function getSignedUrl(hashx) {
         const res = await axiosInstance.post(`${base}${endpoints.signed}`, {
             "0": { "json": { path: hashx, bucket: "ghibli-image-generator" } }
@@ -80,20 +85,32 @@ module.exports = function (app) {
         }
 
         try {
+            console.log('[STEP] Fetching image from:', url);
             const response = await axios.get(url, { responseType: 'arraybuffer' });
+
             const ext = path.extname(url).replace('.', '').toLowerCase();
             const mime = `image/${ext}`;
-            const hashSimple = Buffer.from(url).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
-            const hashx = `original/${hashSimple}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+            console.log('[STEP] Image MIME:', mime);
+
+            const hashx = generateHashPath(url, ext);
+            console.log('[STEP] Generated hash path:', hashx);
 
             const signedUrl = await getSignedUrl(hashx);
+            console.log('[STEP] Signed URL:', signedUrl);
+
             if (!signedUrl) throw new Error('Gagal mendapatkan signed URL.');
 
             await uploadFile(signedUrl, response.data, mime);
+            console.log('[STEP] File uploaded.');
 
             const imageUrl = `${imageBase}/${hashx}`;
+            console.log('[STEP] Image URL:', imageUrl);
+
             const taskId = await processImage(imageUrl);
+            console.log('[STEP] Task ID:', taskId);
+
             const resultUrl = await waitForTask(taskId);
+            console.log('[STEP] Result image URL:', resultUrl);
 
             res.json({
                 status: true,
@@ -101,6 +118,7 @@ module.exports = function (app) {
                 image: resultUrl
             });
         } catch (err) {
+            console.error('[ERROR]', err.message);
             res.status(500).json({ status: false, error: err.message });
         }
     });
