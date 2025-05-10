@@ -2,63 +2,50 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 module.exports = function (app) {
-    async function fetchSchedule(day = 'today') {
-        try {
-            let tanggal = new Date();
-            if (day === 'tomorrow') tanggal.setDate(tanggal.getDate() + 1);
+    async function fetchSchedule(dayOffset = 0) {
+        const tanggal = new Date();
+        tanggal.setDate(tanggal.getDate() + dayOffset);
+        const format = tanggal.toISOString().split('T')[0].replace(/-/g, '');
+        const { data } = await axios.get(`https://www.espn.com/soccer/schedule/_/date/${format}`);
+        const $ = cheerio.load(data);
+        const hasil = [];
+        let liga = '';
 
-            const format_tg = tanggal.toISOString().split('T')[0].replace(/-/g, '');
-            const { data } = await axios.get(`https://www.espn.com/soccer/schedule/_/date/${format_tg}`);
-            const $ = cheerio.load(data);
-            const hasil = [];
-            let liga = '';
-
-            $('.Table__Title, .Table__TBODY .Table__TR').each((_, el) => {
-                if ($(el).hasClass('Table__Title')) {
-                    liga = $(el).text().trim();
-                } else {
-                    const kolore = $(el).find('.Table__TD');
-                    const tim1 = kolore.eq(0).text().trim();
-                    const tim2 = kolore.eq(1).find('span').last().text().trim();
-                    const score = tim1 + ' ' + kolore.eq(1).text().trim();
-                    
-                    const item = {
+        $('.Table__Title, .Table__TBODY .Table__TR').each((_, el) => {
+            if ($(el).hasClass('Table__Title')) {
+                liga = $(el).text().trim();
+            } else {
+                const td = $(el).find('.Table__TD');
+                const tim1 = td.eq(0).text().trim();
+                const tim2 = td.eq(1).find('span').last().text().trim();
+                if (tim1 && tim2) {
+                    hasil.push({
                         liga,
+                        time: td.eq(2).text().trim() || '-',
                         team1: tim1,
                         team2: tim2,
-                        time: kolore.eq(2).text().trim() || '-',
-                        location: kolore.eq(day === 'today' ? 3 : 4).text().trim() || '-',
-                        source: kolore.eq(0).find('a').attr('href') ? 'https://www.espn.com' + kolore.eq(0).find('a').attr('href') : 'Gak ada',
-                        detail: kolore.eq(1).find('a').attr('href') ? 'https://www.espn.com' + kolore.eq(1).find('a').attr('href') : 'Gak ada'
-                    };
-
-                    if (day === 'today' && score.includes('-')) {
-                        item.score = score;
-                    }
-
-                    if (tim1 && tim2) hasil.push(item);
+                        location: td.eq(3).text().trim() || '-',
+                        detail: td.eq(1).find('a').attr('href') 
+                            ? 'https://www.espn.com' + td.eq(1).find('a').attr('href') 
+                            : 'Tidak ada',
+                    });
                 }
-            });
+            }
+        });
 
-            return {
-                status: true,
-                date: tanggal.toISOString().split('T')[0],
-                total: hasil.length,
-                data: hasil
-            };
-        } catch (err) {
-            throw new Error('Gagal mengambil data jadwal bola.');
-        }
+        return {
+            date: tanggal.toISOString().split('T')[0],
+            total: hasil.length,
+            data: hasil
+        };
     }
 
-    app.get('/info/jadwalbola', async (req, res) => {
-        const { day } = req.query; // today / tomorrow
-        if (day !== 'today' && day !== 'tomorrow') {
-            return res.status(400).json({ status: false, error: 'Gunakan query ?day=today atau ?day=tomorrow' });
-        }
-
+    app.get('/info/bola', async (req, res) => {
         try {
-            const result = await fetchSchedule(day);
+            let result = await fetchSchedule(0); // hari ini
+            if (result.total === 0) {
+                result = await fetchSchedule(1); // jika kosong, ambil besok
+            }
             res.json({
                 status: true,
                 creator: "Danz-dev",
