@@ -259,7 +259,7 @@
         {
           "name": "Jadwal tv",
           "desc": "Cari Jadwal Tv",
-          "path": "/info/jadwaltv?query"
+          "path": "/info/jadwaltv?channel="
         },
         {
           "name": "Jadwal Bola",
