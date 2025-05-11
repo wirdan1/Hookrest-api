@@ -43,7 +43,7 @@
         {
           "name": "Hookrest",
           "desc": "Talk with your prompt",
-          "path": "/ai/hookrest?content="
+          "path": "/api/hookrest?content="
         },
         {
           "name": "Gemini Ai",
