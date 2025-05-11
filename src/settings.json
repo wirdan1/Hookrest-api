@@ -187,6 +187,11 @@
           "path": "/dl/tiktok?url="
         },
         {
+          "name": "Snack Video",
+          "desc": "Snackvideo Download by Danz-dev",
+          "path": "/download/snackvideo?url="
+        },
+        {
           "name": "Pinterest",
           "desc": "Pinterest Download by Danz-dev",
           "path": "/dl/pinterest?q="
