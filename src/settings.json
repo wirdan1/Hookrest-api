@@ -43,9 +43,7 @@
         {
           "name": "Autoai",
           "desc": "Talk with your prompt",
-          "user": "?user=",
-          "prompt": "?prompt=",
-          "path": "/api/autoai?text="
+          "path": "/ai/hookrest?text="
         },
         {
           "name": "Gemini Ai",
