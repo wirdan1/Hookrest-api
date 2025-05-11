@@ -31,7 +31,7 @@ module.exports = function (app) {
             const result = await upscaleImage(url);
             res.json({
                 status: true,
-                creator: "KUROM -- BY REZA",
+                creator: "Danz-dev",
                 result: {
                     downloadUrls: result.data.downloadUrls,
                     filesize: result.data.filesize,
