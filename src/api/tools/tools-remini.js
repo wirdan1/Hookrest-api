@@ -22,7 +22,7 @@ module.exports = function (app) {
         }
     }
 
-    app.get('/api/remini', async (req, res) => {
+    app.get('/tools/remini', async (req, res) => {
         const { url } = req.query;
         if (!url) {
             return res.status(400).json({ status: false, error: 'Parameter "url" diperlukan.' });
