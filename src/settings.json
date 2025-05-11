@@ -41,7 +41,7 @@
           "path": "/ai/llama?text="
         },
         {
-          "name": "Autoai",
+          "name": "Hookrest",
           "desc": "Talk with your prompt",
           "path": "/ai/hookrest?text="
         },
