@@ -12,7 +12,7 @@ Ingat:
 
 Ayo ngobrol, aku siap bantu!`;
 
-    app.post('/ai/hookrest', async (req, res) => {
+    app.post('/api/hookrest', async (req, res) => {
         const { content } = req.body;
         if (!content) {
             return res.status(400).json({ status: false, error: 'Parameter "content" diperlukan' });
