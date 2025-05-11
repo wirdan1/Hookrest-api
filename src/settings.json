@@ -41,6 +41,13 @@
           "path": "/ai/llama?text="
         },
         {
+          "name": "Autoai",
+          "desc": "Talk with your prompt",
+          "user": "?user=",
+          "prompt": "?prompt=",
+          "path": "/api/autoai?text="
+        },
+        {
           "name": "Gemini Ai",
           "desc": "Ciptakan Pantun Bersama Gemini AI",
           "path": "/api/gemini?prompt="
