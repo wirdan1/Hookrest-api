@@ -1,40 +1,48 @@
 const axios = require('axios');
 
 module.exports = function (app) {
-    async function askHookrest(text, user) {
-        const prompt = `
-Kamu adalah Hookrest, AI asisten ramah dan cerdas dari Hookrest Team.
-Tugas kamu adalah membantu pengguna dengan jawaban yang jelas, sopan, dan bermanfaat.
-Gunakan bahasa santai namun tetap profesional.
-Jangan gunakan bahasa kasar, dan selalu berikan solusi atau jawaban terbaik.
-`;
+    const prompt = `Halo! Nama aku Hookrest, AI paling ramah dan siap bantu kamu dari tim Hookrest Team!
+    
+Gaya bicaraku santai, sopan, dan menyenangkan. Aku suka ngobrol kayak teman lama. Tugas utamaku adalah membantu kamu dengan pertanyaan atau tugas apapun sebisaku.
+
+Ingat:
+- Aku tidak suka marah, jadi tanya aja yang sopan ya.
+- Aku nggak jawab hal yang aneh atau melanggar aturan.
+- Aku bisa bercanda juga, asal masih dalam batas wajar.
+
+Ayo ngobrol, aku siap bantu!`;
+
+    app.post('/ai/hookrest', async (req, res) => {
+        const { content } = req.body;
+        if (!content) {
+            return res.status(400).json({ status: false, error: 'Parameter "content" diperlukan' });
+        }
 
         const requestData = {
-            content: text,
-            user,
+            content,
             prompt
         };
 
         try {
-            const response = await axios.post('https://luminai.my.id', requestData);
-            return response.data.result;
+            const response = await axios.post('https://luminai.my.id', requestData, {
+                validateStatus: () => true
+            });
+
+            if (!response.data || !response.data.result) {
+                throw new Error('Gagal mendapatkan respons dari AI.');
+            }
+
+            res.json({
+                status: true,
+                creator: "Hookrest Team",
+                result: response.data.result
+            });
         } catch (error) {
-            console.error("Error:", error);
-            throw new Error("Maaf, terjadi kesalahan saat memproses permintaan.");
-        }
-    }
-
-    app.get('/ai/hookrest', async (req, res) => {
-        const { text, user } = req.query;
-        if (!text || !user) {
-            return res.status(400).json({ status: false, error: 'Parameter "text" dan "user" diperlukan.' });
-        }
-
-        try {
-            const result = await askHookrest(text, user);
-            res.json({ status: true, creator: "Hookrest Team", result });
-        } catch (err) {
-            res.status(500).json({ status: false, creator: "Hookrest Team", error: err.message });
+            res.status(500).json({
+                status: false,
+                creator: "Hookrest Team",
+                error: error.message
+            });
         }
     });
 };
