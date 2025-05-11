@@ -147,6 +147,11 @@
           "path": "/tools/kodepos?form="
         },
         {
+          "name": "Remini",
+          "desc": "Make your foto HD",
+          "path": "/tools/remini?url="
+        },
+        {
           "name": "Cek Cuaca",
           "desc": "Cek cuaca di tempat tinggal anda",
           "path": "/tools/cuaca?kota="
