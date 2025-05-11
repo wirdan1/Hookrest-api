@@ -62,18 +62,18 @@
       "name": "Apk",
       "items": [
         {
-          "name": "PlayStore",
+          "name": "Hook-Mod",
           "desc": "Cari aplikasi dari Hookrest-Mod dengan mudah",
           "path": "/apk/hookmod?query="
         },
         {
-          "name": "Hook-Mod",
+          "name": "PlayStore",
           "desc": "Cari aplikasi dari PlayStore dengan mudah",
           "path": "/apk/playstore?query="
         },
         {
           "name": "Happy Mod",
-          "desc": "Cari aplikasi ddari Happy Mod dengan mudah",
+          "desc": "Cari aplikasi dari Happy Mod dengan mudah",
           "path": "/apk/happymod?search="
         }
       ]
