@@ -1,9 +1,5 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const fs = require('fs');
-const path = require('path');
-const tmp = require('tmp');
-const https = require('https');
 
 module.exports = function (app) {
     async function uploadImage(buffer, filename) {
@@ -42,13 +38,9 @@ module.exports = function (app) {
             const buffer = req.files.image.data;
             const filename = req.files.image.name;
 
-            // Upload gambar ke Uguu
             const uploadedUrl = await uploadImage(buffer, filename);
-
-            // Ambil gambar anime dari API
             const animeImage = await getAnimeImage(uploadedUrl);
 
-            // Kirim sebagai file gambar
             res.setHeader('Content-Type', 'image/jpeg');
             res.send(animeImage);
 
