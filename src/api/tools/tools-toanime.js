@@ -1,4 +1,7 @@
 const axios = require('axios');
+const tmp = require('tmp');
+const fs = require('fs');
+const path = require('path');
 
 module.exports = function (app) {
     async function upscaleImage(url) {
@@ -31,9 +34,34 @@ module.exports = function (app) {
         try {
             const result = await upscaleImage(url);
 
-            // Mengirim gambar yang dihasilkan langsung ke respons
-            res.set('Content-Type', 'image/jpeg');  // Set konten jenis gambar (misalnya jpeg)
-            res.send(result);  // Kirim gambar sebagai binary data
+            // Membuat file sementara menggunakan tmp
+            tmp.file({ 
+                prefix: 'upscaled_', 
+                postfix: '.jpg', 
+                discardDescriptor: true 
+            }, (err, tempFilePath, fd, cleanupCallback) => {
+                if (err) {
+                    return res.status(500).json({ status: false, error: 'Gagal membuat file sementara' });
+                }
+
+                // Menyimpan gambar hasil upscale ke file sementara
+                fs.writeFile(tempFilePath, result, async (writeErr) => {
+                    if (writeErr) {
+                        cleanupCallback();
+                        return res.status(500).json({ status: false, error: 'Gagal menyimpan gambar sementara' });
+                    }
+
+                    // Mengirimkan gambar sementara sebagai response
+                    res.sendFile(tempFilePath, (sendErr) => {
+                        if (sendErr) {
+                            return res.status(500).json({ status: false, error: 'Gagal mengirim gambar' });
+                        }
+
+                        // Menghapus file sementara setelah pengiriman
+                        cleanupCallback();
+                    });
+                });
+            });
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
         }
