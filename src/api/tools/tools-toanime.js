@@ -1,49 +1,39 @@
 const axios = require('axios');
-const FormData = require('form-data');
 
 module.exports = function (app) {
-    async function uploadImage(buffer, filename) {
-        const form = new FormData();
-        form.append('files[]', buffer, filename);
+    async function upscaleImage(url) {
+        const apiUrl = `https://api.kuromi.my.id/convert/upscale?url=${encodeURIComponent(url)}`;
 
-        const res = await axios.post('https://uguu.se/upload.php', form, {
-            headers: form.getHeaders()
-        });
+        try {
+            const res = await axios.get(apiUrl, {
+                validateStatus: () => true,
+                responseType: 'arraybuffer', // Menetapkan respons sebagai binary (gambar)
+            });
 
-        if (!res.data.files || !res.data.files[0]) {
-            throw new Error('Upload gagal.');
+            const data = res.data;
+
+            if (!data.success || !data.result || !data.result.data) {
+                throw new Error('Gagal mendapatkan hasil upscale.');
+            }
+
+            return data.result.data;  // Mengembalikan data gambar
+        } catch (err) {
+            throw new Error(err.message || 'Terjadi kesalahan saat memproses permintaan upscale.');
+        }
+    }
+
+    app.get('/api/upscale', async (req, res) => {
+        const { url } = req.query;
+        if (!url) {
+            return res.status(400).json({ status: false, error: 'Parameter "url" diperlukan' });
         }
 
-        return res.data.files[0].url;
-    }
-
-    async function getAnimeImage(imageUrl) {
-        const apiUrl = `https://fgsi1-restapi.hf.space/api/ai/toAnime?url=${encodeURIComponent(imageUrl)}`;
-        const response = await axios.get(apiUrl, {
-            responseType: 'arraybuffer',
-            headers: {
-                'Accept': 'image/*'
-            }
-        });
-
-        return response.data;
-    }
-
-    app.post('/api/toanime', async (req, res) => {
         try {
-            if (!req.files || !req.files.image) {
-                return res.status(400).json({ status: false, error: 'Upload gambar diperlukan dengan field name "image"' });
-            }
+            const result = await upscaleImage(url);
 
-            const buffer = req.files.image.data;
-            const filename = req.files.image.name;
-
-            const uploadedUrl = await uploadImage(buffer, filename);
-            const animeImage = await getAnimeImage(uploadedUrl);
-
-            res.setHeader('Content-Type', 'image/jpeg');
-            res.send(animeImage);
-
+            // Mengirim gambar yang dihasilkan langsung ke respons
+            res.set('Content-Type', 'image/jpeg');  // Set konten jenis gambar (misalnya jpeg)
+            res.send(result);  // Kirim gambar sebagai binary data
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
         }
