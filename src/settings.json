@@ -187,6 +187,11 @@
           "path": "/dl/tiktok?url="
         },
         {
+          "name": "MediaFire",
+          "desc": "MediaFire URL Download by Danz-dev",
+          "path": "/api/mediafire?url="
+        },
+        {
           "name": "Snack Video",
           "desc": "Snackvideo Download by Danz-dev",
           "path": "/download/snackvideo?url="
