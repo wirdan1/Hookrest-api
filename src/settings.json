@@ -152,6 +152,11 @@
           "path": "/tools/kodepos?form="
         },
         {
+          "name": "Toanime",
+          "desc": "Ubah foto menjadi anime style",
+          "path": "/api/toanime?url="
+        },
+        {
           "name": "Cek Cuaca",
           "desc": "Cek cuaca di tempat tinggal anda",
           "path": "/tools/cuaca?kota="
