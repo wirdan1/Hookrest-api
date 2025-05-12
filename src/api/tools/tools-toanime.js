@@ -1,50 +1,57 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const { default: fetch } = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
+const tmp = require('tmp');
+const https = require('https');
 
 module.exports = function (app) {
-    async function uploadToUguu(buffer, filename) {
+    async function uploadImage(buffer, filename) {
         const form = new FormData();
-        form.append('files[]', buffer, { filename });
+        form.append('files[]', buffer, filename);
 
         const res = await axios.post('https://uguu.se/upload.php', form, {
             headers: form.getHeaders()
         });
 
-        if (!res.data.files || !res.data.files[0]) throw new Error('Upload gagal.');
+        if (!res.data.files || !res.data.files[0]) {
+            throw new Error('Upload gagal.');
+        }
+
         return res.data.files[0].url;
     }
 
-    async function toAnime(url) {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Gagal mengambil gambar dari URL');
+    async function getAnimeImage(imageUrl) {
+        const apiUrl = `https://fgsi1-restapi.hf.space/api/ai/toAnime?url=${encodeURIComponent(imageUrl)}`;
+        const response = await axios.get(apiUrl, {
+            responseType: 'arraybuffer',
+            headers: {
+                'Accept': 'image/*'
+            }
+        });
 
-        const buffer = await response.buffer();
-        const contentType = response.headers.get('content-type');
-        const ext = contentType?.split('/')[1] || 'jpg';
-        const filename = `image.${ext}`;
-
-        const uploadedUrl = await uploadToUguu(buffer, filename);
-        const animeImageUrl = `https://fgsi1-restapi.hf.space/api/ai/toAnime?url=${encodeURIComponent(uploadedUrl)}`;
-
-        return animeImageUrl;
+        return response.data;
     }
 
-    app.get('/api/toanime', async (req, res) => {
-        const { url } = req.query;
-        if (!url) {
-            return res.status(400).json({ status: false, error: 'Parameter "url" diperlukan' });
-        }
-
+    app.post('/api/toanime', async (req, res) => {
         try {
-            const animeUrl = await toAnime(url);
-            res.json({
-                status: true,
-                creator: "Danz-dev",
-                result: {
-                    animeUrl
-                }
-            });
+            if (!req.files || !req.files.image) {
+                return res.status(400).json({ status: false, error: 'Upload gambar diperlukan dengan field name "image"' });
+            }
+
+            const buffer = req.files.image.data;
+            const filename = req.files.image.name;
+
+            // Upload gambar ke Uguu
+            const uploadedUrl = await uploadImage(buffer, filename);
+
+            // Ambil gambar anime dari API
+            const animeImage = await getAnimeImage(uploadedUrl);
+
+            // Kirim sebagai file gambar
+            res.setHeader('Content-Type', 'image/jpeg');
+            res.send(animeImage);
+
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
         }
