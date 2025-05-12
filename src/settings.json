@@ -41,11 +41,6 @@
           "path": "/ai/llama?text="
         },
         {
-          "name": "Hookrest",
-          "desc": "Talk with your prompt",
-          "path": "/api/hookrest?content="
-        },
-        {
           "name": "Gemini Ai",
           "desc": "Ciptakan Pantun Bersama Gemini AI",
           "path": "/api/gemini?prompt="
@@ -150,11 +145,6 @@
           "name": "Kodepos",
           "desc": "Cari nomor tempat tinggal anda",
           "path": "/tools/kodepos?form="
-        },
-        {
-          "name": "Toanime",
-          "desc": "Ubah foto menjadi anime style",
-          "path": "/api/toanime?url="
         },
         {
           "name": "Cek Cuaca",
