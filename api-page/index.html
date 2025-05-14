@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Add viewport meta tag with improved settings for mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="/src/icon.png" type="image/png">
     <title id="page"></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"/>
@@ -18,6 +19,16 @@
                 <div class="double-bounce2"></div>
             </div>
             <p>Loading resources...</p>
+        </div>
+    </div>
+
+    <!-- Add this right after the loadingScreen div (around line 28) -->
+    <div id="mobileStatusBar" class="d-md-none">
+        <div class="container">
+            <div class="mobile-status-wrapper">
+                <div class="mobile-status-indicator"></div>
+                <span class="mobile-status-text">API Status: Checking...</span>
+            </div>
         </div>
     </div>
 
@@ -309,5 +320,20 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/script.js"></script>
+
+<!-- Add a toast notification system for status updates -->
+<!-- Add this right before the closing </body> tag -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="statusToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <span id="toastStatusIndicator" class="status-indicator me-2"></span>
+      <strong class="me-auto" id="toastTitle">API Status</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="toastMessage">
+      Checking API status...
+    </div>
+  </div>
+</div>
 </body>
 </html>
