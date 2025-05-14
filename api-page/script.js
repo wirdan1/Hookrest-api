@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Create a controller for timeout
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout (increased from 5)
+      const timeoutId = setTimeout(() => controller.abort(), 6000) // 8 second timeout (increased from 5)
 
       // Try a GET request instead of HEAD (more universally supported)
       const response = await fetch(testUrl, {
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       clearTimeout(timeoutId)
 
       // Consider 2xx and 3xx status codes as "online"
-      const isOnline = response.status >= 200 && response.status < 400
+      const isOnline = response.status >= 200 && response.status < 300
 
       return {
         status: isOnline,
