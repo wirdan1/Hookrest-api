@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       clearTimeout(timeoutId)
 
       // Consider 2xx and 3xx status codes as "online"
-      const isOnline = response.status >= 200 && response.status < 500
+      const isOnline = response.status >= 200 && response.status 499
 
       return {
         status: isOnline,
