@@ -34,7 +34,6 @@
           "name": "Lumin AI",
           "desc": "Talk with luminai",
           "path": "/ai/luminai?text="
-          "status": "online"
         },
         {
           "name": "Llama",
