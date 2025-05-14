@@ -55,24 +55,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       clearTimeout(timeoutId)
 
-      // Consider 2xx and 3xx status codes as "online"
-      const isOnline = response.status >= 200 && response.status < 400
-
-      return {
-        status: isOnline,
-        message: isOnline ? "Online" : `Offline (${response.status})`,
-        statusCode: response.status,
-      }
-    } catch (error) {
-      console.log(`API check error for ${apiPath}:`, error.message)
-      // Check if it's a timeout error
-      if (error.name === "AbortError") {
-        return { status: false, message: "Timeout" }
-      }
-      return { status: false, message: "Offline" }
-    }
-  }
-
   // Update API status indicators
   const updateApiStatusIndicators = async () => {
     const apiItems = document.querySelectorAll(".api-item")
