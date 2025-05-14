@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       clearTimeout(timeoutId)
 
-      // Consider 2xx and 3xx status codes as "online"
+      /* Consider 2xx and 3xx status codes as "online"
       const isOnline = response.status >= 200 && response.status < 400
 
       return {
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       return { status: false, message: "Offline" }
     }
-  }
+  } */
 
   // Update API status indicators
   const updateApiStatusIndicators = async () => {
