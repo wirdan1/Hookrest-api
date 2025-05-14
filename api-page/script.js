@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // API Status checking functionality
   const checkApiStatus = async (apiPath) => {
-    if (!apiPath) return { status: true, message: "Invalid API path" }
+    if (!apiPath) return { status: false, message: "Invalid API path" }
 
     try {
       // Extract the base path without query parameters
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       clearTimeout(timeoutId)
 
       // Consider 2xx and 3xx status codes as "online"
-      const isOnline = response.status >= 200 && response.status < 400
+      const isOnline = response.status >= 200 && response.status < 500
 
       return {
         status: isOnline,
