@@ -394,34 +394,37 @@ body.no-scroll {
   margin-bottom: 1rem;
 }
 
-/* Modified API card styles */
-.hero-section {
+/* Modified API Card Styles - Only changed button position and shadow to border */
+.api-card {
   background-color: var(--bg-card);
   border-radius: var(--radius);
   padding: 1rem;
-  height: auto;
   min-height: 80px;
   border: 1px solid var(--border-color); /* Changed from shadow to border */
-  transition: var(--transition);
   display: flex;
   align-items: center;
-  justify-content: space-between; /* This moves GET button to the right */
+  justify-content: space-between; /* For button positioning */
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
-/* Removed hover effects that had shadow */
-.hero-section:hover {
-  transform: none;
-  box-shadow: none;
+.api-card-content {
+  flex: 1;
+  min-width: 0;
+  padding-right: 1rem;
 }
 
-.hero-section h5 {
+.api-card h5 {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
   color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.hero-section p {
+.api-card p {
   color: var(--text-muted);
   margin-bottom: 0;
   font-size: 0.75rem;
@@ -437,7 +440,8 @@ body.no-scroll {
   font-size: 0.75rem;
   font-weight: 500;
   transition: var(--transition);
-  margin-left: auto; /* Ensures button stays on the right */
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .get-api-btn:hover {
@@ -775,33 +779,6 @@ footer {
   font-weight: 500;
 }
 
-/* Mobile optimizations for API cards */
-@media (max-width: 575.98px) {
-  .api-item {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-
-  .hero-section {
-    flex-wrap: wrap;
-  }
-
-  .hero-section > div:first-child {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
-
-  .api-status {
-    order: 2;
-    margin-right: auto;
-    margin-left: 0;
-  }
-
-  .get-api-btn {
-    order: 3;
-  }
-}
-
 /* Responsive */
 @media (max-width: 991.98px) {
   .hero-content {
@@ -867,9 +844,25 @@ footer {
   .contact-card {
     padding: 1.5rem;
   }
+
+  /* Mobile API Card adjustments */
+  .api-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .api-card-content {
+    padding-right: 0;
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+
+  .get-api-btn {
+    align-self: flex-end;
+  }
 }
 
-/* Add these styles for the mobile status bar */
+/* Mobile Status Bar */
 #mobileStatusBar {
   position: sticky;
   top: 56px;
@@ -908,7 +901,6 @@ footer {
     padding: 0.5rem 0;
   }
 
-  /* Improve mobile modal experience */
   .modal-dialog {
     margin: 0.5rem auto;
     max-width: 95%;
@@ -932,7 +924,6 @@ footer {
     padding: 0.75rem;
   }
 
-  /* Improve mobile search experience */
   .search-box input {
     padding: 0.75rem 0.75rem 0.75rem 2.5rem;
   }
