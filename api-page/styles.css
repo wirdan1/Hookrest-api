@@ -394,23 +394,21 @@ body.no-scroll {
   margin-bottom: 1rem;
 }
 
-/* Modified API Card Styles - Only changed button position and shadow to border */
+/* ONLY CHANGED THESE API CARD STYLES */
 .api-card {
   background-color: var(--bg-card);
   border-radius: var(--radius);
   padding: 1rem;
   min-height: 80px;
-  border: 1px solid var(--border-color); /* Changed from shadow to border */
+  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
+  transition: var(--transition);
   display: flex;
   align-items: center;
-  justify-content: space-between; /* For button positioning */
-  width: 100%;
-  margin-bottom: 1rem;
+  justify-content: space-between; /* This moves GET button to right */
 }
 
 .api-card-content {
   flex: 1;
-  min-width: 0;
   padding-right: 1rem;
 }
 
@@ -419,9 +417,6 @@ body.no-scroll {
   font-weight: 600;
   margin-bottom: 0.25rem;
   color: var(--text-color);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .api-card p {
@@ -440,8 +435,7 @@ body.no-scroll {
   font-size: 0.75rem;
   font-weight: 500;
   transition: var(--transition);
-  flex-shrink: 0;
-  white-space: nowrap;
+  flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .get-api-btn:hover {
@@ -847,18 +841,16 @@ footer {
 
   /* Mobile API Card adjustments */
   .api-card {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row; /* Keep horizontal layout */
+    align-items: center;
   }
 
   .api-card-content {
-    padding-right: 0;
-    margin-bottom: 0.5rem;
-    width: 100%;
+    padding-right: 0.5rem;
   }
 
   .get-api-btn {
-    align-self: flex-end;
+    flex-shrink: 0;
   }
 }
 
