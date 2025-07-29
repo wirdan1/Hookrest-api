@@ -8,7 +8,7 @@
       "https://qu.ax/GbGJV.jpg"
     ],
     "imageSize": {
-      "mobile": "80%",
+      "mobile": "50%",
       "tablet": "40%",
       "desktop": "40%"
     }
@@ -34,7 +34,6 @@
           "name": "Lumin AI",
           "desc": "Talk with luminai",
           "path": "/ai/luminai?text="
-          "status": "ready"
         },
         {
           "name": "Llama",
