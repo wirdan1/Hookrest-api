@@ -1,269 +1,409 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const loadingScreen = document.getElementById("loadingScreen");
-    const body = document.body;
-    body.classList.add("no-scroll");
+document.addEventListener("DOMContentLoaded", async () => {
+const loadingScreen = document.getElementById("loadingScreen");
+const body = document.body;
+body.classList.add("no-scroll");
 
-    try {
-        const settings = await fetch('/src/settings.json').then(res => res.json());
+// Force dark mode for this design
+document.body.classList.add("dark-mode");
+// REMOVE THIS LINE: document.getElementById("darkModeToggle").classList.replace("fa-moon", "fa-sun");
 
-        const setContent = (id, property, value) => {
-            const element = document.getElementById(id);
-            if (element) element[property] = value;
-        };
+// REMOVE THIS BLOCK: Theme toggle functionality
+// document.getElementById("darkModeToggle").addEventListener("click", () => {
+//   document.body.classList.toggle("dark-mode");
+//   const isDarkMode = document.body.classList.contains("dark-mode");
+//   localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+//   const icon = document.getElementById("darkModeToggle");
+//   if (isDarkMode) {
+//     icon.classList.replace("fa-moon", "fa-sun");
+//   } else {
+//     icon.classList.replace("fa-sun", "fa-moon");
+//   }
+// });
 
-        const randomImageSrc =
-            Array.isArray(settings.header.imageSrc) && settings.header.imageSrc.length > 0
-                ? settings.header.imageSrc[Math.floor(Math.random() * settings.header.imageSrc.length)]
-                : "";
+try {
+const settings = await fetch("/src/settings.json").then((res) => res.json());
 
-        const dynamicImage = document.getElementById('dynamicImage');
-        if (dynamicImage) {
-            dynamicImage.src = randomImageSrc;
+const setContent = (id, property, value) => {
+  const element = document.getElementById(id);
+  if (element) element[property] = value;
+};
 
-            const setImageSize = () => {
-                const screenWidth = window.innerWidth;
-                if (screenWidth < 768) {
-                    dynamicImage.style.maxWidth = settings.header.imageSize.mobile || "80%";
-                } else if (screenWidth < 1200) {
-                    dynamicImage.style.maxWidth = settings.header.imageSize.tablet || "40%";
-                } else {
-                    dynamicImage.style.maxWidth = settings.header.imageSize.desktop || "40%";
-                }
-                dynamicImage.style.height = "auto";
-            };
+// Set current year in footer
+document.getElementById("currentYear").textContent = new Date().getFullYear();
 
-            setImageSize();
-            window.addEventListener('resize', setImageSize);
-        }
-        
-        setContent('page', 'textContent', settings.name || "Rynn UI");
-        setContent('header', 'textContent', settings.name || "Rynn UI");
-        setContent('name', 'textContent', settings.name || "Rynn UI");
-        setContent('version', 'textContent', settings.version || "v1.0 Beta");
-        setContent('versionHeader', 'textContent', settings.header.status || "Online!");
-        setContent('description', 'textContent', settings.description || "Simple API's");
+// Set content from settings
+setContent("page", "textContent", settings.name || "Hookrest API");
+setContent("header", "textContent", settings.name || "Hookrest API");
+setContent("footerBrand", "textContent", settings.name || "Hookrest API");
+setContent("name", "textContent", settings.name || "Hookrest API");
+setContent("copyrightName", "textContent", settings.name || "Hookrest API");
+setContent("description", "textContent", settings.description || "Simple API's");
 
-        const apiLinksContainer = document.getElementById('apiLinks');
-        if (apiLinksContainer && settings.links?.length) {
-            settings.links.forEach(({ url, name }) => {
-                const link = Object.assign(document.createElement('a'), {
-                    href: url,
-                    textContent: name,
-                    target: '_blank',
-                    className: 'lead'
-                });
-                apiLinksContainer.appendChild(link);
-            });
-        }
+// Generate API content
+const apiContent = document.getElementById("apiContent");
+settings.categories.forEach((category) => {
+  const categoryDiv = document.createElement("div");
+  categoryDiv.className = "api-category";
 
-        const apiContent = document.getElementById('apiContent');
-        settings.categories.forEach((category) => {
-            const sortedItems = category.items.sort((a, b) => a.name.localeCompare(b.name));
-            const categoryContent = sortedItems.map((item, index, array) => {
-                const isLastItem = index === array.length - 1;
-                const itemClass = `col-md-6 col-lg-4 api-item ${isLastItem ? 'mb-4' : 'mb-2'}`;
-                return `
-                    <div class="${itemClass}" data-name="${item.name}" data-desc="${item.desc}">
-                        <div class="hero-section d-flex align-items-center justify-content-between" style="height: 70px;">
-                            <div>
-                                <h5 class="mb-0" style="font-size: 18px;">${item.name}</h5>
-                                <p class="text-muted mb-0" style="font-size: 0.8rem;">${item.desc}</p>
-                            </div>
-                            <button class="btn btn-dark btn-sm get-api-btn" data-api-path="${item.path}" data-api-name="${item.name}" data-api-desc="${item.desc}">
-                                GET
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            apiContent.insertAdjacentHTML('beforeend', `<h3 class="mb-3 category-header" style="font-size: 22px;">${category.name}</h3><div class="row">${categoryContent}</div>`);
-        });
+  const categoryHeader = document.createElement("div");
+  categoryHeader.className = "api-category-header";
+  categoryHeader.innerHTML = `
+                  <span>${category.name}</span>
+                  <i class="fas fa-chevron-down"></i> <!-- Changed to fa-chevron-down -->
+              `;
+  categoryDiv.appendChild(categoryHeader);
 
-        const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('input', () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            const apiItems = document.querySelectorAll('.api-item');
-            const categoryHeaders = document.querySelectorAll('.category-header');
+  const categoryBody = document.createElement("div");
+  categoryBody.className = "api-category-content";
+  categoryBody.style.display = "none"; // Start collapsed
 
-            apiItems.forEach(item => {
-                const name = item.getAttribute('data-name').toLowerCase();
-                const desc = item.getAttribute('data-desc').toLowerCase();
-                item.style.display = (name.includes(searchTerm) || desc.includes(searchTerm)) ? '' : 'none';
-            });
+  const sortedItems = category.items.sort((a, b) => a.name.localeCompare(b.name));
 
-            categoryHeaders.forEach(header => {
-                const categoryRow = header.nextElementSibling;
-                const visibleItems = categoryRow.querySelectorAll('.api-item:not([style*="display: none"])');
-                header.style.display = visibleItems.length ? '' : 'none';
-            });
-        });
+  sortedItems.forEach((item) => {
+    const endpointCard = document.createElement("div");
+    endpointCard.className = "api-endpoint-card";
+    endpointCard.dataset.apiPath = item.path;
+    endpointCard.dataset.apiName = item.name;
+    endpointCard.dataset.apiDesc = item.desc;
+    endpointCard.dataset.apiInnerDesc = item.innerDesc || "";
 
-        document.addEventListener('click', event => {
-            if (!event.target.classList.contains('get-api-btn')) return;
+    endpointCard.innerHTML = `
+                      <span class="method-badge">GET</span>
+                      <div class="endpoint-text">
+                          <span class="endpoint-path">${item.path.split('?')[0]}</span>
+                          <span class="endpoint-name">${item.name}</span>
+                      </div>
+                      <i class="fas fa-lock lock-icon"></i>
+                      <i class="fas fa-chevron-down"></i> <!-- Added chevron-down icon -->
+                  `;
+    categoryBody.appendChild(endpointCard);
+  });
 
-            const { apiPath, apiName, apiDesc } = event.target.dataset;
-            const modal = new bootstrap.Modal(document.getElementById('apiResponseModal'));
-            const modalRefs = {
-                label: document.getElementById('apiResponseModalLabel'),
-                desc: document.getElementById('apiResponseModalDesc'),
-                content: document.getElementById('apiResponseContent'),
-                endpoint: document.getElementById('apiEndpoint'),
-                spinner: document.getElementById('apiResponseLoading'),
-                queryInputContainer: document.getElementById('apiQueryInputContainer'),
-                submitBtn: document.getElementById('submitQueryBtn')
-            };
+  categoryDiv.appendChild(categoryBody);
+  apiContent.appendChild(categoryDiv);
 
-            modalRefs.label.textContent = apiName;
-            modalRefs.desc.textContent = apiDesc;
-            modalRefs.content.textContent = '';
-            modalRefs.endpoint.textContent = '';
-            modalRefs.spinner.classList.add('d-none');
-            modalRefs.content.classList.add('d-none');
-            modalRefs.endpoint.classList.add('d-none');
-
-            modalRefs.queryInputContainer.innerHTML = '';
-            modalRefs.submitBtn.classList.add('d-none');
-
-            let baseApiUrl = `${window.location.origin}${apiPath}`;
-            let params = new URLSearchParams(apiPath.split('?')[1]);
-            let hasParams = params.toString().length > 0;
-
-            if (hasParams) {
-                const paramContainer = document.createElement('div');
-                paramContainer.className = 'param-container';
-
-                const paramsArray = Array.from(params.keys());
-                
-                paramsArray.forEach((param, index) => {
-                    const paramGroup = document.createElement('div');
-                    paramGroup.className = index < paramsArray.length - 1 ? 'mb-2' : '';
-
-                    const inputField = document.createElement('input');
-                    inputField.type = 'text';
-                    inputField.className = 'form-control';
-                    inputField.placeholder = `Enter ${param}...`;
-                    inputField.dataset.param = param;
-
-                    inputField.required = true;
-                    inputField.addEventListener('input', validateInputs);
-
-                    paramGroup.appendChild(inputField);
-                    paramContainer.appendChild(paramGroup);
-                });
-                
-                const currentItem = settings.categories
-                    .flatMap(category => category.items)
-                    .find(item => item.path === apiPath);
-
-                if (currentItem && currentItem.innerDesc) {
-                    const innerDescDiv = document.createElement('div');
-                    innerDescDiv.className = 'text-muted mt-2';
-                    innerDescDiv.style.fontSize = '13px';
-                    innerDescDiv.innerHTML = currentItem.innerDesc.replace(/\n/g, '<br>');
-                    paramContainer.appendChild(innerDescDiv);
-                }
-
-                modalRefs.queryInputContainer.appendChild(paramContainer);
-                modalRefs.submitBtn.classList.remove('d-none');
-
-                modalRefs.submitBtn.onclick = async () => {
-                    const inputs = modalRefs.queryInputContainer.querySelectorAll('input');
-                    const newParams = new URLSearchParams();
-                    let isValid = true;
-
-                    inputs.forEach(input => {
-                        if (!input.value.trim()) {
-                            isValid = false;
-                            input.classList.add('is-invalid');
-                        } else {
-                            input.classList.remove('is-invalid');
-                            newParams.append(input.dataset.param, input.value.trim());
-                        }
-                    });
-
-                    if (!isValid) {
-                        modalRefs.content.textContent = 'Please fill in all required fields.';
-                        modalRefs.content.classList.remove('d-none');
-                        return;
-                    }
-
-                    const apiUrlWithParams = `${window.location.origin}${apiPath.split('?')[0]}?${newParams.toString()}`;
-                    
-                    modalRefs.queryInputContainer.innerHTML = '';
-                    modalRefs.submitBtn.classList.add('d-none');
-                    handleApiRequest(apiUrlWithParams, modalRefs, apiName);
-                };
-            } else {
-                handleApiRequest(baseApiUrl, modalRefs, apiName);
-            }
-
-            modal.show();
-        });
-
-        function validateInputs() {
-            const submitBtn = document.getElementById('submitQueryBtn');
-            const inputs = document.querySelectorAll('.param-container input');
-            const isValid = Array.from(inputs).every(input => input.value.trim() !== '');
-            submitBtn.disabled = !isValid;
-        }
-
-        async function handleApiRequest(apiUrl, modalRefs, apiName) {
-            modalRefs.spinner.classList.remove('d-none');
-            modalRefs.content.classList.add('d-none');
-
-            try {
-                const response = await fetch(apiUrl);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const contentType = response.headers.get('Content-Type');
-                if (contentType && contentType.startsWith('image/')) {
-                    const blob = await response.blob();
-                    const imageUrl = URL.createObjectURL(blob);
-
-                    const img = document.createElement('img');
-                    img.src = imageUrl;
-                    img.alt = apiName;
-                    img.style.maxWidth = '100%';
-                    img.style.height = 'auto';
-                    img.style.borderRadius = '5px';
-
-                    modalRefs.content.innerHTML = '';
-                    modalRefs.content.appendChild(img);
-                } else {
-                    const data = await response.json();
-                    modalRefs.content.textContent = JSON.stringify(data, null, 2);
-                }
-
-                modalRefs.endpoint.textContent = apiUrl;
-                modalRefs.endpoint.classList.remove('d-none');
-            } catch (error) {
-                modalRefs.content.textContent = `Error: ${error.message}`;
-            } finally {
-                modalRefs.spinner.classList.add('d-none');
-                modalRefs.content.classList.remove('d-none');
-            }
-        }
-    } catch (error) {
-        console.error('Error loading settings:', error);
-    } finally {
-        setTimeout(() => {
-            loadingScreen.style.display = "none";
-            body.classList.remove("no-scroll");
-        }, 2000);
-    }
+  // Toggle category content
+  categoryHeader.addEventListener("click", () => {
+    categoryBody.style.display = categoryBody.style.display === "none" ? "grid" : "none";
+    categoryHeader.classList.toggle("collapsed");
+    categoryHeader.querySelector(".fas").classList.toggle("fa-chevron-up");
+    categoryHeader.querySelector(".fas").classList.toggle("fa-chevron-down");
+  });
 });
 
-window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    const navbarBrand = document.querySelector('.navbar-brand');
-    if (window.scrollY > 0) {
-        navbarBrand.classList.add('visible');
-        navbar.classList.add('scrolled');
+// Search functionality
+const searchInput = document.getElementById("searchInput");
+searchInput.addEventListener("input", () => {
+  const searchTerm = searchInput.value.toLowerCase();
+  const apiItems = document.querySelectorAll(".api-endpoint-card");
+  const categoryDivs = document.querySelectorAll(".api-category");
+
+  apiItems.forEach((item) => {
+    const name = item.getAttribute("data-api-name").toLowerCase();
+    const path = item.getAttribute("data-api-path").toLowerCase();
+    item.style.display = name.includes(searchTerm) || path.includes(searchTerm) ? "flex" : "none";
+  });
+
+  categoryDivs.forEach((categoryDiv) => {
+    const categoryBody = categoryDiv.querySelector(".api-category-content");
+    const categoryHeader = categoryDiv.querySelector(".api-category-header");
+    const visibleItems = categoryBody.querySelectorAll('.api-endpoint-card[style*="display: flex"]');
+    
+    if (visibleItems.length > 0) {
+      categoryDiv.style.display = "";
+      categoryBody.style.display = "grid"; // Ensure it's visible and grid layout
+      categoryHeader.classList.remove("collapsed");
+      categoryHeader.querySelector(".fas").classList.replace("fa-chevron-down", "fa-chevron-up");
     } else {
-        navbarBrand.classList.remove('visible');
-        navbar.classList.remove('scrolled');
+      categoryDiv.style.display = "none";
     }
+  });
+});
+
+// API request handling (Modal logic)
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".api-endpoint-card")) return;
+
+  const card = event.target.closest(".api-endpoint-card");
+  const { apiPath, apiName, apiDesc, apiInnerDesc } = card.dataset;
+
+  const modal = new bootstrap.Modal(document.getElementById("apiResponseModal"));
+  const modalRefs = {
+    label: document.getElementById("apiResponseModalLabel"),
+    desc: document.getElementById("apiResponseModalDesc"),
+    modalApiDescription: document.getElementById("modalApiDescription"),
+    modalEndpointPath: document.getElementById("modalEndpointPath"),
+    queryInputContainer: document.getElementById("apiQueryInputContainer"),
+    submitBtn: document.getElementById("submitQueryBtn"),
+    clearBtn: document.getElementById("clearQueryBtn"),
+    apiCurlContent: document.getElementById("apiCurlContent"),
+    apiRequestUrlContent: document.getElementById("apiRequestUrlContent"),
+    apiResponseCode: document.getElementById("apiResponseCode"),
+    apiResponseBody: document.getElementById("apiResponseBody"),
+    apiResponseHeaders: document.getElementById("apiResponseHeaders"),
+    parametersTab: document.getElementById("parametersTab"),
+    responsesTab: document.getElementById("responsesTab"),
+    responseCodeTab: document.getElementById("responseCodeTab"),
+    responseDetailsTab: document.getElementById("responseDetailsTab"),
+  };
+
+  // Reset modal content
+  modalRefs.label.textContent = apiName;
+  modalRefs.desc.textContent = apiDesc;
+  modalRefs.modalApiDescription.textContent = apiDesc;
+  modalRefs.modalEndpointPath.textContent = apiPath.split('?')[0];
+  modalRefs.queryInputContainer.innerHTML = "";
+  modalRefs.apiCurlContent.textContent = "";
+  modalRefs.apiRequestUrlContent.textContent = "";
+  modalRefs.apiResponseCode.textContent = "";
+  modalRefs.apiResponseBody.textContent = "";
+  modalRefs.apiResponseHeaders.textContent = "";
+
+  // Reset tab states
+  document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+  document.querySelector(".tab-button[data-tab='parameters']").classList.add("active");
+  modalRefs.parametersTab.classList.add("active");
+  modalRefs.responsesTab.classList.remove("active");
+
+  document.querySelectorAll(".response-tab-button").forEach(btn => btn.classList.remove("active"));
+  document.querySelector(".response-tab-button[data-response-tab='code']").classList.add("active");
+  modalRefs.responseCodeTab.classList.add("active");
+  modalRefs.responseDetailsTab.classList.remove("active");
+
+
+  const baseApiUrl = `${window.location.origin}${apiPath.split("?")[0]}`;
+  const paramsString = apiPath.split("?")[1];
+  const params = new URLSearchParams(paramsString);
+  const hasParams = params.toString().length > 0;
+
+  let currentParams = {}; // To store current input values
+
+  if (hasParams) {
+    const paramContainer = document.createElement("div");
+    paramContainer.className = "param-container";
+
+    Array.from(params.keys()).forEach((param) => {
+      const paramGroup = document.createElement("div");
+      paramGroup.className = "param-group";
+
+      const label = document.createElement("label");
+      label.innerHTML = `${param.charAt(0).toUpperCase() + param.slice(1)} <span class="required-star">*</span> <span class="param-type">string (query)</span>`;
+
+      const inputField = document.createElement("input");
+      inputField.type = "text";
+      inputField.className = "form-control";
+      inputField.placeholder = `Enter ${param}...`;
+      inputField.dataset.param = param;
+      inputField.required = true;
+      inputField.addEventListener("input", () => {
+        currentParams[param] = inputField.value.trim();
+        updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
+      });
+
+      const paramDesc = document.createElement("p");
+      paramDesc.className = "param-description";
+      paramDesc.textContent = `The query to ask ${param.charAt(0).toUpperCase() + param.slice(1)}`; // Generic description
+
+      const paramExample = document.createElement("p");
+      paramExample.className = "param-example";
+      paramExample.textContent = `Example: ${param === 'text' ? 'Hello world' : 'Paris'}`; // Simple example
+
+      paramGroup.appendChild(label);
+      paramGroup.appendChild(inputField);
+      paramGroup.appendChild(paramDesc);
+      paramGroup.appendChild(paramExample);
+      paramContainer.appendChild(paramGroup);
+    });
+
+    if (apiInnerDesc) {
+      const innerDescDiv = document.createElement("div");
+      innerDescDiv.className = "text-muted mt-3";
+      innerDescDiv.style.fontSize = "0.875rem";
+      innerDescDiv.innerHTML = apiInnerDesc.replace(/\n/g, "<br>");
+      paramContainer.appendChild(innerDescDiv);
+    }
+
+    modalRefs.queryInputContainer.appendChild(paramContainer);
+    modalRefs.submitBtn.style.display = "inline-block";
+    modalRefs.clearBtn.style.display = "inline-block";
+
+    // Initial update for Curl and Request URL
+    updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
+
+  } else {
+    modalRefs.submitBtn.style.display = "none";
+    modalRefs.clearBtn.style.display = "none";
+    updateCurlAndRequestUrl(baseApiUrl, {}, apiPath.split('?')[0]); // For endpoints without params
+  }
+
+  modalRefs.submitBtn.onclick = async () => {
+    const inputs = modalRefs.queryInputContainer.querySelectorAll("input");
+    const newParams = new URLSearchParams();
+    let isValid = true;
+
+    inputs.forEach((input) => {
+      if (input.required && !input.value.trim()) {
+        isValid = false;
+        input.classList.add("is-invalid");
+      } else {
+        input.classList.remove("is-invalid");
+        newParams.append(input.dataset.param, input.value.trim());
+      }
+    });
+
+    if (!isValid) {
+      modalRefs.apiResponseCode.textContent = "400";
+      modalRefs.apiResponseBody.textContent = JSON.stringify({ status: false, error: "Please fill in all required fields." }, null, 2);
+      modalRefs.apiResponseHeaders.textContent = "Content-Type: application/json";
+      // Switch to responses tab
+      document.querySelector(".tab-button[data-tab='responses']").click();
+      return;
+    }
+
+    const apiUrlWithParams = `${baseApiUrl}?${newParams.toString()}`;
+    handleApiRequest(apiUrlWithParams, modalRefs, apiName);
+  };
+
+  modalRefs.clearBtn.onclick = () => {
+    modalRefs.queryInputContainer.querySelectorAll("input").forEach(input => {
+      input.value = "";
+      input.classList.remove("is-invalid");
+    });
+    currentParams = {};
+    updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
+    modalRefs.apiResponseCode.textContent = "";
+    modalRefs.apiResponseBody.textContent = "";
+    modalRefs.apiResponseHeaders.textContent = "";
+  };
+
+  modal.show();
+});
+
+// Tab switching logic for modal
+document.querySelectorAll(".tab-button").forEach(button => {
+  button.addEventListener("click", function() {
+    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+    this.classList.add("active");
+    document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.remove("active"));
+    document.getElementById(this.dataset.tab + "Tab").classList.add("active");
+  });
+});
+
+document.querySelectorAll(".response-tab-button").forEach(button => {
+  button.addEventListener("click", function() {
+    document.querySelectorAll(".response-tab-button").forEach(btn => btn.classList.remove("active"));
+    this.classList.add("active");
+    document.querySelectorAll(".response-tab-pane").forEach(pane => pane.classList.remove("active"));
+    document.getElementById(this.dataset.responseTab + "Tab").classList.add("active");
+  });
+});
+
+// Copy functionality
+document.getElementById("copyCurl").addEventListener("click", () => {
+  const text = document.getElementById("apiCurlContent").textContent;
+  copyToClipboard(text, "Curl command copied to clipboard!");
+});
+
+document.getElementById("copyRequestUrl").addEventListener("click", () => {
+  const text = document.getElementById("apiRequestUrlContent").textContent;
+  copyToClipboard(text, "Request URL copied to clipboard!");
+});
+
+document.getElementById("downloadResponse").addEventListener("click", () => {
+  const responseText = document.getElementById("apiResponseBody").textContent;
+  const filename = "response.json";
+  const blob = new Blob([responseText], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert("Response downloaded!");
+});
+
+function copyToClipboard(text, successMessage) {
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      alert(successMessage);
+    })
+    .catch((err) => {
+      console.error("Could not copy text: ", err);
+    });
+}
+
+function updateCurlAndRequestUrl(baseApiUrl, params, endpointPath) {
+  const newParams = new URLSearchParams();
+  for (const key in params) {
+    if (params[key]) {
+      newParams.append(key, params[key]);
+    }
+  }
+
+  const fullRequestUrl = `${baseApiUrl}${newParams.toString() ? '?' + newParams.toString() : ''}`;
+  document.getElementById("apiRequestUrlContent").textContent = fullRequestUrl;
+
+  const curlCommand = `curl -X 'GET' \\\n  '${fullRequestUrl}' \\\n  -H 'accept: */*'`;
+  document.getElementById("apiCurlContent").textContent = curlCommand;
+}
+
+async function handleApiRequest(apiUrl, modalRefs, apiName) {
+  modalRefs.apiResponseCode.textContent = "Loading...";
+  modalRefs.apiResponseBody.textContent = "Loading...";
+  modalRefs.apiResponseHeaders.textContent = "Loading...";
+
+  // Switch to responses tab and code tab
+  document.querySelector(".tab-button[data-tab='responses']").click();
+  document.querySelector(".response-tab-button[data-response-tab='code']").click();
+
+  try {
+    const response = await fetch(apiUrl);
+    const headers = {};
+    response.headers.forEach((value, name) => {
+      headers[name] = value;
+    });
+
+    modalRefs.apiResponseCode.textContent = response.status;
+    modalRefs.apiResponseHeaders.textContent = Object.entries(headers).map(([key, value]) => `${key}: ${value}`).join('\n');
+
+    const contentType = response.headers.get("Content-Type");
+    if (contentType && contentType.startsWith("image/")) {
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+
+      const img = document.createElement("img");
+      img.src = imageUrl;
+      img.alt = apiName;
+      img.style.maxWidth = "100%";
+      img.style.height = "auto";
+      img.style.borderRadius = "8px";
+
+      modalRefs.apiResponseBody.innerHTML = "";
+      modalRefs.apiResponseBody.appendChild(img);
+    } else {
+      const data = await response.json();
+      modalRefs.apiResponseBody.textContent = JSON.stringify(data, null, 2);
+    }
+  } catch (error) {
+    modalRefs.apiResponseCode.textContent = "500";
+    modalRefs.apiResponseBody.textContent = JSON.stringify({ status: false, error: error.message }, null, 2);
+    modalRefs.apiResponseHeaders.textContent = "Content-Type: application/json";
+  }
+}
+
+} catch (error) {
+console.error("Error loading settings:", error);
+} finally {
+// Simulate loading for better UX
+setTimeout(() => {
+  loadingScreen.style.opacity = 0;
+  setTimeout(() => {
+    loadingScreen.style.display = "none";
+    body.classList.remove("no-scroll");
+  }, 300);
+}, 1500);
+}
 });
