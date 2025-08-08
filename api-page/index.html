@@ -28,59 +28,28 @@
                   <div class="d-flex align-items-center">
                       <img src="/src/icon.png" alt="Logo" class="logo-img me-2">
                       <span id="header"></span>
-                      <div id="versionHeader" class="version-badge ms-2"></div>
                   </div>
               </a>
-              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                  <i class="fas fa-bars"></i>
-              </button>
-              <div class="collapse navbar-collapse" id="navbarNav">
-                  <ul class="navbar-nav ms-auto">
-                      <li class="nav-item">
-                          <a class="nav-link active" href="#apis">APIs</a>
-                      </li>
-                      <li class="nav-item">
-                          <a class="nav-link" href="#contact">Contact Us</a>
-                      </li>
-                  </ul>
-                  <div class="theme-toggle ms-3">
-                      <i class="fas fa-moon" id="darkModeToggle"></i>
-                  </div>
+              <div class="theme-toggle ms-auto">
+                  <i class="fas fa-moon" id="darkModeToggle"></i>
               </div>
           </div>
       </nav>
 
-      <main>
-          <section id="apis" class="apis-section">
-              <div class="container">
-                  <div class="section-header">
-                      <h2>Available APIs</h2>
-                      <p>Explore our collection of powerful APIs</p>
-                  </div>
-                  
-                  <div class="search-container">
-                      <div class="search-box">
-                          <i class="fas fa-search"></i>
-                          <input type="text" id="searchInput" class="form-control" placeholder="Search APIs...">
-                      </div>
-                  </div>
-                  
-                   API Content will be dynamically generated here 
-                  <div id="apiContent"></div>
-              </div>
-          </section>
+      <main class="container my-4">
+          <div class="api-header">
+              <h1 id="name"></h1>
+              <p id="description"></p>
+          </div>
 
-          <section id="contact" class="contact-section">
-              <div class="container">
-                  <div class="section-header">
-                      <h2>Contact Us</h2>
-                      <p>Have questions or need support? Reach out to us!</p>
-                  </div>
-                  <div class="row justify-content-center" id="contactMethodsContainer">
-                      <!-- Contact methods will be dynamically generated here -->
-                  </div>
+          <div class="search-auth-container">
+              <div class="search-box">
+                  <input type="text" id="searchInput" class="form-control" placeholder="Cari endpoint.">
               </div>
-          </section>
+              <button class="btn btn-authorize">Authorize <i class="fas fa-lock"></i></button>
+          </div>
+          
+          <div id="apiContent" class="mt-4"></div>
       </main>
 
       <footer>
@@ -90,21 +59,93 @@
                       <img src="/src/icon.png" alt="Logo" class="logo-img">
                       <span id="footerBrand"></span>
                   </div>
-                  <div class="footer-links">
-                      <a href="#apis">APIs</a>
-                      <a href="#contact">Contact Us</a>
+                  <div class="footer-bottom">
+                      <p>&copy; <span id="currentYear"></span> <span id="copyrightName"></span>. All rights reserved.</p>
                   </div>
-                  <div class="footer-social">
-                      <a href="#"><i class="fab fa-github"></i></a>
-                      <a href="#"><i class="fab fa-whatsapp"></i></a>
-                      <a href="#"><i class="fab fa-telegram"></i></a>
-                  </div>
-              </div>
-              <div class="footer-bottom">
-                  <p>&copy; <span id="currentYear"></span> <span id="copyrightName"></span>. All rights reserved.</p>
               </div>
           </div>
       </footer>
+  </div>
+
+  <div class="modal fade" id="apiResponseModal" tabindex="-1" aria-labelledby="apiResponseModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl" id="modalDialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <div>
+                      <h5 class="modal-title" id="apiResponseModalLabel"></h5>
+                      <p class="modal-desc mb-0" id="apiResponseModalDesc"></p>
+                  </div>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <div class="endpoint-info">
+                      <span class="method-badge" id="modalMethod">GET</span>
+                      <span class="endpoint-path" id="modalEndpointPath"></span>
+                      <i class="fas fa-lock lock-icon"></i>
+                  </div>
+                  <p class="api-description" id="modalApiDescription"></p>
+
+                  <div class="tab-buttons">
+                      <button class="tab-button active" data-tab="parameters">Parameters</button>
+                      <button class="tab-button" data-tab="responses">Responses</button>
+                  </div>
+
+                  <div class="tab-content-wrapper">
+                      <div id="parametersTab" class="tab-pane active">
+                          <div id="apiQueryInputContainer"></div>
+                          <div class="action-buttons">
+                              <button id="submitQueryBtn" class="btn btn-primary">Execute</button>
+                              <button id="clearQueryBtn" class="btn btn-outline">Clear</button>
+                          </div>
+                      </div>
+
+                      <div id="responsesTab" class="tab-pane">
+                          <div class="response-section">
+                              <div class="response-header">
+                                  <span>Curl</span>
+                                  <button id="copyCurl" class="copy-btn"><i class="fas fa-copy"></i></button>
+                              </div>
+                              <pre id="apiCurlContent" class="code-block"></pre>
+                          </div>
+
+                          <div class="response-section">
+                              <div class="response-header">
+                                  <span>Request URL</span>
+                                  <button id="copyRequestUrl" class="copy-btn"><i class="fas fa-copy"></i></button>
+                              </div>
+                              <pre id="apiRequestUrlContent" class="code-block"></pre>
+                          </div>
+
+                          <div class="response-section">
+                              <div class="response-header">
+                                  <span>Server response</span>
+                                  <div class="response-tabs">
+                                      <button class="response-tab-button active" data-response-tab="code">Code</button>
+                                      <button class="response-tab-button" data-response-tab="details">Details</button>
+                                  </div>
+                              </div>
+                              <div class="response-content-wrapper">
+                                  <div id="responseCodeTab" class="response-tab-pane active">
+                                      <pre id="apiResponseCode" class="code-block"></pre>
+                                  </div>
+                                  <div id="responseDetailsTab" class="response-tab-pane">
+                                      <div class="response-header-details">
+                                          <span>Response body</span>
+                                          <button id="downloadResponse" class="copy-btn"><i class="fas fa-download"></i> Download</button>
+                                      </div>
+                                      <pre id="apiResponseBody" class="code-block"></pre>
+                                      <div class="response-header-details mt-3">
+                                          <span>Response headers</span>
+                                      </div>
+                                      <pre id="apiResponseHeaders" class="code-block"></pre>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
   </div>
 
    Bootstrap JS 
