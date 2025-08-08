@@ -38,54 +38,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Set current year in footer
     document.getElementById("currentYear").textContent = new Date().getFullYear();
 
-    // Set random image from settings
-    const randomImageSrc =
-      Array.isArray(settings.header.imageSrc) && settings.header.imageSrc.length > 0
-        ? settings.header.imageSrc[Math.floor(Math.random() * settings.header.imageSrc.length)]
-        : "";
-
-    const dynamicImage = document.getElementById("dynamicImage");
-    if (dynamicImage) {
-      dynamicImage.src = randomImageSrc;
-
-      const setImageSize = () => {
-        const screenWidth = window.innerWidth;
-        if (screenWidth < 768) {
-          dynamicImage.style.maxWidth = settings.header.imageSize.mobile || "100%";
-        } else if (screenWidth < 1200) {
-          dynamicImage.style.maxWidth = settings.header.imageSize.tablet || "100%";
-        } else {
-          dynamicImage.style.maxWidth = settings.header.imageSize.desktop || "100%";
-        }
-      };
-
-      setImageSize();
-      window.addEventListener("resize", setImageSize);
-    }
-
     // Set content from settings
     setContent("page", "textContent", settings.name || "Hookrest API");
     setContent("header", "textContent", settings.name || "Hookrest API");
     setContent("footerBrand", "textContent", settings.name || "Hookrest API");
-    setContent("name", "textContent", settings.name || "Hookrest API");
     setContent("copyrightName", "textContent", settings.name || "Hookrest API");
-    setContent("version", "textContent", settings.version || "v1.0");
     setContent("versionHeader", "textContent", settings.header.status || "Online!");
-    setContent("description", "textContent", settings.description || "Simple API's");
-
-    // Set API links
-    const apiLinksContainer = document.getElementById("apiLinks");
-    if (apiLinksContainer && settings.links?.length) {
-      settings.links.forEach(({ url, name }) => {
-        const link = Object.assign(document.createElement("a"), {
-          href: url,
-          textContent: name,
-          target: "_blank",
-          className: "api-link",
-        });
-        apiLinksContainer.appendChild(link);
-      });
-    }
 
     // --- API Content Generation ---
     const apiContent = document.getElementById("apiContent");
@@ -191,6 +149,39 @@ document.addEventListener("DOMContentLoaded", async () => {
       apiContent.appendChild(categoryContainer);
     });
 
+    // --- Contact Methods Generation ---
+    const contactMethodsContainer = document.getElementById("contactMethodsContainer");
+    if (contactMethodsContainer && settings.links?.length) {
+      settings.links.forEach(link => {
+        const colDiv = document.createElement("div");
+        colDiv.className = "col-md-4 mb-4";
+
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "contact-card text-center";
+
+        let iconClass = "fas fa-link"; // Default icon
+        if (link.name.toLowerCase().includes("whatsapp") || link.url.includes("wa.me")) {
+          iconClass = "fab fa-whatsapp";
+        } else if (link.name.toLowerCase().includes("github")) {
+          iconClass = "fab fa-github";
+        } else if (link.name.toLowerCase().includes("telegram")) {
+          iconClass = "fab fa-telegram";
+        } else if (link.name.toLowerCase().includes("email") || link.url.includes("mailto:")) {
+          iconClass = "fas fa-envelope";
+        }
+
+        cardDiv.innerHTML = `
+          <i class="${iconClass} contact-icon"></i>
+          <h3>${link.name}</h3>
+          <p>${link.url}</p>
+          <a href="${link.url}" target="_blank" class="btn btn-primary">Go to ${link.name}</a>
+        `;
+        colDiv.appendChild(cardDiv);
+        contactMethodsContainer.appendChild(colDiv);
+      });
+    }
+
+
     // --- Global Event Listeners (for elements created once) ---
 
     // Toggle API category collapse
@@ -253,8 +244,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           // Activate clicked tab and show its content pane
           button.classList.add('active');
-          // Use uniqueId for tab content panes
-          detailContent.querySelector(`#${tabName}-tab${tabName.includes('response') ? '' : '-' + uniqueId}`).style.display = 'block';
+          // Corrected: Always use uniqueId for all tab content panes within this detailContent
+          detailContent.querySelector(`#${tabName}-tab-${uniqueId}`).style.display = 'block';
         });
       });
 
