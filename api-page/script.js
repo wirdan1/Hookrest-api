@@ -1,522 +1,407 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const loadingScreen = document.getElementById("loadingScreen");
-  const body = document.body;
-  body.classList.add("no-scroll");
+const loadingScreen = document.getElementById("loadingScreen");
+const body = document.body;
+body.classList.add("no-scroll");
 
-  // Check for saved theme preference
-  const savedTheme = localStorage.getItem("theme");
-  if (savedTheme === "dark") {
-    document.body.classList.add("dark-mode");
-    document.getElementById("darkModeToggle").classList.replace("fa-moon", "fa-sun");
+// Force dark mode for this design
+document.body.classList.add("dark-mode");
+document.getElementById("darkModeToggle").classList.replace("fa-moon", "fa-sun");
+
+// Theme toggle functionality (still available if user wants to switch, though design is dark)
+document.getElementById("darkModeToggle").addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+  const isDarkMode = document.body.classList.contains("dark-mode");
+  localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+  const icon = document.getElementById("darkModeToggle");
+  if (isDarkMode) {
+    icon.classList.replace("fa-moon", "fa-sun");
+  } else {
+    icon.classList.replace("fa-sun", "fa-moon");
   }
+});
 
-  // Theme toggle functionality
-  document.getElementById("darkModeToggle").addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-    const isDarkMode = document.body.classList.contains("dark-mode");
+try {
+  const settings = await fetch("/src/settings.json").then((res) => res.json());
 
-    // Save theme preference
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+  const setContent = (id, property, value) => {
+    const element = document.getElementById(id);
+    if (element) element[property] = value;
+  };
 
-    // Toggle icon
-    const icon = document.getElementById("darkModeToggle");
-    if (isDarkMode) {
-      icon.classList.replace("fa-moon", "fa-sun");
-    } else {
-      icon.classList.replace("fa-sun", "fa-moon");
-    }
+  // Set current year in footer
+  document.getElementById("currentYear").textContent = new Date().getFullYear();
+
+  // Set content from settings
+  setContent("page", "textContent", settings.name || "Hookrest API");
+  setContent("header", "textContent", settings.name || "Hookrest API");
+  setContent("footerBrand", "textContent", settings.name || "Hookrest API");
+  setContent("name", "textContent", settings.name || "Hookrest API");
+  setContent("copyrightName", "textContent", settings.name || "Hookrest API");
+  setContent("description", "textContent", settings.description || "Simple API's");
+
+  // Generate API content
+  const apiContent = document.getElementById("apiContent");
+  settings.categories.forEach((category) => {
+    const categoryDiv = document.createElement("div");
+    categoryDiv.className = "api-category";
+
+    const categoryHeader = document.createElement("div");
+    categoryHeader.className = "api-category-header";
+    categoryHeader.innerHTML = `
+              <span>${category.name}</span>
+              <i class="fas fa-chevron-up"></i>
+          `;
+    categoryDiv.appendChild(categoryHeader);
+
+    const categoryBody = document.createElement("div");
+    categoryBody.className = "api-category-content";
+
+    const sortedItems = category.items.sort((a, b) => a.name.localeCompare(b.name));
+
+    sortedItems.forEach((item) => {
+      const endpointCard = document.createElement("div");
+      endpointCard.className = "api-endpoint-card";
+      endpointCard.dataset.apiPath = item.path;
+      endpointCard.dataset.apiName = item.name;
+      endpointCard.dataset.apiDesc = item.desc;
+      endpointCard.dataset.apiInnerDesc = item.innerDesc || "";
+
+      endpointCard.innerHTML = `
+                  <span class="method-badge">GET</span>
+                  <div class="endpoint-text">
+                      <span class="endpoint-path">${item.path.split('?')[0]}</span>
+                      <span class="endpoint-name">${item.name}</span>
+                  </div>
+                  <i class="fas fa-lock lock-icon"></i>
+              `;
+      categoryBody.appendChild(endpointCard);
+    });
+
+    categoryDiv.appendChild(categoryBody);
+    apiContent.appendChild(categoryDiv);
+
+    // Toggle category content
+    categoryHeader.addEventListener("click", () => {
+      categoryBody.style.display = categoryBody.style.display === "none" ? "grid" : "none";
+      categoryHeader.classList.toggle("collapsed");
+      categoryHeader.querySelector(".fas").classList.toggle("fa-chevron-up");
+      categoryHeader.querySelector(".fas").classList.toggle("fa-chevron-down");
+    });
   });
 
-  try {
-    const settings = await fetch("/src/settings.json").then((res) => res.json());
+  // Search functionality
+  const searchInput = document.getElementById("searchInput");
+  searchInput.addEventListener("input", () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const apiItems = document.querySelectorAll(".api-endpoint-card");
+    const categoryDivs = document.querySelectorAll(".api-category");
 
-    const setContent = (id, property, value) => {
-      const element = document.getElementById(id);
-      if (element) element[property] = value;
+    apiItems.forEach((item) => {
+      const name = item.getAttribute("data-api-name").toLowerCase();
+      const path = item.getAttribute("data-api-path").toLowerCase();
+      item.style.display = name.includes(searchTerm) || path.includes(searchTerm) ? "flex" : "none";
+    });
+
+    categoryDivs.forEach((categoryDiv) => {
+      const categoryBody = categoryDiv.querySelector(".api-category-content");
+      const categoryHeader = categoryDiv.querySelector(".api-category-header");
+      const visibleItems = categoryBody.querySelectorAll('.api-endpoint-card[style*="display: flex"]');
+      
+      if (visibleItems.length > 0) {
+        categoryDiv.style.display = "";
+        categoryBody.style.display = "grid"; // Ensure it's visible and grid layout
+        categoryHeader.classList.remove("collapsed");
+        categoryHeader.querySelector(".fas").classList.replace("fa-chevron-down", "fa-chevron-up");
+      } else {
+        categoryDiv.style.display = "none";
+      }
+    });
+  });
+
+  // API request handling (Modal logic)
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".api-endpoint-card")) return;
+
+    const card = event.target.closest(".api-endpoint-card");
+    const { apiPath, apiName, apiDesc, apiInnerDesc } = card.dataset;
+
+    const modal = new bootstrap.Modal(document.getElementById("apiResponseModal"));
+    const modalRefs = {
+      label: document.getElementById("apiResponseModalLabel"),
+      desc: document.getElementById("apiResponseModalDesc"),
+      modalApiDescription: document.getElementById("modalApiDescription"),
+      modalEndpointPath: document.getElementById("modalEndpointPath"),
+      queryInputContainer: document.getElementById("apiQueryInputContainer"),
+      submitBtn: document.getElementById("submitQueryBtn"),
+      clearBtn: document.getElementById("clearQueryBtn"),
+      apiCurlContent: document.getElementById("apiCurlContent"),
+      apiRequestUrlContent: document.getElementById("apiRequestUrlContent"),
+      apiResponseCode: document.getElementById("apiResponseCode"),
+      apiResponseBody: document.getElementById("apiResponseBody"),
+      apiResponseHeaders: document.getElementById("apiResponseHeaders"),
+      parametersTab: document.getElementById("parametersTab"),
+      responsesTab: document.getElementById("responsesTab"),
+      responseCodeTab: document.getElementById("responseCodeTab"),
+      responseDetailsTab: document.getElementById("responseDetailsTab"),
     };
 
-    // Set current year in footer
-    document.getElementById("currentYear").textContent = new Date().getFullYear();
+    // Reset modal content
+    modalRefs.label.textContent = apiName;
+    modalRefs.desc.textContent = apiDesc;
+    modalRefs.modalApiDescription.textContent = apiDesc;
+    modalRefs.modalEndpointPath.textContent = apiPath.split('?')[0];
+    modalRefs.queryInputContainer.innerHTML = "";
+    modalRefs.apiCurlContent.textContent = "";
+    modalRefs.apiRequestUrlContent.textContent = "";
+    modalRefs.apiResponseCode.textContent = "";
+    modalRefs.apiResponseBody.textContent = "";
+    modalRefs.apiResponseHeaders.textContent = "";
 
-    // Set content from settings
-    setContent("page", "textContent", settings.name || "Hookrest API");
-    setContent("header", "textContent", settings.name || "Hookrest API");
-    setContent("footerBrand", "textContent", settings.name || "Hookrest API");
-    setContent("copyrightName", "textContent", settings.name || "Hookrest API");
-    setContent("versionHeader", "textContent", settings.header.status || "Online!");
+    // Reset tab states
+    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+    document.querySelector(".tab-button[data-tab='parameters']").classList.add("active");
+    modalRefs.parametersTab.classList.add("active");
+    modalRefs.responsesTab.classList.remove("active");
 
-    // --- API Content Generation ---
-    const apiContent = document.getElementById("apiContent");
-    apiContent.innerHTML = ''; // Clear existing content
+    document.querySelectorAll(".response-tab-button").forEach(btn => btn.classList.remove("active"));
+    document.querySelector(".response-tab-button[data-response-tab='code']").classList.add("active");
+    modalRefs.responseCodeTab.classList.add("active");
+    modalRefs.responseDetailsTab.classList.remove("active");
 
-    settings.categories.forEach((category) => {
-      const categoryContainer = document.createElement("div");
-      categoryContainer.className = "api-category-container mb-4";
 
-      const categoryHeader = document.createElement("div");
-      categoryHeader.className = "api-category-header collapsed"; // Start collapsed
-      categoryHeader.setAttribute("data-bs-toggle", "collapse");
-      categoryHeader.setAttribute("data-bs-target", `#collapse-${category.name.replace(/\s/g, '-')}`);
-      categoryHeader.setAttribute("aria-expanded", "false");
-      categoryHeader.setAttribute("aria-controls", `collapse-${category.name.replace(/\s/g, '-')}`);
-      categoryHeader.innerHTML = `
-        <span>${category.name}</span>
-        <i class="fas fa-chevron-right"></i>
-      `;
-      categoryContainer.appendChild(categoryHeader);
+    const baseApiUrl = `${window.location.origin}${apiPath.split("?")[0]}`;
+    const paramsString = apiPath.split("?")[1];
+    const params = new URLSearchParams(paramsString);
+    const hasParams = params.toString().length > 0;
 
-      const categoryCollapseContent = document.createElement("div");
-      categoryCollapseContent.className = "collapse api-category-content";
-      categoryCollapseContent.id = `collapse-${category.name.replace(/\s/g, '-')}`;
-      categoryContainer.appendChild(categoryCollapseContent);
+    let currentParams = {}; // To store current input values
 
-      const sortedItems = category.items.sort((a, b) => a.name.localeCompare(b.name));
+    if (hasParams) {
+      const paramContainer = document.createElement("div");
+      paramContainer.className = "param-container";
 
-      sortedItems.forEach((item) => {
-        const uniqueId = item.name.replace(/\s/g, '-').replace(/[^a-zA-Z0-9-]/g, ''); // Sanitize for ID
-        const endpointCard = document.createElement("div");
-        endpointCard.className = "api-endpoint-card";
-        endpointCard.setAttribute("data-api-name", item.name);
-        endpointCard.setAttribute("data-api-desc", item.desc);
-        endpointCard.setAttribute("data-api-path", item.path);
-        endpointCard.setAttribute("data-api-inner-desc", item.innerDesc || '');
+      Array.from(params.keys()).forEach((param) => {
+        const paramGroup = document.createElement("div");
+        paramGroup.className = "param-group";
 
-        endpointCard.innerHTML = `
-          <span class="method-badge">GET</span>
-          <span class="endpoint-path">${item.path.split('?')[0]}</span>
-          <span class="endpoint-name">${item.name}</span>
-          <button class="toggle-details-btn" data-bs-toggle="collapse" data-bs-target="#detail-${uniqueId}" aria-expanded="false" aria-controls="detail-${uniqueId}">
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        `;
-        categoryCollapseContent.appendChild(endpointCard);
+        const label = document.createElement("label");
+        label.innerHTML = `${param.charAt(0).toUpperCase() + param.slice(1)} <span class="required-star">*</span> <span class="param-type">string (query)</span>`;
 
-        const detailContent = document.createElement("div");
-        detailContent.className = "collapse api-detail-content";
-        detailContent.id = `detail-${uniqueId}`;
-        detailContent.innerHTML = `
-          <div class="description-box mb-3">
-            ${item.desc}
-            ${item.innerDesc ? `<br><br>${item.innerDesc.replace(/\n/g, "<br>")}` : ''}
-          </div>
+        const inputField = document.createElement("input");
+        inputField.type = "text";
+        inputField.className = "form-control";
+        inputField.placeholder = `Enter ${param}...`;
+        inputField.dataset.param = param;
+        inputField.required = true;
+        inputField.addEventListener("input", () => {
+          currentParams[param] = inputField.value.trim();
+          updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
+        });
 
-          <div class="tabs">
-            <button class="tab-button active" data-tab="parameters" data-api-path="${item.path}">Parameters</button>
-            <button class="tab-button" data-tab="try-it-out" data-api-path="${item.path}">Try it out</button>
-          </div>
+        const paramDesc = document.createElement("p");
+        paramDesc.className = "param-description";
+        paramDesc.textContent = `The query to ask ${param.charAt(0).toUpperCase() + param.slice(1)}`; // Generic description
 
-          <div class="tab-content-pane active" id="parameters-tab-${uniqueId}">
-            <div class="param-inputs-container"></div>
-            <div class="action-buttons">
-              <button class="btn btn-primary execute-api-btn">Execute</button>
-              <button class="btn btn-outline clear-inputs-btn">Clear</button>
-            </div>
-          </div>
+        const paramExample = document.createElement("p");
+        paramExample.className = "param-example";
+        paramExample.textContent = `Example: ${param === 'text' ? 'Hello world' : 'Paris'}`; // Simple example
 
-          <div class="tab-content-pane" id="try-it-out-tab-${uniqueId}" style="display:none;">
-            <div class="response-section">
-              <div class="response-header">
-                <span>Server response</span>
-              </div>
-              <div class="tabs">
-                <button class="tab-button active" data-tab="response-body">Response body</button>
-                <button class="tab-button" data-tab="response-headers">Response headers</button>
-              </div>
-              <div class="tab-content-pane active" id="response-body-tab-${uniqueId}" style="display:block;">
-                <div class="api-response-loading d-none">
-                  <div class="spinner">
-                    <div class="double-bounce1"></div>
-                    <div class="double-bounce2"></div>
-                  </div>
-                </div>
-                <pre class="api-response-content"></pre>
-                <button class="btn btn-primary download-response-btn mt-2 d-none">
-                  <i class="fas fa-download"></i> Download
-                </button>
-              </div>
-              <div class="tab-content-pane" id="response-headers-tab-${uniqueId}" style="display:none;">
-                <pre class="api-response-headers"></pre>
-              </div>
-            </div>
-          </div>
-        `;
-        categoryCollapseContent.appendChild(detailContent);
-
-        // Attach event listeners for the newly created detailContent
-        attachDetailContentListeners(detailContent, item.path, uniqueId);
+        paramGroup.appendChild(label);
+        paramGroup.appendChild(inputField);
+        paramGroup.appendChild(paramDesc);
+        paramGroup.appendChild(paramExample);
+        paramContainer.appendChild(paramGroup);
       });
 
-      apiContent.appendChild(categoryContainer);
-    });
+      if (apiInnerDesc) {
+        const innerDescDiv = document.createElement("div");
+        innerDescDiv.className = "text-muted mt-3";
+        innerDescDiv.style.fontSize = "0.875rem";
+        innerDescDiv.innerHTML = apiInnerDesc.replace(/\n/g, "<br>");
+        paramContainer.appendChild(innerDescDiv);
+      }
 
-    // --- Contact Methods Generation ---
-    const contactMethodsContainer = document.getElementById("contactMethodsContainer");
-    if (contactMethodsContainer && settings.links?.length) {
-      settings.links.forEach(link => {
-        const colDiv = document.createElement("div");
-        colDiv.className = "col-md-4 mb-4";
+      modalRefs.queryInputContainer.appendChild(paramContainer);
+      modalRefs.submitBtn.style.display = "inline-block";
+      modalRefs.clearBtn.style.display = "inline-block";
 
-        const cardDiv = document.createElement("div");
-        cardDiv.className = "contact-card text-center";
+      // Initial update for Curl and Request URL
+      updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
 
-        let iconClass = "fas fa-link"; // Default icon
-        if (link.name.toLowerCase().includes("whatsapp") || link.url.includes("wa.me")) {
-          iconClass = "fab fa-whatsapp";
-        } else if (link.name.toLowerCase().includes("github")) {
-          iconClass = "fab fa-github";
-        } else if (link.name.toLowerCase().includes("telegram")) {
-          iconClass = "fab fa-telegram";
-        } else if (link.name.toLowerCase().includes("email") || link.url.includes("mailto:")) {
-          iconClass = "fas fa-envelope";
-        }
-
-        cardDiv.innerHTML = `
-          <i class="${iconClass} contact-icon"></i>
-          <h3>${link.name}</h3>
-          <p>${link.url}</p>
-          <a href="${link.url}" target="_blank" class="btn btn-primary">Go to ${link.name}</a>
-        `;
-        colDiv.appendChild(cardDiv);
-        contactMethodsContainer.appendChild(colDiv);
-      });
+    } else {
+      modalRefs.submitBtn.style.display = "none";
+      modalRefs.clearBtn.style.display = "none";
+      updateCurlAndRequestUrl(baseApiUrl, {}, apiPath.split('?')[0]); // For endpoints without params
     }
 
+    modalRefs.submitBtn.onclick = async () => {
+      const inputs = modalRefs.queryInputContainer.querySelectorAll("input");
+      const newParams = new URLSearchParams();
+      let isValid = true;
 
-    // --- Global Event Listeners (for elements created once) ---
-
-    // Toggle API category collapse
-    document.querySelectorAll('.api-category-header').forEach(header => {
-      header.addEventListener('click', () => {
-        const icon = header.querySelector('.fas');
-        const isCollapsed = header.classList.contains('collapsed');
-        header.classList.toggle('collapsed', !isCollapsed);
-        icon.classList.toggle('fa-chevron-right', isCollapsed);
-        icon.classList.toggle('fa-chevron-down', !isCollapsed);
-      });
-    });
-
-    // Toggle API endpoint details
-    document.querySelectorAll('.toggle-details-btn').forEach(button => {
-      button.addEventListener('click', (event) => {
-        const targetId = button.dataset.bsTarget;
-        const targetElement = document.querySelector(targetId);
-        const isExpanded = button.getAttribute('aria-expanded') === 'true';
-
-        // Toggle the button's expanded state and icon
-        button.setAttribute('aria-expanded', !isExpanded);
-        button.classList.toggle('expanded', !isExpanded);
-        button.querySelector('.fas').classList.toggle('fa-chevron-right', isExpanded);
-        button.querySelector('.fas').classList.toggle('fa-chevron-down', !isExpanded);
-
-        // Generate parameters when expanded
-        if (!isExpanded) {
-          const apiPath = button.closest('.api-endpoint-card').dataset.apiPath;
-          const uniqueId = targetElement.id.replace('detail-', '');
-          const paramInputsContainer = targetElement.querySelector('.param-inputs-container');
-          generateParameterInputs(apiPath, paramInputsContainer);
-
-          // Ensure Parameters tab is active when opening
-          const parametersTabButton = targetElement.querySelector(`.tab-button[data-tab="parameters"]`);
-          const tryItOutTabButton = targetElement.querySelector(`.tab-button[data-tab="try-it-out"]`);
-          const parametersContentPane = targetElement.querySelector(`#parameters-tab-${uniqueId}`);
-          const tryItOutContentPane = targetElement.querySelector(`#try-it-out-tab-${uniqueId}`);
-
-          parametersTabButton.classList.add('active');
-          tryItOutTabButton.classList.remove('active');
-          parametersContentPane.style.display = 'block';
-          tryItOutContentPane.style.display = 'none';
-        }
-      });
-    });
-
-    // --- Function to attach listeners to a specific detailContent block ---
-    function attachDetailContentListeners(detailContent, apiPath, uniqueId) {
-      // Tab switching for Parameters/Try it out and Response Body/Headers
-      detailContent.querySelectorAll('.tabs .tab-button').forEach(button => {
-        button.addEventListener('click', (event) => {
-          const tabName = button.dataset.tab;
-          const parentTabsContainer = button.closest('.tabs');
-
-          // Deactivate all tabs in this group
-          parentTabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-          // Hide all content panes in this group
-          detailContent.querySelectorAll('.tab-content-pane').forEach(pane => pane.style.display = 'none');
-
-          // Activate clicked tab and show its content pane
-          button.classList.add('active');
-          // Corrected: Always use uniqueId for all tab content panes within this detailContent
-          detailContent.querySelector(`#${tabName}-tab-${uniqueId}`).style.display = 'block';
-        });
-      });
-
-      // Execute API button
-      detailContent.querySelector('.execute-api-btn').addEventListener('click', async (event) => {
-        const paramInputs = detailContent.querySelectorAll('.param-inputs-container input');
-        const responseContentPre = detailContent.querySelector('.api-response-content');
-        const responseHeadersPre = detailContent.querySelector('.api-response-headers');
-        const loadingSpinner = detailContent.querySelector('.api-response-loading');
-        const downloadBtn = detailContent.querySelector('.download-response-btn');
-        const apiName = detailContent.closest('.api-endpoint-card').dataset.apiName;
-
-        const newParams = new URLSearchParams();
-        let isValid = true;
-
-        paramInputs.forEach(input => {
-          if (input.required && !input.value.trim()) {
-            isValid = false;
-            input.classList.add('is-invalid');
-          } else {
-            input.classList.remove('is-invalid');
-            newParams.append(input.dataset.paramName, input.value.trim());
-          }
-        });
-
-        if (!isValid) {
-          responseContentPre.textContent = "Please fill in all required parameters.";
-          responseHeadersPre.textContent = "";
-          downloadBtn.classList.add('d-none');
-          return;
-        }
-
-        const baseUrl = apiPath.split('?')[0];
-        const fullUrl = `${window.location.origin}${baseUrl}?${newParams.toString()}`;
-
-        responseContentPre.innerHTML = ''; // Use innerHTML for potential image
-        responseHeadersPre.textContent = '';
-        loadingSpinner.classList.remove('d-none');
-        downloadBtn.classList.add('d-none');
-
-        try {
-          const response = await fetch(fullUrl);
-          const headers = {};
-          response.headers.forEach((value, name) => {
-            headers[name] = value;
-          });
-
-          responseHeadersPre.textContent = JSON.stringify(headers, null, 2);
-
-          const contentType = response.headers.get("Content-Type");
-          if (contentType && contentType.startsWith("image/")) {
-            const blob = await response.blob();
-            const imageUrl = URL.createObjectURL(blob);
-
-            const img = document.createElement("img");
-            img.src = imageUrl;
-            img.alt = apiName;
-            img.style.maxWidth = "100%";
-            img.style.height = "auto";
-            img.style.borderRadius = "8px";
-
-            responseContentPre.innerHTML = "";
-            responseContentPre.appendChild(img);
-            downloadBtn.classList.add('d-none'); // No download for image directly
-          } else {
-            const data = await response.json();
-            responseContentPre.textContent = JSON.stringify(data, null, 2);
-            downloadBtn.classList.remove('d-none');
-            downloadBtn.onclick = () => downloadJson(data, `${apiName}.json`);
-          }
-
-        } catch (error) {
-          responseContentPre.textContent = `Error: ${error.message}`;
-          responseHeadersPre.textContent = "";
-          downloadBtn.classList.add('d-none');
-        } finally {
-          loadingSpinner.classList.add('d-none');
-          // Automatically switch to "Try it out" tab after execution
-          const tryItOutTabButton = detailContent.querySelector(`.tab-button[data-tab="try-it-out"]`);
-          const parametersTabButton = detailContent.querySelector(`.tab-button[data-tab="parameters"]`);
-          const tryItOutContentPane = detailContent.querySelector(`#try-it-out-tab-${uniqueId}`);
-          const parametersContentPane = detailContent.querySelector(`#parameters-tab-${uniqueId}`);
-
-          parametersTabButton.classList.remove('active');
-          tryItOutTabButton.classList.add('active');
-          parametersContentPane.style.display = 'none';
-          tryItOutContentPane.style.display = 'block';
-
-          // Ensure response body tab is active within "Try it out"
-          const responseBodyTabButton = detailContent.querySelector(`.tab-button[data-tab="response-body"]`);
-          const responseHeadersTabButton = detailContent.querySelector(`.tab-button[data-tab="response-headers"]`);
-          const responseBodyContentPane = detailContent.querySelector(`#response-body-tab-${uniqueId}`);
-          const responseHeadersContentPane = detailContent.querySelector(`#response-headers-tab-${uniqueId}`);
-
-          responseHeadersTabButton.classList.remove('active');
-          responseBodyTabButton.classList.add('active');
-          responseHeadersContentPane.style.display = 'none';
-          responseBodyContentPane.style.display = 'block';
+      inputs.forEach((input) => {
+        if (input.required && !input.value.trim()) {
+          isValid = false;
+          input.classList.add("is-invalid");
+        } else {
+          input.classList.remove("is-invalid");
+          newParams.append(input.dataset.param, input.value.trim());
         }
       });
 
-      // Clear inputs button
-      detailContent.querySelector('.clear-inputs-btn').addEventListener('click', (event) => {
-        detailContent.querySelectorAll('.param-inputs-container input').forEach(input => {
-          input.value = '';
-          input.classList.remove('is-invalid');
-        });
-        detailContent.querySelector('.api-response-content').innerHTML = ''; // Use innerHTML for potential image
-        detailContent.querySelector('.api-response-headers').textContent = '';
-        detailContent.querySelector('.download-response-btn').classList.add('d-none');
-      });
-    }
-
-    // Function to generate parameter input fields
-    function generateParameterInputs(apiPath, container) {
-      container.innerHTML = ''; // Clear previous inputs
-      const urlParts = apiPath.split('?');
-      const queryString = urlParts.length > 1 ? urlParts[1] : '';
-      const params = new URLSearchParams(queryString);
-      const paramNames = Array.from(params.keys());
-
-      const actionButtons = container.closest('.tab-content-pane').querySelector('.action-buttons');
-
-      if (paramNames.length === 0) {
-        container.innerHTML = '<p class="text-muted">No parameters required for this endpoint.</p>';
-        if (actionButtons) actionButtons.style.display = 'none';
+      if (!isValid) {
+        modalRefs.apiResponseCode.textContent = "400";
+        modalRefs.apiResponseBody.textContent = JSON.stringify({ status: false, error: "Please fill in all required fields." }, null, 2);
+        modalRefs.apiResponseHeaders.textContent = "Content-Type: application/json";
+        // Switch to responses tab
+        document.querySelector(".tab-button[data-tab='responses']").click();
         return;
       }
 
-      if (actionButtons) actionButtons.style.display = 'flex';
+      const apiUrlWithParams = `${baseApiUrl}?${newParams.toString()}`;
+      handleApiRequest(apiUrlWithParams, modalRefs, apiName);
+    };
 
-      paramNames.forEach(param => {
-        const paramGroup = document.createElement('div');
-        paramGroup.className = 'param-input-group';
-
-        const label = document.createElement('label');
-        label.textContent = `${param.charAt(0).toUpperCase() + param.slice(1)}:`;
-        paramGroup.appendChild(label);
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = `Enter ${param}`;
-        input.dataset.paramName = param;
-        input.required = true;
-        paramGroup.appendChild(input);
-
-        container.appendChild(paramGroup);
+    modalRefs.clearBtn.onclick = () => {
+      modalRefs.queryInputContainer.querySelectorAll("input").forEach(input => {
+        input.value = "";
+        input.classList.remove("is-invalid");
       });
-    }
+      currentParams = {};
+      updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
+      modalRefs.apiResponseCode.textContent = "";
+      modalRefs.apiResponseBody.textContent = "";
+      modalRefs.apiResponseHeaders.textContent = "";
+    };
 
-    // Download JSON function
-    function downloadJson(data, filename) {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
+    modal.show();
+  });
 
-    // Search functionality (updated for new structure)
-    const searchInput = document.getElementById("searchInput");
-    searchInput.addEventListener("input", () => {
-      const searchTerm = searchInput.value.toLowerCase();
-      const apiCategories = document.querySelectorAll(".api-category-container");
-
-      apiCategories.forEach(categoryContainer => {
-        let categoryHasVisibleItems = false;
-        const categoryCollapseContent = categoryContainer.querySelector('.api-category-content');
-        const categoryHeader = categoryContainer.querySelector('.api-category-header');
-
-        categoryCollapseContent.querySelectorAll('.api-endpoint-card').forEach(item => {
-          const name = item.getAttribute("data-api-name").toLowerCase();
-          const desc = item.getAttribute("data-api-desc").toLowerCase();
-          const path = item.getAttribute("data-api-path").toLowerCase();
-
-          const isVisible = name.includes(searchTerm) || desc.includes(searchTerm) || path.includes(searchTerm);
-          item.style.display = isVisible ? "" : "none";
-
-          if (isVisible) {
-            categoryHasVisibleItems = true;
-            // If an item is visible, ensure its detail content is hidden initially
-            const detailId = item.querySelector('.toggle-details-btn').dataset.bsTarget;
-            const detailElement = document.querySelector(detailId);
-            if (detailElement && detailElement.classList.contains('show')) {
-                new bootstrap.Collapse(detailElement, { toggle: false }).hide();
-                item.querySelector('.toggle-details-btn').setAttribute('aria-expanded', 'false');
-                item.querySelector('.toggle-details-btn').classList.remove('expanded');
-                item.querySelector('.toggle-details-btn .fas').classList.replace('fa-chevron-down', 'fa-chevron-right');
-            }
-          }
-        });
-
-        // Show/hide category header based on visible items
-        categoryContainer.style.display = categoryHasVisibleItems ? "" : "none";
-
-        // If category has visible items, ensure it's expanded
-        if (categoryHasVisibleItems && searchTerm.length > 0) { // Only auto-expand if searching
-            if (categoryHeader.classList.contains('collapsed')) {
-                new bootstrap.Collapse(categoryCollapseContent, { toggle: false }).show();
-                categoryHeader.classList.remove('collapsed');
-                categoryHeader.setAttribute('aria-expanded', 'true');
-                categoryHeader.querySelector('.fas').classList.replace('fa-chevron-right', 'fa-chevron-down');
-            }
-        } else if (searchTerm.length === 0) { // Collapse all when search is cleared
-            if (!categoryHeader.classList.contains('collapsed')) {
-                new bootstrap.Collapse(categoryCollapseContent, { toggle: false }).hide();
-                categoryHeader.classList.add('collapsed');
-                categoryHeader.setAttribute('aria-expanded', 'false');
-                categoryHeader.querySelector('.fas').classList.replace('fa-chevron-down', 'fa-chevron-right');
-            }
-        }
-      });
+  // Tab switching logic for modal
+  document.querySelectorAll(".tab-button").forEach(button => {
+    button.addEventListener("click", function() {
+      document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+      this.classList.add("active");
+      document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.remove("active"));
+      document.getElementById(this.dataset.tab + "Tab").classList.add("active");
     });
+  });
 
-
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-      anchor.addEventListener("click", function (e) {
-        e.preventDefault();
-
-        const targetId = this.getAttribute("href");
-        const targetElement = document.querySelector(targetId);
-
-        if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop - 80,
-            behavior: "smooth",
-          });
-
-          // Update active nav link
-          document.querySelectorAll(".nav-link").forEach((link) => {
-            link.classList.remove("active");
-          });
-          this.classList.add("active");
-        }
-      });
+  document.querySelectorAll(".response-tab-button").forEach(button => {
+    button.addEventListener("click", function() {
+      document.querySelectorAll(".response-tab-button").forEach(btn => btn.classList.remove("active"));
+      this.classList.add("active");
+      document.querySelectorAll(".response-tab-pane").forEach(pane => pane.classList.remove("active"));
+      document.getElementById(this.dataset.responseTab + "Tab").classList.add("active");
     });
+  });
 
-    // Update active nav link on scroll
-    window.addEventListener("scroll", () => {
-      const scrollPosition = window.scrollY;
+  // Copy functionality
+  document.getElementById("copyCurl").addEventListener("click", () => {
+    const text = document.getElementById("apiCurlContent").textContent;
+    copyToClipboard(text, "Curl command copied to clipboard!");
+  });
 
-      document.querySelectorAll("section").forEach((section) => {
-        const sectionTop = section.offsetTop - 100;
-        const sectionBottom = sectionTop + section.offsetHeight;
-        const sectionId = section.getAttribute("id");
+  document.getElementById("copyRequestUrl").addEventListener("click", () => {
+    const text = document.getElementById("apiRequestUrlContent").textContent;
+    copyToClipboard(text, "Request URL copied to clipboard!");
+  });
 
-        if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
-          document.querySelectorAll(".nav-link").forEach((link) => {
-            link.classList.remove("active");
-            if (link.getAttribute("href") === `#${sectionId}`) {
-              link.classList.add("active");
-            }
-          });
-        }
+  document.getElementById("downloadResponse").addEventListener("click", () => {
+    const responseText = document.getElementById("apiResponseBody").textContent;
+    const filename = "response.json";
+    const blob = new Blob([responseText], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert("Response downloaded!");
+  });
+
+  function copyToClipboard(text, successMessage) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        alert(successMessage);
+      })
+      .catch((err) => {
+        console.error("Could not copy text: ", err);
       });
-    });
-  } catch (error) {
-    console.error("Error loading settings:", error);
-  } finally {
-    // Simulate loading for better UX
-    setTimeout(() => {
-      loadingScreen.style.opacity = 0;
-      setTimeout(() => {
-        loadingScreen.style.display = "none";
-        body.classList.remove("no-scroll");
-      }, 300);
-    }, 1500);
   }
+
+  function updateCurlAndRequestUrl(baseApiUrl, params, endpointPath) {
+    const newParams = new URLSearchParams();
+    for (const key in params) {
+      if (params[key]) {
+        newParams.append(key, params[key]);
+      }
+    }
+
+    const fullRequestUrl = `${baseApiUrl}${newParams.toString() ? '?' + newParams.toString() : ''}`;
+    document.getElementById("apiRequestUrlContent").textContent = fullRequestUrl;
+
+    const curlCommand = `curl -X 'GET' \\\n  '${fullRequestUrl}' \\\n  -H 'accept: */*'`;
+    document.getElementById("apiCurlContent").textContent = curlCommand;
+  }
+
+  async function handleApiRequest(apiUrl, modalRefs, apiName) {
+    modalRefs.apiResponseCode.textContent = "Loading...";
+    modalRefs.apiResponseBody.textContent = "Loading...";
+    modalRefs.apiResponseHeaders.textContent = "Loading...";
+
+    // Switch to responses tab and code tab
+    document.querySelector(".tab-button[data-tab='responses']").click();
+    document.querySelector(".response-tab-button[data-response-tab='code']").click();
+
+    try {
+      const response = await fetch(apiUrl);
+      const headers = {};
+      response.headers.forEach((value, name) => {
+        headers[name] = value;
+      });
+
+      modalRefs.apiResponseCode.textContent = response.status;
+      modalRefs.apiResponseHeaders.textContent = Object.entries(headers).map(([key, value]) => `${key}: ${value}`).join('\n');
+
+      const contentType = response.headers.get("Content-Type");
+      if (contentType && contentType.startsWith("image/")) {
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = apiName;
+        img.style.maxWidth = "100%";
+        img.style.height = "auto";
+        img.style.borderRadius = "8px";
+
+        modalRefs.apiResponseBody.innerHTML = "";
+        modalRefs.apiResponseBody.appendChild(img);
+      } else {
+        const data = await response.json();
+        modalRefs.apiResponseBody.textContent = JSON.stringify(data, null, 2);
+      }
+    } catch (error) {
+      modalRefs.apiResponseCode.textContent = "500";
+      modalRefs.apiResponseBody.textContent = JSON.stringify({ status: false, error: error.message }, null, 2);
+      modalRefs.apiResponseHeaders.textContent = "Content-Type: application/json";
+    }
+  }
+
+} catch (error) {
+  console.error("Error loading settings:", error);
+} finally {
+  // Simulate loading for better UX
+  setTimeout(() => {
+    loadingScreen.style.opacity = 0;
+    setTimeout(() => {
+      loadingScreen.style.display = "none";
+      body.classList.remove("no-scroll");
+    }, 300);
+  }, 1500);
+}
 });
