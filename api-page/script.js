@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    // --- API Content Generation (Rewritten) ---
+    // --- API Content Generation ---
     const apiContent = document.getElementById("apiContent");
     apiContent.innerHTML = ''; // Clear existing content
 
@@ -115,6 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const sortedItems = category.items.sort((a, b) => a.name.localeCompare(b.name));
 
       sortedItems.forEach((item) => {
+        const uniqueId = item.name.replace(/\s/g, '-').replace(/[^a-zA-Z0-9-]/g, ''); // Sanitize for ID
         const endpointCard = document.createElement("div");
         endpointCard.className = "api-endpoint-card";
         endpointCard.setAttribute("data-api-name", item.name);
@@ -126,7 +127,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <span class="method-badge">GET</span>
           <span class="endpoint-path">${item.path.split('?')[0]}</span>
           <span class="endpoint-name">${item.name}</span>
-          <button class="toggle-details-btn" data-bs-toggle="collapse" data-bs-target="#detail-${item.name.replace(/\s/g, '-')}" aria-expanded="false" aria-controls="detail-${item.name.replace(/\s/g, '-')}" data-api-item-id="detail-${item.name.replace(/\s/g, '-')}">
+          <button class="toggle-details-btn" data-bs-toggle="collapse" data-bs-target="#detail-${uniqueId}" aria-expanded="false" aria-controls="detail-${uniqueId}">
             <i class="fas fa-chevron-right"></i>
           </button>
         `;
@@ -134,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const detailContent = document.createElement("div");
         detailContent.className = "collapse api-detail-content";
-        detailContent.id = `detail-${item.name.replace(/\s/g, '-')}`;
+        detailContent.id = `detail-${uniqueId}`;
         detailContent.innerHTML = `
           <div class="description-box mb-3">
             ${item.desc}
@@ -146,7 +147,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <button class="tab-button" data-tab="try-it-out" data-api-path="${item.path}">Try it out</button>
           </div>
 
-          <div class="tab-content-pane active" id="parameters-tab">
+          <div class="tab-content-pane active" id="parameters-tab-${uniqueId}">
             <div class="param-inputs-container"></div>
             <div class="action-buttons">
               <button class="btn btn-primary execute-api-btn">Execute</button>
@@ -154,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
           </div>
 
-          <div class="tab-content-pane" id="try-it-out-tab" style="display:none;">
+          <div class="tab-content-pane" id="try-it-out-tab-${uniqueId}" style="display:none;">
             <div class="response-section">
               <div class="response-header">
                 <span>Server response</span>
@@ -163,7 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <button class="tab-button active" data-tab="response-body">Response body</button>
                 <button class="tab-button" data-tab="response-headers">Response headers</button>
               </div>
-              <div class="tab-content-pane active" id="response-body-tab" style="display:block;">
+              <div class="tab-content-pane active" id="response-body-tab-${uniqueId}" style="display:block;">
                 <div class="api-response-loading d-none">
                   <div class="spinner">
                     <div class="double-bounce1"></div>
@@ -175,19 +176,22 @@ document.addEventListener("DOMContentLoaded", async () => {
                   <i class="fas fa-download"></i> Download
                 </button>
               </div>
-              <div class="tab-content-pane" id="response-headers-tab" style="display:none;">
+              <div class="tab-content-pane" id="response-headers-tab-${uniqueId}" style="display:none;">
                 <pre class="api-response-headers"></pre>
               </div>
             </div>
           </div>
         `;
         categoryCollapseContent.appendChild(detailContent);
+
+        // Attach event listeners for the newly created detailContent
+        attachDetailContentListeners(detailContent, item.path, uniqueId);
       });
 
       apiContent.appendChild(categoryContainer);
     });
 
-    // --- Event Listeners for new API section ---
+    // --- Global Event Listeners (for elements created once) ---
 
     // Toggle API category collapse
     document.querySelectorAll('.api-category-header').forEach(header => {
@@ -216,77 +220,52 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Generate parameters when expanded
         if (!isExpanded) {
           const apiPath = button.closest('.api-endpoint-card').dataset.apiPath;
+          const uniqueId = targetElement.id.replace('detail-', '');
           const paramInputsContainer = targetElement.querySelector('.param-inputs-container');
           generateParameterInputs(apiPath, paramInputsContainer);
+
+          // Ensure Parameters tab is active when opening
+          const parametersTabButton = targetElement.querySelector(`.tab-button[data-tab="parameters"]`);
+          const tryItOutTabButton = targetElement.querySelector(`.tab-button[data-tab="try-it-out"]`);
+          const parametersContentPane = targetElement.querySelector(`#parameters-tab-${uniqueId}`);
+          const tryItOutContentPane = targetElement.querySelector(`#try-it-out-tab-${uniqueId}`);
+
+          parametersTabButton.classList.add('active');
+          tryItOutTabButton.classList.remove('active');
+          parametersContentPane.style.display = 'block';
+          tryItOutContentPane.style.display = 'none';
         }
       });
     });
 
-    // Tab switching for Parameters/Try it out and Response Body/Headers
-    document.querySelectorAll('.api-detail-content .tabs .tab-button').forEach(button => {
-      button.addEventListener('click', (event) => {
-        const tabName = button.dataset.tab;
-        const parentTabsContainer = button.closest('.tabs');
-        const detailContent = button.closest('.api-detail-content');
+    // --- Function to attach listeners to a specific detailContent block ---
+    function attachDetailContentListeners(detailContent, apiPath, uniqueId) {
+      // Tab switching for Parameters/Try it out and Response Body/Headers
+      detailContent.querySelectorAll('.tabs .tab-button').forEach(button => {
+        button.addEventListener('click', (event) => {
+          const tabName = button.dataset.tab;
+          const parentTabsContainer = button.closest('.tabs');
 
-        // Deactivate all tabs in this group
-        parentTabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-        // Hide all content panes in this group
-        detailContent.querySelectorAll('.tab-content-pane').forEach(pane => pane.style.display = 'none');
+          // Deactivate all tabs in this group
+          parentTabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          // Hide all content panes in this group
+          detailContent.querySelectorAll('.tab-content-pane').forEach(pane => pane.style.display = 'none');
 
-        // Activate clicked tab and show its content pane
-        button.classList.add('active');
-        detailContent.querySelector(`#${tabName}-tab`).style.display = 'block';
+          // Activate clicked tab and show its content pane
+          button.classList.add('active');
+          // Use uniqueId for tab content panes
+          detailContent.querySelector(`#${tabName}-tab${tabName.includes('response') ? '' : '-' + uniqueId}`).style.display = 'block';
+        });
       });
-    });
 
-    // Function to generate parameter input fields
-    function generateParameterInputs(apiPath, container) {
-      container.innerHTML = ''; // Clear previous inputs
-      const urlParts = apiPath.split('?');
-      const queryString = urlParts.length > 1 ? urlParts[1] : '';
-      const params = new URLSearchParams(queryString);
-      const paramNames = Array.from(params.keys());
-
-      const actionButtons = container.closest('.tab-content-pane').querySelector('.action-buttons');
-
-      if (paramNames.length === 0) {
-        container.innerHTML = '<p class="text-muted">No parameters required for this endpoint.</p>';
-        if (actionButtons) actionButtons.style.display = 'none';
-        return;
-      }
-
-      if (actionButtons) actionButtons.style.display = 'flex';
-
-      paramNames.forEach(param => {
-        const paramGroup = document.createElement('div');
-        paramGroup.className = 'param-input-group';
-
-        const label = document.createElement('label');
-        label.textContent = `${param.charAt(0).toUpperCase() + param.slice(1)}:`;
-        paramGroup.appendChild(label);
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = `Enter ${param}`;
-        input.dataset.paramName = param;
-        input.required = true;
-        paramGroup.appendChild(input);
-
-        container.appendChild(paramGroup);
-      });
-    }
-
-    // Execute API button
-    document.querySelectorAll('.execute-api-btn').forEach(button => {
-      button.addEventListener('click', async (event) => {
-        const detailContent = button.closest('.api-detail-content');
-        const apiPath = detailContent.querySelector('.tab-button[data-tab="parameters"]').dataset.apiPath;
+      // Execute API button
+      detailContent.querySelector('.execute-api-btn').addEventListener('click', async (event) => {
         const paramInputs = detailContent.querySelectorAll('.param-inputs-container input');
         const responseContentPre = detailContent.querySelector('.api-response-content');
         const responseHeadersPre = detailContent.querySelector('.api-response-headers');
         const loadingSpinner = detailContent.querySelector('.api-response-loading');
         const downloadBtn = detailContent.querySelector('.download-response-btn');
+        const apiName = detailContent.closest('.api-endpoint-card').dataset.apiName;
 
         const newParams = new URLSearchParams();
         let isValid = true;
@@ -332,7 +311,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const img = document.createElement("img");
             img.src = imageUrl;
-            img.alt = "API Response Image";
+            img.alt = apiName;
             img.style.maxWidth = "100%";
             img.style.height = "auto";
             img.style.borderRadius = "8px";
@@ -344,7 +323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const data = await response.json();
             responseContentPre.textContent = JSON.stringify(data, null, 2);
             downloadBtn.classList.remove('d-none');
-            downloadBtn.onclick = () => downloadJson(data, `${detailContent.querySelector('.api-endpoint-card').dataset.apiName}.json`);
+            downloadBtn.onclick = () => downloadJson(data, `${apiName}.json`);
           }
 
         } catch (error) {
@@ -356,8 +335,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           // Automatically switch to "Try it out" tab after execution
           const tryItOutTabButton = detailContent.querySelector(`.tab-button[data-tab="try-it-out"]`);
           const parametersTabButton = detailContent.querySelector(`.tab-button[data-tab="parameters"]`);
-          const tryItOutContentPane = detailContent.querySelector(`#try-it-out-tab`);
-          const parametersContentPane = detailContent.querySelector(`#parameters-tab`);
+          const tryItOutContentPane = detailContent.querySelector(`#try-it-out-tab-${uniqueId}`);
+          const parametersContentPane = detailContent.querySelector(`#parameters-tab-${uniqueId}`);
 
           parametersTabButton.classList.remove('active');
           tryItOutTabButton.classList.add('active');
@@ -367,8 +346,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           // Ensure response body tab is active within "Try it out"
           const responseBodyTabButton = detailContent.querySelector(`.tab-button[data-tab="response-body"]`);
           const responseHeadersTabButton = detailContent.querySelector(`.tab-button[data-tab="response-headers"]`);
-          const responseBodyContentPane = detailContent.querySelector(`#response-body-tab`);
-          const responseHeadersContentPane = detailContent.querySelector(`#response-headers-tab`);
+          const responseBodyContentPane = detailContent.querySelector(`#response-body-tab-${uniqueId}`);
+          const responseHeadersContentPane = detailContent.querySelector(`#response-headers-tab-${uniqueId}`);
 
           responseHeadersTabButton.classList.remove('active');
           responseBodyTabButton.classList.add('active');
@@ -376,12 +355,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           responseBodyContentPane.style.display = 'block';
         }
       });
-    });
 
-    // Clear inputs button
-    document.querySelectorAll('.clear-inputs-btn').forEach(button => {
-      button.addEventListener('click', (event) => {
-        const detailContent = button.closest('.api-detail-content');
+      // Clear inputs button
+      detailContent.querySelector('.clear-inputs-btn').addEventListener('click', (event) => {
         detailContent.querySelectorAll('.param-inputs-container input').forEach(input => {
           input.value = '';
           input.classList.remove('is-invalid');
@@ -390,7 +366,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         detailContent.querySelector('.api-response-headers').textContent = '';
         detailContent.querySelector('.download-response-btn').classList.add('d-none');
       });
-    });
+    }
+
+    // Function to generate parameter input fields
+    function generateParameterInputs(apiPath, container) {
+      container.innerHTML = ''; // Clear previous inputs
+      const urlParts = apiPath.split('?');
+      const queryString = urlParts.length > 1 ? urlParts[1] : '';
+      const params = new URLSearchParams(queryString);
+      const paramNames = Array.from(params.keys());
+
+      const actionButtons = container.closest('.tab-content-pane').querySelector('.action-buttons');
+
+      if (paramNames.length === 0) {
+        container.innerHTML = '<p class="text-muted">No parameters required for this endpoint.</p>';
+        if (actionButtons) actionButtons.style.display = 'none';
+        return;
+      }
+
+      if (actionButtons) actionButtons.style.display = 'flex';
+
+      paramNames.forEach(param => {
+        const paramGroup = document.createElement('div');
+        paramGroup.className = 'param-input-group';
+
+        const label = document.createElement('label');
+        label.textContent = `${param.charAt(0).toUpperCase() + param.slice(1)}:`;
+        paramGroup.appendChild(label);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = `Enter ${param}`;
+        input.dataset.paramName = param;
+        input.required = true;
+        paramGroup.appendChild(input);
+
+        container.appendChild(paramGroup);
+      });
+    }
 
     // Download JSON function
     function downloadJson(data, filename) {
