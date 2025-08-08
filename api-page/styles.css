@@ -129,240 +129,7 @@ body.no-scroll {
   color: var(--primary-color);
 }
 
-/* Hero Section */
-.hero-section {
-  padding: 5rem 0;
-  background-color: var(--bg-secondary);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-content h1 {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-  color: var(--text-color);
-}
-
-.hero-content .lead {
-  font-size: 1.125rem;
-  color: var(--text-muted);
-  margin-bottom: 2rem;
-}
-
-.hero-buttons {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  border-radius: var(--radius);
-  transition: var(--transition);
-}
-
-.btn-primary {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-hover);
-  border-color: var(--primary-hover);
-}
-
-.btn-outline {
-  background-color: transparent;
-  border: 2px solid var(--border-color);
-  color: var(--text-color);
-}
-
-.btn-outline:hover {
-  background-color: var(--bg-secondary);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.hero-image {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.hero-image img {
-  max-width: 100%;
-  border-radius: var(--radius);
-  box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px var(--shadow-color);
-  transition: var(--transition);
-}
-
-/* Documentation Section */
-.documentation-section,
-.rules-section,
-.contact-section {
-  padding: 5rem 0;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.section-header h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: var(--text-color);
-}
-
-.section-header p {
-  font-size: 1.125rem;
-  color: var(--text-muted);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.doc-card {
-  background-color: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 2rem;
-  height: 100%;
-  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
-  transition: var(--transition);
-}
-
-.doc-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px -3px var(--shadow-color-strong), 0 4px 6px -2px var(--shadow-color);
-}
-
-.doc-icon {
-  font-size: 2rem;
-  color: var(--primary-color);
-  margin-bottom: 1.5rem;
-}
-
-.doc-card h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--text-color);
-}
-
-.doc-card p {
-  color: var(--text-muted);
-  margin-bottom: 1.5rem;
-}
-
-.doc-list {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.doc-list li {
-  position: relative;
-  padding-left: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-muted);
-}
-
-.doc-list li::before {
-  content: "•";
-  color: var(--primary-color);
-  font-weight: bold;
-  position: absolute;
-  left: 0;
-}
-
-/* Rules Section */
-.rules-card {
-  background-color: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 2rem;
-  height: 100%;
-  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
-  transition: var(--transition);
-  border-left: 4px solid var(--success-color);
-}
-
-.rules-card.prohibited {
-  border-left: 4px solid var(--danger-color);
-}
-
-.rules-card h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: var(--text-color);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.rules-card h3 i {
-  color: var(--success-color);
-}
-
-.rules-card.prohibited h3 i {
-  color: var(--danger-color);
-}
-
-.rules-card ul {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.rules-card ul li {
-  position: relative;
-  padding-left: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: var(--text-muted);
-}
-
-.rules-card ul li::before {
-  content: "✓";
-  color: var(--success-color);
-  position: absolute;
-  left: 0;
-}
-
-.rules-card.prohibited ul li::before {
-  content: "✕";
-  color: var(--danger-color);
-}
-
-.disclaimer-box {
-  background-color: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 2rem;
-  margin-top: 2rem;
-  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
-  border-left: 4px solid var(--warning-color);
-}
-
-.disclaimer-box h4 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--text-color);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.disclaimer-box h4 i {
-  color: var(--warning-color);
-}
-
-.disclaimer-box p {
-  color: var(--text-muted);
-  margin-bottom: 0;
-}
-
-/* APIs Section (Always Dark Mode as per screenshot) */
+/* APIs Section */
 .apis-section {
   padding: 5rem 0;
   background-color: var(--api-bg-color-dark);
@@ -407,7 +174,7 @@ body.no-scroll {
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
-/* API Categories (New Styles) */
+/* API Categories */
 .api-category-header {
   background-color: var(--api-bg-card-dark);
   border: 1px solid var(--api-border-color-dark);
@@ -449,7 +216,7 @@ body.no-scroll {
   margin-bottom: 1.5rem;
 }
 
-/* API Endpoint Card (New Styles) */
+/* API Endpoint Card */
 .api-endpoint-card {
   background-color: var(--api-bg-secondary-dark); /* Slightly darker than main card */
   border: 1px solid var(--api-border-color-dark);
@@ -671,12 +438,105 @@ body.no-scroll {
   margin-top: 1rem;
 }
 
+/* Contact Section */
+.contact-section {
+  padding: 5rem 0;
+  background-color: var(--bg-secondary); /* Use global secondary background for consistency */
+  color: var(--text-color);
+}
+
+.contact-section .section-header h2,
+.contact-section .section-header p {
+  color: var(--text-color);
+}
+
+.dark-mode .contact-section {
+  background-color: var(--api-bg-color-dark); /* Dark mode for contact section */
+  color: var(--api-text-color-dark);
+}
+
+.dark-mode .contact-section .section-header h2,
+.dark-mode .contact-section .section-header p {
+  color: var(--api-text-color-dark);
+}
+
+.contact-card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 2rem;
+  height: 100%;
+  box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark-mode .contact-card {
+  background-color: var(--api-bg-card-dark);
+  border: 1px solid var(--api-border-color-dark);
+  box-shadow: 0 4px 6px -1px var(--api-shadow-color), 0 2px 4px -1px var(--api-shadow-color);
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px var(--shadow-color-strong), 0 4px 6px -2px var(--shadow-color);
+}
+
+.dark-mode .contact-card:hover {
+  box-shadow: 0 10px 15px -3px var(--api-shadow-color-strong-dark), 0 4px 6px -2px var(--api-shadow-color-dark);
+}
+
+.contact-icon {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.dark-mode .contact-icon {
+  color: var(--api-primary-color-dark);
+}
+
+.contact-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+.dark-mode .contact-card h3 {
+  color: var(--api-text-color-dark);
+}
+
+.contact-card p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.dark-mode .contact-card p {
+  color: var(--api-text-muted-dark);
+}
+
+.contact-card .btn {
+  width: auto;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
 /* Footer */
 footer {
   background-color: var(--bg-secondary);
   padding: 4rem 0 2rem;
   margin-top: auto;
   border-top: 1px solid var(--border-color);
+}
+
+.dark-mode footer {
+  background-color: var(--bg-secondary); /* Keep consistent with global dark mode */
+  border-top-color: var(--border-color);
 }
 
 .footer-content {
@@ -694,6 +554,10 @@ footer {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-color);
+}
+
+.dark-mode .footer-logo {
+  color: var(--text-color); /* Use global dark text color */
 }
 
 .footer-links {
@@ -729,6 +593,11 @@ footer {
   transition: var(--transition);
 }
 
+.dark-mode .footer-social a {
+  background-color: var(--bg-card); /* Use global dark card background */
+  color: var(--text-color);
+}
+
 .footer-social a:hover {
   background-color: var(--primary-color);
   color: white;
@@ -755,15 +624,6 @@ footer {
 
 /* Responsive */
 @media (max-width: 991.98px) {
-  .hero-content {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
-
-  .hero-buttons {
-    justify-content: center;
-  }
-
   .footer-content {
     flex-direction: column;
     gap: 2rem;
@@ -777,14 +637,6 @@ footer {
 }
 
 @media (max-width: 767.98px) {
-  .hero-section {
-    padding: 3rem 0;
-  }
-
-  .hero-content h1 {
-    font-size: 2.5rem;
-  }
-
   .section-header h2 {
     font-size: 2rem;
   }
@@ -800,21 +652,11 @@ footer {
 }
 
 @media (max-width: 575.98px) {
-  .hero-content h1 {
-    font-size: 2rem;
-  }
-
   .btn {
     width: 100%;
     margin-bottom: 0.5rem;
   }
 
-  .hero-buttons {
-    flex-direction: column;
-  }
-
-  .doc-card,
-  .rules-card,
   .contact-card {
     padding: 1.5rem;
   }
@@ -822,18 +664,6 @@ footer {
 
 /* Enhanced Mobile Responsiveness */
 @media (max-width: 767.98px) {
-  .hero-section {
-    padding: 2rem 0;
-  }
-
-  .hero-content h1 {
-    font-size: 2rem;
-  }
-
-  .hero-content .lead {
-    font-size: 1rem;
-  }
-
   .section-header h2 {
     font-size: 1.75rem;
   }
@@ -846,25 +676,6 @@ footer {
     margin-bottom: 0.75rem;
   }
 
-  .hero-section {
-    padding: 0.75rem;
-    min-height: 70px;
-  }
-
-  .hero-section h5 {
-    font-size: 0.9rem;
-    margin-bottom: 0.15rem;
-  }
-
-  .hero-section p {
-    font-size: 0.7rem;
-  }
-
-  .get-api-btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.7rem;
-  }
-
   .modal-dialog {
     margin: 0.5rem;
     max-width: 95%;
@@ -872,6 +683,8 @@ footer {
 
   .modal-body {
     padding: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
   }
 
   #apiEndpoint,
