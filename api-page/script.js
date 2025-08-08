@@ -123,10 +123,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         queryInputContainer: document.getElementById("apiQueryInputContainer"),
         submitBtn: document.getElementById("submitQueryBtn"),
         clearBtn: document.getElementById("clearQueryBtn"),
-        parametersTab: document.getElementById("parametersTab"),
-        responsesTab: document.getElementById("responsesTab"),
-        responseCodeTab: document.getElementById("responseCodeTab"),
-        responseDetailsTab: document.getElementById("responseDetailsTab"),
       };
 
       // Reset modal content
@@ -140,17 +136,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("apiResponseCode").textContent = "";
       document.getElementById("apiResponseBody").textContent = "";
       document.getElementById("apiResponseHeaders").textContent = "";
+      
+      // Reset tab states to default
+      document.querySelector(".tab-button[data-tab='parameters']").click();
+      document.querySelector(".response-tab-button[data-response-tab='code']").click();
 
-      // Reset tab states
-      document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-      document.querySelector(".tab-button[data-tab='parameters']").classList.add("active");
-      modalRefs.parametersTab.classList.add("active");
-      modalRefs.responsesTab.classList.remove("active");
-
-      document.querySelectorAll(".response-tab-button").forEach(btn => btn.classList.remove("active"));
-      document.querySelector(".response-tab-button[data-response-tab='code']").classList.add("active");
-      modalRefs.responseCodeTab.classList.add("active");
-      modalRefs.responseDetailsTab.classList.remove("active");
 
       const baseApiUrl = `${window.location.origin}${apiPath.split("?")[0]}`;
       const paramsString = apiPath.split("?")[1];
@@ -223,7 +213,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const apiUrlWithParams = `${baseApiUrl}?${newParams.toString()}`;
-        // Perubahan di sini: Tidak perlu lagi mengirim modalRefs
         handleApiRequest(apiUrlWithParams, apiName);
       };
 
@@ -245,15 +234,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Tab switching logic
     document.querySelectorAll(".tab-button, .response-tab-button").forEach(button => {
       button.addEventListener("click", function() {
-        const group = this.classList.contains('tab-button') ? 'tab' : 'response-tab';
-        this.parentElement.querySelectorAll(`.${group}-button`).forEach(btn => btn.classList.remove("active"));
+        const isMainTab = this.classList.contains('tab-button');
+        const groupClass = isMainTab ? 'tab-button' : 'response-tab-button';
+        const paneClass = isMainTab ? '.tab-pane' : '.response-tab-pane';
+        
+        this.parentElement.querySelectorAll(`.${groupClass}`).forEach(btn => btn.classList.remove("active"));
         this.classList.add("active");
+
+        let tabId;
+        if (isMainTab) {
+          tabId = this.dataset.tab + "Tab";
+        } else {
+          const tabName = this.dataset.responseTab;
+          tabId = "response" + tabName.charAt(0).toUpperCase() + tabName.slice(1) + "Tab";
+        }
         
-        const contentSelector = group === 'tab' ? '.tab-pane' : '.response-tab-pane';
-        const tabId = group === 'tab' ? this.dataset.tab + "Tab" : this.dataset.responseTab + "Tab";
-        
-        document.querySelectorAll(contentSelector).forEach(pane => pane.classList.remove("active"));
-        document.getElementById(tabId).classList.add("active");
+        const parentPane = this.closest('.tab-content-wrapper') || this.closest('.modal-body');
+        if (parentPane) {
+            parentPane.querySelectorAll(paneClass).forEach(pane => pane.classList.remove("active"));
+            const activePane = document.getElementById(tabId);
+            if (activePane) activePane.classList.add("active");
+        }
       });
     });
 
@@ -295,34 +296,27 @@ function updateCurlAndRequestUrl(baseApiUrl, params) {
   document.getElementById("apiCurlContent").textContent = `curl -X 'GET' \\\n  '${fullRequestUrl}' \\\n  -H 'accept: */*'`;
 }
 
-// Perubahan utama di fungsi ini
 async function handleApiRequest(apiUrl, apiName) {
-  // 1. Ambil elemen-elemennya langsung di sini
   const apiResponseCode = document.getElementById("apiResponseCode");
   const apiResponseBody = document.getElementById("apiResponseBody");
   const apiResponseHeaders = document.getElementById("apiResponseHeaders");
 
-  // Pastikan elemennya ada sebelum melanjutkan
   if (!apiResponseCode || !apiResponseBody || !apiResponseHeaders) {
     console.error("Modal response elements not found!");
     return;
   }
 
-  // 2. Set status loading
   apiResponseCode.textContent = "Loading...";
   apiResponseBody.textContent = "Loading...";
   apiResponseHeaders.textContent = "Loading...";
 
-  // Pindah tab secara otomatis
   document.querySelector(".tab-button[data-tab='responses']").click();
-  document.querySelector(".response-tab-button[data-response-tab='code']").click();
 
   try {
     const response = await fetch(apiUrl);
     const headers = {};
     response.headers.forEach((value, name) => { headers[name] = value; });
 
-    // 3. Update UI dengan hasil fetch
     apiResponseCode.textContent = response.status;
     apiResponseHeaders.textContent = Object.entries(headers).map(([key, value]) => `${key}: ${value}`).join('\n');
 
