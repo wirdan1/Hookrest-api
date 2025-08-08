@@ -2,424 +2,271 @@ document.addEventListener("DOMContentLoaded", async () => {
   const loadingScreen = document.getElementById("loadingScreen");
   const body = document.body;
   body.classList.add("no-scroll");
-
-  // The dark mode is already forced by default in styles.css, so this line is redundant.
-  // document.body.classList.add("dark-mode");
+  document.body.classList.add("dark-mode");
 
   try {
-    const settings = await fetch("/src/settings.json").then((res) => res.json());
+    // 1. Load settings.json dengan error handling
+    const settingsResponse = await fetch("/src/settings.json");
+    
+    if (!settingsResponse.ok) {
+      throw new Error(`Failed to load settings: ${settingsResponse.status}`);
+    }
+    
+    const settings = await settingsResponse.json();
+    
+    // 2. Validasi struktur data
+    if (!settings.categories || !Array.isArray(settings.categories)) {
+      throw new Error("Invalid settings format: categories missing or not an array");
+    }
 
-    const setContent = (id, property, value) => {
+    // Fungsi helper untuk set konten
+    const setContent = (id, value) => {
       const element = document.getElementById(id);
-      if (element) element[property] = value;
+      if (element) element.textContent = value;
     };
 
-    // Set current year in footer
-    document.getElementById("currentYear").textContent = new Date().getFullYear();
+    // Set informasi dasar
+    setContent("page", settings.name || "API Documentation");
+    setContent("header", settings.name || "API Documentation");
+    setContent("footerBrand", settings.name || "API Documentation");
+    setContent("name", settings.name || "API Documentation");
+    setContent("copyrightName", settings.name || "API Documentation");
+    setContent("description", settings.description || "API Endpoints Documentation");
+    setContent("currentYear", new Date().getFullYear());
 
-    // Set content from settings
-    setContent("page", "textContent", settings.name || "Hookrest API");
-    setContent("header", "textContent", settings.name || "Hookrest API");
-    setContent("footerBrand", "textContent", settings.name || "Hookrest API");
-    setContent("name", "textContent", settings.name || "Hookrest API");
-    setContent("copyrightName", "textContent", settings.name || "Hookrest API");
-    setContent("description", "textContent", settings.description || "Simple API's");
-
-    // Generate API content
+    // 3. Generate API content
     const apiContent = document.getElementById("apiContent");
+    apiContent.innerHTML = "";
+
     settings.categories.forEach((category) => {
+      if (!category.name || !category.items) return;
+
       const categoryDiv = document.createElement("div");
       categoryDiv.className = "api-category";
 
       const categoryHeader = document.createElement("div");
       categoryHeader.className = "api-category-header";
       categoryHeader.innerHTML = `
-                <span>${category.name}</span>
-                <i class="fas fa-chevron-down"></i>  Changed to fa-chevron-down 
-            `;
+        <span>${category.name}</span>
+        <i class="fas fa-chevron-down"></i>
+      `;
       categoryDiv.appendChild(categoryHeader);
 
       const categoryBody = document.createElement("div");
       categoryBody.className = "api-category-content";
-      categoryBody.style.display = "none"; // Start collapsed
+      categoryBody.style.display = "none";
 
-      const sortedItems = category.items.sort((a, b) => a.name.localeCompare(b.name));
+      // Sort items by name
+      const sortedItems = [...category.items].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
       sortedItems.forEach((item) => {
+        if (!item.path || !item.name) return;
+
         const endpointCard = document.createElement("div");
         endpointCard.className = "api-endpoint-card";
         endpointCard.dataset.apiPath = item.path;
         endpointCard.dataset.apiName = item.name;
-        endpointCard.dataset.apiDesc = item.desc;
+        endpointCard.dataset.apiDesc = item.desc || "";
         endpointCard.dataset.apiInnerDesc = item.innerDesc || "";
 
         endpointCard.innerHTML = `
-                    <span class="method-badge">GET</span>
-                    <div class="endpoint-text">
-                        <span class="endpoint-path">${item.path.split('?')[0]}</span>
-                        <span class="endpoint-name">${item.name}</span>
-                    </div>
-                    <i class="fas fa-lock lock-icon"></i>
-                    <i class="fas fa-chevron-down"></i>  Added chevron-down icon 
-                `;
+          <span class="method-badge">GET</span>
+          <div class="endpoint-text">
+            <span class="endpoint-path">${item.path.split('?')[0]}</span>
+            <span class="endpoint-name">${item.name}</span>
+          </div>
+          <i class="fas fa-chevron-down"></i>
+        `;
         categoryBody.appendChild(endpointCard);
       });
 
       categoryDiv.appendChild(categoryBody);
       apiContent.appendChild(categoryDiv);
 
-      // Toggle category content
+      // Toggle category
       categoryHeader.addEventListener("click", () => {
-        categoryBody.style.display = categoryBody.style.display === "none" ? "grid" : "none";
-        categoryHeader.classList.toggle("collapsed");
-        categoryHeader.querySelector(".fas").classList.toggle("fa-chevron-up");
-        categoryHeader.querySelector(".fas").classList.toggle("fa-chevron-down");
+        const isCollapsed = categoryBody.style.display === "none";
+        categoryBody.style.display = isCollapsed ? "grid" : "none";
+        const icon = categoryHeader.querySelector("i");
+        icon.classList.toggle("fa-chevron-up", isCollapsed);
+        icon.classList.toggle("fa-chevron-down", !isCollapsed);
       });
     });
 
-    // Search functionality
-    const searchInput = document.getElementById("searchInput");
-    searchInput.addEventListener("input", () => {
-      const searchTerm = searchInput.value.toLowerCase();
-      const apiItems = document.querySelectorAll(".api-endpoint-card");
-      const categoryDivs = document.querySelectorAll(".api-category");
-
-      apiItems.forEach((item) => {
-        const name = item.getAttribute("data-api-name").toLowerCase();
-        const path = item.getAttribute("data-api-path").toLowerCase();
-        item.style.display = name.includes(searchTerm) || path.includes(searchTerm) ? "flex" : "none";
+    // 4. Search functionality
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      const term = e.target.value.toLowerCase();
+      document.querySelectorAll(".api-endpoint-card").forEach(card => {
+        const name = card.dataset.apiName.toLowerCase();
+        const path = card.dataset.apiPath.toLowerCase();
+        card.style.display = name.includes(term) || path.includes(term) ? "flex" : "none";
       });
 
-      categoryDivs.forEach((categoryDiv) => {
-        const categoryBody = categoryDiv.querySelector(".api-category-content");
-        const categoryHeader = categoryDiv.querySelector(".api-category-header");
-        const visibleItems = categoryBody.querySelectorAll('.api-endpoint-card[style*="display: flex"]');
-
-        if (visibleItems.length > 0) {
-          categoryDiv.style.display = "";
-          categoryBody.style.display = "grid"; // Ensure it's visible and grid layout
-          categoryHeader.classList.remove("collapsed");
-          categoryHeader.querySelector(".fas").classList.replace("fa-chevron-down", "fa-chevron-up");
-        } else {
-          categoryDiv.style.display = "none";
-        }
+      document.querySelectorAll(".api-category").forEach(category => {
+        const body = category.querySelector(".api-category-content");
+        const hasVisibleItems = body.querySelector('.api-endpoint-card[style*="flex"]');
+        category.style.display = hasVisibleItems ? "block" : "none";
       });
     });
 
-    // API request handling (Modal logic)
-    document.addEventListener("click", (event) => {
-      if (!event.target.closest(".api-endpoint-card")) return;
+    // 5. Handle endpoint clicks
+    document.addEventListener("click", async (e) => {
+      const card = e.target.closest(".api-endpoint-card");
+      if (!card) return;
 
-      const card = event.target.closest(".api-endpoint-card");
-      const { apiPath, apiName, apiDesc, apiInnerDesc } = card.dataset;
-
+      const { apiPath, apiName, apiDesc } = card.dataset;
       const modal = new bootstrap.Modal(document.getElementById("apiResponseModal"));
-      const modalRefs = {
-        label: document.getElementById("apiResponseModalLabel"),
-        desc: document.getElementById("apiResponseModalDesc"),
-        modalApiDescription: document.getElementById("modalApiDescription"),
-        modalEndpointPath: document.getElementById("modalEndpointPath"),
-        queryInputContainer: document.getElementById("apiQueryInputContainer"),
-        submitBtn: document.getElementById("submitQueryBtn"),
-        clearBtn: document.getElementById("clearQueryBtn"),
-        apiCurlContent: document.getElementById("apiCurlContent"),
-        apiRequestUrlContent: document.getElementById("apiRequestUrlContent"),
-        apiResponseCode: document.getElementById("apiResponseCode"),
-        apiResponseBody: document.getElementById("apiResponseBody"),
-        apiResponseHeaders: document.getElementById("apiResponseHeaders"),
-        parametersTab: document.getElementById("parametersTab"),
-        responsesTab: document.getElementById("responsesTab"),
-        responseCodeTab: document.getElementById("responseCodeTab"),
-        responseDetailsTab: document.getElementById("responseDetailsTab"),
-      };
+      
+      // Set modal content
+      document.getElementById("apiResponseModalLabel").textContent = apiName;
+      document.getElementById("apiResponseModalDesc").textContent = apiDesc;
+      document.getElementById("modalApiDescription").textContent = apiDesc;
+      document.getElementById("modalEndpointPath").textContent = apiPath.split('?')[0];
 
-      // Reset modal content
-      modalRefs.label.textContent = apiName;
-      modalRefs.desc.textContent = apiDesc;
-      modalRefs.modalApiDescription.textContent = apiDesc;
-      modalRefs.modalEndpointPath.textContent = apiPath.split('?')[0];
-      modalRefs.queryInputContainer.innerHTML = "";
-      modalRefs.apiCurlContent.textContent = "";
-      modalRefs.apiRequestUrlContent.textContent = "";
-      modalRefs.apiResponseCode.textContent = "";
-      modalRefs.apiResponseBody.textContent = "";
-      modalRefs.apiResponseHeaders.textContent = "";
+      // Reset response sections
+      document.getElementById("apiResponseCode").textContent = "";
+      document.getElementById("apiResponseBody").textContent = "";
+      document.getElementById("apiResponseHeaders").textContent = "";
 
-      // Reset tab states
-      document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-      document.querySelector(".tab-button[data-tab='parameters']").classList.add("active");
-      modalRefs.parametersTab.classList.add("active");
-      modalRefs.responsesTab.classList.remove("active");
+      // Handle parameters
+      const queryContainer = document.getElementById("apiQueryInputContainer");
+      queryContainer.innerHTML = "";
+      
+      const baseUrl = window.location.origin + apiPath.split('?')[0];
+      const queryParams = new URLSearchParams(apiPath.split('?')[1] || "");
+      const params = {};
 
-      document.querySelectorAll(".response-tab-button").forEach(btn => btn.classList.remove("active"));
-      document.querySelector(".response-tab-button[data-response-tab='code']").classList.add("active");
-      modalRefs.responseCodeTab.classList.add("active");
-      modalRefs.responseDetailsTab.classList.remove("active");
-
-
-      const baseApiUrl = `${window.location.origin}${apiPath.split("?")[0]}`;
-      const paramsString = apiPath.split("?")[1];
-      const params = new URLSearchParams(paramsString);
-      const hasParams = params.toString().length > 0;
-
-      let currentParams = {}; // To store current input values
-
-      const validateInputs = () => {
-        const inputs = modalRefs.queryInputContainer.querySelectorAll("input");
-        let isValid = true;
-
-        inputs.forEach((input) => {
-          if (input.required && !input.value.trim()) {
-            isValid = false;
-          }
-        });
-
-        modalRefs.submitBtn.disabled = !isValid;
-      };
-
-      if (hasParams) {
-        const paramContainer = document.createElement("div");
-        paramContainer.className = "param-container";
-
-        Array.from(params.keys()).forEach((param) => {
-          const paramGroup = document.createElement("div");
-          paramGroup.className = "param-group";
-
-          const label = document.createElement("label");
-          label.innerHTML = `${param.charAt(0).toUpperCase() + param.slice(1)} <span class="required-star">*</span> <span class="param-type">string (query)</span>`;
-
-          const inputField = document.createElement("input");
-          inputField.type = "text";
-          inputField.className = "form-control";
-          inputField.placeholder = `Enter ${param}...`;
-          inputField.dataset.param = param;
-          inputField.required = true;
-          inputField.addEventListener("input", () => {
-            currentParams[param] = inputField.value.trim();
-            updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
-            validateInputs();
+      if (queryParams.toString()) {
+        Array.from(queryParams.keys()).forEach(param => {
+          const group = document.createElement("div");
+          group.className = "param-group";
+          
+          group.innerHTML = `
+            <label>${param} <span class="required-star">*</span> <span class="param-type">string</span></label>
+            <input type="text" class="form-control" data-param="${param}" placeholder="Enter ${param}">
+            <p class="param-description">Parameter ${param}</p>
+          `;
+          
+          group.querySelector("input").addEventListener("input", (e) => {
+            params[param] = e.target.value;
+            updateRequestInfo(baseUrl, params);
           });
-
-          const paramDesc = document.createElement("p");
-          paramDesc.className = "param-description";
-          paramDesc.textContent = `The query to ask ${param.charAt(0).toUpperCase() + param.slice(1)}`; // Generic description
-
-          const paramExample = document.createElement("p");
-          paramExample.className = "param-example";
-          paramExample.textContent = `Example: ${param === 'text' ? 'Hello world' : 'Paris'}`; // Simple example
-
-          paramGroup.appendChild(label);
-          paramGroup.appendChild(inputField);
-          paramGroup.appendChild(paramDesc);
-          paramGroup.appendChild(paramExample);
-          paramContainer.appendChild(paramGroup);
+          
+          queryContainer.appendChild(group);
         });
-
-        if (apiInnerDesc) {
-          const innerDescDiv = document.createElement("div");
-          innerDescDiv.className = "text-muted mt-3";
-          innerDescDiv.style.fontSize = "0.875rem";
-          innerDescDiv.innerHTML = apiInnerDesc.replace(/\n/g, "<br>");
-          paramContainer.appendChild(innerDescDiv);
-        }
-
-        modalRefs.queryInputContainer.appendChild(paramContainer);
-        modalRefs.submitBtn.style.display = "inline-block";
-        modalRefs.clearBtn.style.display = "inline-block";
-
-        // Initial update for Curl and Request URL
-        updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
-        validateInputs();
-
+        
+        document.getElementById("submitQueryBtn").style.display = "block";
+        document.getElementById("clearQueryBtn").style.display = "block";
       } else {
-        modalRefs.submitBtn.style.display = "none";
-        modalRefs.clearBtn.style.display = "none";
-        updateCurlAndRequestUrl(baseApiUrl, {}, apiPath.split('?')[0]); // For endpoints without params
+        document.getElementById("submitQueryBtn").style.display = "none";
+        document.getElementById("clearQueryBtn").style.display = "none";
       }
 
-      modalRefs.submitBtn.onclick = async () => {
-        const inputs = modalRefs.queryInputContainer.querySelectorAll("input");
-        const newParams = new URLSearchParams();
-        let isValid = true;
+      // Initial request info
+      updateRequestInfo(baseUrl, {});
 
-        inputs.forEach((input) => {
-          if (input.required && !input.value.trim()) {
-            isValid = false;
-            input.classList.add("is-invalid");
-          } else {
-            input.classList.remove("is-invalid");
-            newParams.append(input.dataset.param, input.value.trim());
-          }
-        });
+      // Submit button handler
+      document.getElementById("submitQueryBtn").onclick = async () => {
+        try {
+          const query = new URLSearchParams();
+          Object.entries(params).forEach(([key, value]) => {
+            if (value) query.append(key, value);
+          });
 
-        if (!isValid) {
-          modalRefs.apiResponseCode.textContent = "400";
-          modalRefs.apiResponseBody.textContent = JSON.stringify({ status: false, error: "Please fill in all required fields." }, null, 2);
-          modalRefs.apiResponseHeaders.textContent = "Content-Type: application/json";
-          // Switch to responses tab
-          document.querySelector(".tab-button[data-tab='responses']").click();
-          return;
+          const url = baseUrl + (query.toString() ? `?${query.toString()}` : "");
+          await fetchAndDisplayResponse(url, apiName);
+        } catch (error) {
+          console.error("API request failed:", error);
+          document.getElementById("apiResponseCode").textContent = "Error";
+          document.getElementById("apiResponseBody").textContent = JSON.stringify({
+            error: error.message
+          }, null, 2);
         }
-
-        const apiUrlWithParams = `${baseApiUrl}?${newParams.toString()}`;
-        handleApiRequest(apiUrlWithParams, modalRefs, apiName);
       };
 
-      modalRefs.clearBtn.onclick = () => {
-        modalRefs.queryInputContainer.querySelectorAll("input").forEach(input => {
+      // Clear button handler
+      document.getElementById("clearQueryBtn").onclick = () => {
+        queryContainer.querySelectorAll("input").forEach(input => {
           input.value = "";
-          input.classList.remove("is-invalid");
+          params[input.dataset.param] = "";
         });
-        currentParams = {};
-        updateCurlAndRequestUrl(baseApiUrl, currentParams, apiPath.split('?')[0]);
-        modalRefs.apiResponseCode.textContent = "";
-        modalRefs.apiResponseBody.textContent = "";
-        modalRefs.apiResponseHeaders.textContent = "";
-        validateInputs();
+        updateRequestInfo(baseUrl, {});
+        document.getElementById("apiResponseCode").textContent = "";
+        document.getElementById("apiResponseBody").textContent = "";
+        document.getElementById("apiResponseHeaders").textContent = "";
       };
 
+      // Show modal
       modal.show();
     });
 
-    // Tab switching logic for modal
-    document.querySelectorAll(".tab-button").forEach(button => {
-      button.addEventListener("click", function() {
-        document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-        document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.remove("active"));
-        document.getElementById(this.dataset.tab + "Tab").classList.add("active");
+    // Helper function to update request info
+    function updateRequestInfo(baseUrl, params) {
+      const query = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) query.append(key, value);
       });
-    });
 
-    document.querySelectorAll(".response-tab-button").forEach(button => {
-      button.addEventListener("click", function() {
-        document.querySelectorAll(".response-tab-button").forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-        document.querySelectorAll(".response-tab-pane").forEach(pane => pane.classList.remove("active"));
-        document.getElementById(this.dataset.responseTab + "Tab").classList.add("active");
-      });
-    });
-
-    // Copy functionality
-    document.getElementById("copyCurl").addEventListener("click", () => {
-      const text = document.getElementById("apiCurlContent").textContent;
-      copyToClipboard(text, "Curl command copied to clipboard!");
-    });
-
-    document.getElementById("copyRequestUrl").addEventListener("click", () => {
-      const text = document.getElementById("apiRequestUrlContent").textContent;
-      copyToClipboard(text, "Request URL copied to clipboard!");
-    });
-
-    document.getElementById("downloadResponse").addEventListener("click", () => {
-      const responseText = document.getElementById("apiResponseBody").textContent;
-      const filename = "response.json";
-      const blob = new Blob([responseText], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      alert("Response downloaded!");
-    });
-
-    function copyToClipboard(text, successMessage) {
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          alert(successMessage);
-        })
-        .catch((err) => {
-          console.error("Could not copy text: ", err);
-        });
+      const url = baseUrl + (query.toString() ? `?${query.toString()}` : "");
+      
+      // Update request URL
+      document.getElementById("apiRequestUrlContent").textContent = url;
+      
+      // Update cURL command
+      document.getElementById("apiCurlContent").textContent = `curl -X GET '${url}'`;
     }
 
-    function updateCurlAndRequestUrl(baseApiUrl, params, endpointPath) {
-      const newParams = new URLSearchParams();
-      for (const key in params) {
-        if (params[key]) {
-          newParams.append(key, params[key]);
-        }
-      }
+    // Helper function to fetch and display response
+    async function fetchAndDisplayResponse(url, apiName) {
+      const codeEl = document.getElementById("apiResponseCode");
+      const bodyEl = document.getElementById("apiResponseBody");
+      const headersEl = document.getElementById("apiResponseHeaders");
 
-      const fullRequestUrl = `${baseApiUrl}${newParams.toString() ? '?' + newParams.toString() : ''}`;
-      document.getElementById("apiRequestUrlContent").textContent = fullRequestUrl;
-
-      const curlCommand = `curl -X 'GET' \\\n  '${fullRequestUrl}' \\\n  -H 'accept: */*'`;
-      document.getElementById("apiCurlContent").textContent = curlCommand;
-    }
-
-    async function handleApiRequest(apiUrl, modalRefs, apiName) {
-      modalRefs.apiResponseCode.textContent = "Loading...";
-      modalRefs.apiResponseBody.textContent = "Loading...";
-      modalRefs.apiResponseHeaders.textContent = "Loading...";
-
-      // Switch to responses tab and code tab
-      document.querySelector(".tab-button[data-tab='responses']").click();
-      document.querySelector(".response-tab-button[data-response-tab='code']").click();
+      codeEl.textContent = "Loading...";
+      bodyEl.textContent = "Loading...";
+      headersEl.textContent = "Loading...";
 
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(url);
+        
+        // Display status code
+        codeEl.textContent = response.status;
+        
+        // Display headers
         const headers = {};
         response.headers.forEach((value, name) => {
           headers[name] = value;
         });
-
-        modalRefs.apiResponseCode.textContent = response.status;
-        modalRefs.apiResponseHeaders.textContent = Object.entries(headers).map(([key, value]) => `${key}: ${value}`).join('\n');
-
-        const contentType = response.headers.get("Content-Type");
-        let responseBodyContent;
-
-        if (contentType && contentType.startsWith("image/")) {
-          const blob = await response.blob();
-          const imageUrl = URL.createObjectURL(blob);
-
-          const img = document.createElement("img");
-          img.src = imageUrl;
-          img.alt = apiName;
-          img.style.maxWidth = "100%";
-          img.style.height = "auto";
-          img.style.borderRadius = "8px";
-
-          modalRefs.apiResponseBody.innerHTML = ""; // Clear previous content
-          modalRefs.apiResponseBody.appendChild(img);
+        headersEl.textContent = JSON.stringify(headers, null, 2);
+        
+        // Display response body
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          bodyEl.textContent = JSON.stringify(await response.json(), null, 2);
+        } else if (contentType.startsWith("text/")) {
+          bodyEl.textContent = await response.text();
         } else {
-          // Attempt to parse as JSON first
-          try {
-            const data = await response.json();
-            responseBodyContent = JSON.stringify(data, null, 2);
-          } catch (jsonError) {
-            // If JSON parsing fails, get as plain text
-            responseBodyContent = await response.text();
-            if (!responseBodyContent) {
-              responseBodyContent = `No response body for status ${response.status}`;
-            }
-          }
-          modalRefs.apiResponseBody.textContent = responseBodyContent;
+          bodyEl.textContent = "Unsupported content type: " + contentType;
         }
-
       } catch (error) {
-        // This catch block is for network errors or issues before getting a response object
-        modalRefs.apiResponseCode.textContent = "Error"; // More general error
-        modalRefs.apiResponseBody.textContent = JSON.stringify({ status: false, error: `Network or client-side error: ${error.message}` }, null, 2);
-        modalRefs.apiResponseHeaders.textContent = "Content-Type: application/json";
+        codeEl.textContent = "Error";
+        bodyEl.textContent = JSON.stringify({
+          error: error.message
+        }, null, 2);
+        headersEl.textContent = "";
       }
     }
 
   } catch (error) {
-    console.error("Error loading settings:", error);
+    console.error("Initialization error:", error);
+    loadingScreen.querySelector("p").textContent = "Failed to load documentation. Please check console.";
   } finally {
-    // Simulate loading for better UX
     setTimeout(() => {
-      loadingScreen.style.opacity = 0;
+      loadingScreen.style.opacity = "0";
       setTimeout(() => {
         loadingScreen.style.display = "none";
         body.classList.remove("no-scroll");
       }, 300);
-    }, 1500);
+    }, 800);
   }
 });
