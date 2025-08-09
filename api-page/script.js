@@ -1,3 +1,5 @@
+const BASEURL = window.location.origin
+
 document.addEventListener("DOMContentLoaded", async () => {
   const loadingScreen = document.getElementById("loadingScreen");
   const body = document.body;
@@ -6,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.body.classList.add("dark-mode");
 
   try {
-    const settings = await fetch("/src/settings.json").then((res) => res.json());
+    const settings = await fetch(BASEURL+"/src/settings.json").then((res) => res.json());
 
     const setContent = (id, property, value) => {
       const element = document.getElementById(id);
@@ -54,9 +56,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     });
 
-    // --- PERUBAHAN DI SINI: Panggil fungsi untuk cek status endpoint ---
-    checkEndpointsStatus(settings);
-
     const searchInput = document.getElementById("searchInput");
     searchInput.addEventListener("input", () => {
       const searchTerm = searchInput.value.toLowerCase();
@@ -101,14 +100,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("apiCurlContent").textContent = "";
       document.getElementById("apiRequestUrlContent").textContent = "";
       document.getElementById("apiResponseCode").textContent = "";
-      document.getElementById("apiResponseBody").innerHTML = ""; // Gunakan innerHTML untuk reset
+      document.getElementById("apiResponseBody").innerHTML = "";
       document.getElementById("apiResponseHeaders").textContent = "";
       document.querySelector(".tab-button[data-tab='parameters']").click();
       document.querySelector(".response-tab-button[data-response-tab='code']").click();
-      const baseApiUrl = `${window.location.origin}${apiPath.split("?")[0]}`;
+      
+      const baseApiUrl = `${BASEURL}${apiPath.split("?")[0]}`;
       const params = new URLSearchParams(apiPath.split("?")[1]);
       let currentParams = {};
+      
+      // --- PERUBAHAN LOGIKA DI SINI ---
+      // Tombol Execute selalu muncul.
+      modalRefs.submitBtn.style.display = "inline-block";
+      // Tombol Clear disembunyikan secara default.
+      modalRefs.clearBtn.style.display = "none";
+
       if (params.toString()) {
+        // KASUS 1: JIKA ENDPOINT PUNYA PARAMETER
+        
+        // Tampilkan tombol Clear
+        modalRefs.clearBtn.style.display = "inline-block";
+        
         const paramContainer = document.createElement("div");
         paramContainer.className = "param-container";
         params.forEach((_, param) => {
@@ -121,6 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
           paramContainer.appendChild(paramGroup);
         });
+
         if (apiInnerDesc) {
           const innerDescDiv = document.createElement("div");
           innerDescDiv.className = "text-muted mt-3";
@@ -128,36 +141,44 @@ document.addEventListener("DOMContentLoaded", async () => {
           innerDescDiv.innerHTML = apiInnerDesc.replace(/\n/g, "<br>");
           paramContainer.appendChild(innerDescDiv);
         }
+        
         modalRefs.queryInputContainer.appendChild(paramContainer);
-        modalRefs.submitBtn.style.display = "inline-block";
-        modalRefs.clearBtn.style.display = "inline-block";
         updateCurlAndRequestUrl(baseApiUrl, currentParams);
-      } else {
-        modalRefs.submitBtn.style.display = "none";
-        modalRefs.clearBtn.style.display = "none";
-        updateCurlAndRequestUrl(baseApiUrl, {});
-      }
-      modalRefs.submitBtn.onclick = async () => {
-        const newParams = new URLSearchParams();
-        let isValid = true;
-        modalRefs.queryInputContainer.querySelectorAll("input").forEach((input) => {
-          if (!input.value.trim()) {
-            isValid = false;
-            input.classList.add("is-invalid");
-          } else {
-            input.classList.remove("is-invalid");
-            newParams.append(input.dataset.param, input.value.trim());
+
+        // Onclick untuk Execute dengan validasi
+        modalRefs.submitBtn.onclick = async () => {
+          const newParams = new URLSearchParams();
+          let isValid = true;
+          modalRefs.queryInputContainer.querySelectorAll("input").forEach((input) => {
+            if (!input.value.trim()) {
+              isValid = false;
+              input.classList.add("is-invalid");
+            } else {
+              input.classList.remove("is-invalid");
+              newParams.append(input.dataset.param, input.value.trim());
+            }
+          });
+          if (isValid) {
+            handleApiRequest(`${baseApiUrl}?${newParams.toString()}`, apiName);
           }
-        });
-        if (isValid) {
-          handleApiRequest(`${baseApiUrl}?${newParams.toString()}`, apiName);
-        }
-      };
-      modalRefs.clearBtn.onclick = () => {
-        modalRefs.queryInputContainer.querySelectorAll("input").forEach((input) => (input.value = ""));
-        currentParams = {};
-        updateCurlAndRequestUrl(baseApiUrl, currentParams);
-      };
+        };
+
+        modalRefs.clearBtn.onclick = () => {
+            modalRefs.queryInputContainer.querySelectorAll("input").forEach((input) => (input.value = ""));
+            currentParams = {};
+            updateCurlAndRequestUrl(baseApiUrl, currentParams);
+        };
+
+      } else {
+        // KASUS 2: JIKA ENDPOINT TIDAK PUNYA PARAMETER
+        updateCurlAndRequestUrl(baseApiUrl, {});
+
+        // Onclick untuk Execute tanpa validasi, langsung panggil API
+        modalRefs.submitBtn.onclick = async () => {
+          handleApiRequest(baseApiUrl, apiName);
+        };
+      }
+      
       modal.show();
     });
 
@@ -212,28 +233,17 @@ function updateCurlAndRequestUrl(baseApiUrl, params) {
   document.getElementById("apiCurlContent").textContent = `curl -X 'GET' \\\n  '${fullRequestUrl}' \\\n  -H 'accept: */*'`;
 }
 
-// --- PERUBAHAN DI SINI: Fungsi cek status endpoint ---
-async function checkEndpointsStatus(settings) {
-  for (const category of settings.categories) {
-    for (const item of category.items) {
-      try {
-        const response = await fetch(item.path, { method: 'HEAD', mode: 'cors' });
-        if (!response.ok) throw new Error(`Status: ${response.status}`);
-      } catch (error) {
-        const card = document.querySelector(`.api-endpoint-card[data-api-path="${item.path}"]`);
-        if (card) {
-          const errorIcon = document.createElement('span');
-          errorIcon.className = 'api-status-error';
-          errorIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-          errorIcon.title = `Endpoint may be down or has CORS issues. Error: ${error.message}`;
-          card.appendChild(errorIcon);
-        }
-      }
-    }
-  }
+// --- PERUBAHAN UTAMA DI SINI ---
+// Fungsi untuk mengubah Blob menjadi Base64
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
-// --- PERUBAHAN BESAR DI SINI: handleApiRequest jadi lebih pintar ---
 async function handleApiRequest(apiUrl, apiName) {
   const apiResponseCode = document.getElementById("apiResponseCode");
   const apiResponseBody = document.getElementById("apiResponseBody");
@@ -255,37 +265,34 @@ async function handleApiRequest(apiUrl, apiName) {
     const contentType = response.headers.get("Content-Type") || "";
 
     if (!response.ok) {
-        // Jika response tidak OK (4xx, 5xx), coba baca sebagai JSON (untuk pesan error)
         try {
             const errorData = await response.json();
             apiResponseBody.textContent = JSON.stringify(errorData, null, 2);
         } catch (e) {
-            // Jika bukan JSON, baca sebagai teks biasa
             apiResponseBody.textContent = await response.text();
         }
-        return; // Hentikan proses lebih lanjut
+        return;
     }
 
-    // Smart Content Preview
-    if (contentType.startsWith("image/")) {
+    // --- PERUBAHAN LOGIKA PREVIEW MEDIA ---
+    if (contentType.startsWith("image/") || contentType.startsWith("audio/") || contentType.startsWith("video/")) {
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      apiResponseBody.innerHTML = `<img src="${url}" alt="${apiName}" style="max-width: 100%; border-radius: 8px;">`;
-    } else if (contentType.startsWith("audio/")) {
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      apiResponseBody.innerHTML = `<audio controls src="${url}" style="width: 100%;"></audio>`;
-    } else if (contentType.startsWith("video/")) {
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      apiResponseBody.innerHTML = `<video controls src="${url}" style="max-width: 100%; border-radius: 8px;"></video>`;
+      const base64data = await blobToBase64(blob);
+
+      if (contentType.startsWith("image/")) {
+        apiResponseBody.innerHTML = `<img src="${base64data}" alt="${apiName}" style="max-width: 100%; border-radius: 8px;">`;
+      } else if (contentType.startsWith("audio/")) {
+        apiResponseBody.innerHTML = `<audio controls src="${base64data}" style="width: 100%;"></audio>`;
+      } else if (contentType.startsWith("video/")) {
+        apiResponseBody.innerHTML = `<video controls src="${base64data}" style="max-width: 100%; border-radius: 8px;"></video>`;
+      }
     } else if (contentType.includes("application/json")) {
       const data = await response.json();
       apiResponseBody.textContent = JSON.stringify(data, null, 2);
     } else if (contentType.startsWith("text/")) {
       apiResponseBody.textContent = await response.text();
     } else {
-      apiResponseBody.textContent = "Preview for this content type is not available. Please check the headers for more details.";
+      apiResponseBody.textContent = "Preview for this content type is not available.";
     }
 
   } catch (error) {
