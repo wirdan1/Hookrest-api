@@ -12,13 +12,26 @@
   "dependencies": {
     "axios": "^1.6.8",
     "body-parser": "^1.20.3",
-    "cheerio": "^1.0.0",
-    "cors": "^2.8.5",
+    "canvas": "^3.1.2",
     "chalk": "^4.1.2",
+    "cheerio": "^1.0.0",
+    "child_process": "^1.0.2",
+    "cors": "^2.8.5",
+    "cryp": "^0.1.1",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.2.0",
     "express": "^4.19.2",
+    "form-data": "^4.0.4",
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
+    "jimp": "^1.6.0",
+    "moment-timezone": "^0.6.0",
     "node-fetch": "^2.6.1",
+    "qrcode": "^1.5.4",
+    "undici": "^7.13.0",
+    "util": "^0.12.5",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.3",
     "yt-search": "^2.12.1"
   }
 }
