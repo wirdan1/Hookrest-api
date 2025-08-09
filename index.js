@@ -16,14 +16,29 @@ app.use(cors());
 app.use('/', express.static(path.join(__dirname, 'api-page')));
 app.use('/src', express.static(path.join(__dirname, 'src')));
 
+// Load settings.json dengan penanganan error
 const settingsPath = path.join(__dirname, './src/settings.json');
-const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+let settings;
+try {
+    settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+} catch (err) {
+    console.error(chalk.bgRed.hex('#FFF').bold('Error reading settings.json:', err.message));
+    process.exit(1);
+}
 
 // Middleware untuk cek maintenance mode
 app.use((req, res, next) => {
     if (settings.maintenance && settings.maintenance.enabled === true) {
-        // Jika maintenance mode aktif, kirim file maintenance.html untuk semua request
-        return res.status(503).sendFile(path.join(__dirname, 'api-page', 'maintenance.html'));
+        const maintenancePath = path.join(__dirname, 'api-page', 'maintenance.html');
+        if (fs.existsSync(maintenancePath)) {
+            return res.status(503).sendFile(maintenancePath);
+        } else {
+            console.error(chalk.bgRed.hex('#FFF').bold('Maintenance file not found:', maintenancePath));
+            return res.status(503).json({
+                status: 'error',
+                message: 'Server is under maintenance, but maintenance page is not available.'
+            });
+        }
     }
     next();
 });
@@ -68,12 +83,12 @@ app.get('/', (req, res) => {
 });
 
 app.use((req, res, next) => {
-    res.status(404).sendFile(process.cwd() + "/api-page/404.html");
+    res.status(404).sendFile(path.join(__dirname, 'api-page', '404.html'));
 });
 
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).sendFile(process.cwd() + "/api-page/500.html");
+    console.error(chalk.bgRed.hex('#FFF').bold(err.stack));
+    res.status(500).sendFile(path.join(__dirname, 'api-page', '500.html'));
 });
 
 app.listen(PORT, () => {
