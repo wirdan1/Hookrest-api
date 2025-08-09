@@ -1,23 +1,17 @@
-const { createCanvas, loadImage, registerFont } = require('canvas');
+const { createCanvas, loadImage } = require('canvas');
 const twemoji = require('twemoji');
 const fetch = require('node-fetch');
-
-// Coba register font default dari sistem (opsional, hapus jika tidak diperlukan)
-// registerFont('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', { family: 'DejaVu Sans' }); // Path bisa berbeda per sistem
 
 module.exports = function(app) {
     async function generateBratImage(text) {
         try {
-            // Dynamically adjust initial font size based on text length
             const baseFontSize = Math.max(70 - (text.length * 0.5), 20);
             const canvas = createCanvas(512, 512);
             const ctx = canvas.getContext('2d');
 
-            // Background putih
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Font setup (coba fallback ke font yang umum)
             let fontSize = baseFontSize;
             const maxWidth = canvas.width - 50;
             let lineHeight = fontSize + 15;
@@ -25,22 +19,8 @@ module.exports = function(app) {
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
             ctx.fillStyle = '#000000';
+            ctx.font = `${fontSize}px`; // Tanpa font spesifik, pakai default sistem
 
-            // Coba beberapa font fallback
-            const fontFamilies = ['sans-serif', 'Arial', 'Helvetica', 'Verdana'];
-            let fontFound = false;
-            for (let font of fontFamilies) {
-                ctx.font = `bold ${fontSize}px ${font}`;
-                if (ctx.measureText('test').width > 0) {
-                    fontFound = true;
-                    break;
-                }
-            }
-            if (!fontFound) {
-                ctx.font = `bold ${fontSize}px sans-serif`; // Fallback terakhir
-            }
-
-            // Fungsi wrap text
             function wrapText(ctx, text, maxWidth) {
                 const words = text.split(' ');
                 const lines = [];
@@ -60,10 +40,9 @@ module.exports = function(app) {
                 return lines;
             }
 
-            // Sesuaikan font size biar muat
             let lines;
             do {
-                ctx.font = `bold ${fontSize}px ${ctx.font.split(' ')[1] || 'sans-serif'}`;
+                ctx.font = `${fontSize}px`;
                 lines = wrapText(ctx, text, maxWidth);
                 if (lines.length * lineHeight > canvas.height - 40) {
                     fontSize -= 2;
@@ -73,7 +52,6 @@ module.exports = function(app) {
                 }
             } while (fontSize > 20);
 
-            // Render text + emoji
             let y = 30;
             for (let line of lines) {
                 let x = 25;
