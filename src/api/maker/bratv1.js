@@ -1,9 +1,6 @@
-const { createCanvas, loadImage, registerFont } = require('canvas');
+const { createCanvas, loadImage } = require('canvas');
 const twemoji = require('twemoji');
 const fetch = require('node-fetch');
-
-// Register a custom font (e.g., Roboto)
-registerFont('path/to/Roboto-Regular.ttf', { family: 'Roboto' });
 
 module.exports = function(app) {
     async function generateBratImage(text) {
@@ -17,7 +14,7 @@ module.exports = function(app) {
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Font setup
+            // Font setup (use default system font)
             let fontSize = baseFontSize;
             const maxWidth = canvas.width - 50;
             let lineHeight = fontSize + 15; // Adjust line height relative to font size
@@ -25,7 +22,7 @@ module.exports = function(app) {
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
             ctx.fillStyle = '#000000';
-            ctx.font = `bold ${fontSize}px Roboto`; // Use registered font
+            ctx.font = `bold ${fontSize}px sans-serif`; // Use default sans-serif font
 
             // Fungsi wrap text
             function wrapText(ctx, text, maxWidth) {
@@ -50,7 +47,7 @@ module.exports = function(app) {
             // Sesuaikan font size biar muat
             let lines;
             do {
-                ctx.font = `bold ${fontSize}px Roboto`;
+                ctx.font = `bold ${fontSize}px sans-serif`;
                 lines = wrapText(ctx, text, maxWidth);
                 if (lines.length * lineHeight > canvas.height - 40) {
                     fontSize -= 2;
