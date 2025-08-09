@@ -28,6 +28,7 @@
     "moment-timezone": "^0.6.0",
     "node-fetch": "^2.6.1",
     "qrcode": "^1.5.4",
+    "twemoji": "^14.0.2",
     "undici": "^7.13.0",
     "util": "^0.12.5",
     "uuid": "^11.1.0",
