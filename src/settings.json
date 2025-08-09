@@ -116,6 +116,16 @@
           "path": "/info/bola"
         }
       ]
+    },
+    {
+      "name": "Status",
+      "items": [
+        {
+          "name": "Info status",
+          "desc": "Cek status api",
+          "path": "/api/status"
+        }
+      ]
     }
   ],
   "maintenance": {
