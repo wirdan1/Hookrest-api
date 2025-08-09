@@ -283,5 +283,8 @@
         }
       ]
     }
-  ]
+  ],
+  "maintenance": {
+    "enabled": false
+  }
 }
