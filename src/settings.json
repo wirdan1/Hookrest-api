@@ -285,6 +285,6 @@
     }
   ],
   "maintenance": {
-    "enabled": false
+    "enabled": true
   }
 }
