@@ -78,7 +78,12 @@ fs.readdirSync(apiFolder).forEach((subfolder) => {
 console.log(chalk.bgHex('#90EE90').hex('#333').bold(' Load Complete! ✓ '));
 console.log(chalk.bgHex('#90EE90').hex('#333').bold(` Total Routes Loaded: ${totalRoutes} `));
 
+// Rute utama
 app.get('/', (req, res) => {
+    const maintenancePath = path.join(__dirname, 'api-page', 'maintenance.html');
+    if (settings.maintenance && settings.maintenance.enabled === true && fs.existsSync(maintenancePath)) {
+        return res.status(503).sendFile(maintenancePath);
+    }
     res.sendFile(path.join(__dirname, 'api-page', 'index.html'));
 });
 
