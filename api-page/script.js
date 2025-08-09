@@ -206,7 +206,7 @@ document.addEventListener("click", (event) => {
 
       const paramExample = document.createElement("p");
       paramExample.className = "param-example";
-      paramExample.textContent = `Example: ${param === 'Ya begitu lah' ? 'Sesuaikan aja bre' : 'Sesuaikan kalau q,text,prompt itu menggunakan text misal hallo atau hai, jika url kirim link url, jika nomor masukin nomor'}`; // Simple example
+      paramExample.textContent = `Example: ${param === 'Ya begitu lah' ? 'Sesuaikan aja bre' : 'Sesuaikan kalau q,text,prompt itu menggunakan text misal hallo atau hai, jika url kirim link url, jika city/kota masukin aja kota yang kamu mau dan jika no/nomor masukin nomor'}`; // Simple example
 
       paramGroup.appendChild(label);
       paramGroup.appendChild(inputField);
