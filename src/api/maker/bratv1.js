@@ -47,7 +47,7 @@ module.exports = function(app) {
         do {
             ctx.font = `bold ${fontSize}px Arial`;
             lines = wrapText(ctx, text, maxWidth);
-            if (lines.length * lineHeight > canvas.height - 40) {
+            if (lines.length * lineHeight > canvas.height - 40) { 
                 fontSize -= 2;
                 lineHeight -= 1;
             } else {
@@ -70,9 +70,7 @@ module.exports = function(app) {
                         ctx.drawImage(img, x, y, fontSize, fontSize);
                         x += fontSize;
                         continue;
-                    } catch (err) {
-                        // kalau gagal ambil emoji, fallback teks
-                    }
+                    } catch {}
                 }
                 ctx.fillText(char, x, y);
                 x += ctx.measureText(char).width;
@@ -83,14 +81,14 @@ module.exports = function(app) {
         return canvas.toBuffer('image/png');
     }
 
-    // Endpoint mirip bluearchive
+    // Endpoint HTTP mirip contoh bluearchive
     app.get('/maker/brat', async (req, res) => {
         try {
             const text = req.query.text;
             const imageBuffer = await bratImage(text);
             res.writeHead(200, {
                 'Content-Type': 'image/png',
-                'Content-Length': imageBuffer.length
+                'Content-Length': imageBuffer.length,
             });
             res.end(imageBuffer);
         } catch (error) {
