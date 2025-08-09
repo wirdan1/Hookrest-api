@@ -1,7 +1,7 @@
 {
   "name": "Hookrest Api's",
   "version": "Hookrest UI",
-  "description": "Hookrest adalah website penghasil api endpoind resmi yang di terbitkan oleh Danz-dev. Mohon untuk all pengguna agar kiranya melaporkan jika ada fitur yang error,langsung ke developer saja, nomor developer sudah tertera di bawah ini & jika kalian bisa ngoding jangan sungkan chat developer kalau tertarik menjadi owner website ini.",
+  "description": "Simple rest api by Hookrest.",
   "header": {
     "status": "Online!",
     "imageSrc": [
@@ -34,47 +34,6 @@
           "name": "Lumin AI",
           "desc": "Talk with luminai",
           "path": "/ai/luminai?text="
-        },
-        {
-          "name": "Llama",
-          "desc": "Talk with Llama",
-          "path": "/ai/llama?text="
-        },
-        {
-          "name": "Gemini Ai",
-          "desc": "Ciptakan Pantun Bersama Gemini AI",
-          "path": "/api/gemini?prompt="
-        },
-        {
-          "name": "Dukun",
-          "desc": "Dukun Sakti",
-          "path": "/ai/dukun?content="
-        },
-        {
-          "name": "HydroMind",
-          "desc": "Talk with hydromind",
-          "path": "/ai/hydromind?text=&model=",
-          "innerDesc": "See the list of supported AI models here: https://mind.hydrooo.web.id"
-        }
-      ]
-    },
-    {
-      "name": "Apk",
-      "items": [
-        {
-          "name": "Hook-Mod",
-          "desc": "Cari aplikasi dari Hookrest-Mod dengan mudah",
-          "path": "/apk/hookmod?query="
-        },
-        {
-          "name": "PlayStore",
-          "desc": "Cari aplikasi dari PlayStore dengan mudah",
-          "path": "/apk/playstore?query="
-        },
-        {
-          "name": "Happy Mod",
-          "desc": "Cari aplikasi dari Happy Mod dengan mudah",
-          "path": "/apk/happymod?search="
         }
       ]
     },
@@ -90,11 +49,6 @@
           "name": "Random Hadist",
           "desc": "Hadist",
           "path": "/islami/hadits/random"
-        },
-        {
-          "name": "Asmaul Husna",
-          "desc": "Asmaul husna random",
-          "path": "/islami/asmaulhusna"
         }
       ]
     },
@@ -119,41 +73,6 @@
       ]
     },
     {
-      "name": "Fun",
-      "items": [
-        {
-          "name": "Tahukah Kamu",
-          "desc": "Temukan apa yang belum kamu ketahui disini",
-          "path": "/fun/tahukahkamu"
-        },
-        {
-          "name": "Hytamkan",
-          "desc": "Hitamkan waifu disini",
-          "path": "/fun/hytam?url="
-        },
-        {
-          "name": "Cek Khodam",
-          "desc": "Analisis Khodam kamu",
-          "path": "/fun/cekkhodam?nama="
-        }
-      ]
-    },
-    {
-      "name": "Tools",
-      "items": [
-        {
-          "name": "Kodepos",
-          "desc": "Cari nomor tempat tinggal anda",
-          "path": "/tools/kodepos?form="
-        },
-        {
-          "name": "Cek Cuaca",
-          "desc": "Cek cuaca di tempat tinggal anda",
-          "path": "/tools/cuaca?kota="
-        }
-      ]
-    },
-    {
       "name": "Maker",
       "items": [
         {
@@ -169,93 +88,8 @@
       ]
     },
     {
-      "name": "Download",
-      "items": [
-        {
-          "name": "Douyin",
-          "desc": "Douyin Download by Danz-dev",
-          "path": "/dl/douyin?url="
-        },
-        {
-          "name": "Tiktok",
-          "desc": "Tiktok Download by Danz-dev",
-          "path": "/dl/tiktok?url="
-        },
-        {
-          "name": "MediaFire",
-          "desc": "MediaFire URL Download by Danz-dev",
-          "path": "/api/mediafire?url="
-        },
-        {
-          "name": "Snack Video",
-          "desc": "Snackvideo Download by Danz-dev",
-          "path": "/download/snackvideo?url="
-        },
-        {
-          "name": "Pinterest",
-          "desc": "Pinterest Download by Danz-dev",
-          "path": "/dl/pinterest?q="
-        },
-        {
-          "name": "ytmp3",
-          "desc": "Ytmp3 Download by Danz-dev",
-          "path": "/dl/ytmp3?url="
-        },
-        {
-          "name": "Plays",
-          "desc": "Play spotify by Danz-dev",
-          "path": "/dl/plays?q="
-        },
-        {
-          "name": "Twitter",
-          "desc": "Download Link Twitter by Danz-dev",
-          "path": "/dl/twitter?url="
-        },
-        {
-          "name": "ytmp4",
-          "desc": "Ytmp4 Download by Danz-dev",
-          "path": "/dl/ytmp4?url="
-        },
-        {
-          "name": "Play",
-          "desc": "YouTube Play by Danz-dev",
-          "path": "/dl/play?q="
-        },
-        {
-          "name": "Play v2",
-          "desc": "YouTube Play by Danz-dev",
-          "path": "/dl/playv2?q="
-        },
-        {
-          "name": "Sound Cloud",
-          "desc": "Sound Cloud Download by Danz-dev",
-          "path": "/dl/soundcloud?url="
-        }
-      ]
-    },
-    {
       "name": "Search Tools",
       "items": [
-        {
-          "name": "lyrics",
-          "desc": "Lyrics search",
-          "path": "/search/lyrics?title="
-        },
-        {
-          "name": "Surah",
-          "desc": "Cari Surah",
-          "path": "/search/surah?no="
-        },
-        {
-          "name": "Google Search",
-          "desc": "Google search by Danz-dev",
-          "path": "/search/google?q="
-        },
-        {
-          "name": "Sound Cloud",
-          "desc": "Sound Cloud Search",
-          "path": "/search/cloud?q="
-        },
         {
           "name": "YouTube",
           "desc": "Youtube search",
