@@ -73,21 +73,6 @@
       ]
     },
     {
-      "name": "Maker",
-      "items": [
-        {
-          "name": "Brat",
-          "desc": "Brat Image",
-          "path": "/maker/brat?text="
-        },
-        {
-          "name": "Brat Vid",
-          "desc": "Brat Video",
-          "path": "/maker/bratvid?text="
-        }
-      ]
-    },
-    {
       "name": "Search Tools",
       "items": [
         {
