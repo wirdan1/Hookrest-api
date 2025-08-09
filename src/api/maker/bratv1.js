@@ -1,19 +1,57 @@
-const sharp = require('sharp');
+const { createCanvas, loadImage } = require('canvas');
 const twemoji = require('twemoji');
 const fetch = require('node-fetch');
 
 module.exports = function(app) {
     async function generateBratImage(text) {
         try {
-            const svg = `
-                <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100%" height="100%" fill="white"/>
-                    <text x="25" y="50" font-size="${Math.max(70 - (text.length * 0.5), 20)}" fill="black" font-family="sans-serif">${text}</text>
-                </svg>
-            `;
-            const buffer = await sharp(Buffer.from(svg)).png().toBuffer();
-            return buffer;
+            const baseSize = Math.max(30, 30 - (text.length * 0.1)); // Ukuran dasar, mengecil seiring panjang teks
+            const canvas = createCanvas(512, 512);
+            const ctx = canvas.getContext('2d');
+
+            // Background putih
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Pengaturan teks dengan font default minimal
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#000000';
+            ctx.font = `${baseSize}px sans-serif`; // Gunakan font default paling dasar
+
+            // Render teks dan emoji
+            let y = 30;
+            let x = 25;
+            const lines = text.split('\n'); // Pisah baris jika ada
+            for (let line of lines) {
+                let currentX = x;
+                for (const char of [...line]) {
+                    if (twemoji.test(char)) {
+                        const emojiUrl = twemoji.parse(char, {
+                            folder: 'svg',
+                            ext: '.svg'
+                        }).match(/src="(.*?)"/)?.[1];
+
+                        if (emojiUrl) {
+                            const emojiPngUrl = emojiUrl.replace('/svg/', '/72x72/').replace('.svg', '.png');
+                            const res = await fetch(emojiPngUrl);
+                            const buf = await res.arrayBuffer();
+                            const img = await loadImage(Buffer.from(buf));
+                            ctx.drawImage(img, currentX, y, baseSize, baseSize);
+                            currentX += baseSize + 5;
+                            continue;
+                        }
+                    }
+                    ctx.fillText(char, currentX, y);
+                    currentX += ctx.measureText(char).width;
+                }
+                y += baseSize + 10;
+                if (y + baseSize > canvas.height - 25) break; // Batasi tinggi
+            }
+
+            return canvas.toBuffer('image/png');
         } catch (error) {
+            console.log('Error:', error);
             throw error;
         }
     }
