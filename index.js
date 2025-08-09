@@ -13,36 +13,25 @@ app.set("json spaces", 2);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
-app.use('/', express.static(path.join(__dirname, 'api-page')));
-app.use('/src', express.static(path.join(__dirname, 'src')));
 
-// Load settings.json dengan penanganan error
+// Load settings
 const settingsPath = path.join(__dirname, './src/settings.json');
-let settings;
-try {
-    settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
-} catch (err) {
-    console.error(chalk.bgRed.hex('#FFF').bold('Error reading settings.json:', err.message));
-    process.exit(1);
-}
+const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
 
-// Middleware untuk cek maintenance mode
+// Maintenance Middleware - Letakkan SEBELUM static files
 app.use((req, res, next) => {
-    if (settings.maintenance && settings.maintenance.enabled === true) {
-        const maintenancePath = path.join(__dirname, 'api-page', 'maintenance.html');
-        if (fs.existsSync(maintenancePath)) {
-            return res.status(503).sendFile(maintenancePath);
-        } else {
-            console.error(chalk.bgRed.hex('#FFF').bold('Maintenance file not found:', maintenancePath));
-            return res.status(503).json({
-                status: 'error',
-                message: 'Server is under maintenance, but maintenance page is not available.'
-            });
-        }
+    if (settings.maintenance && settings.maintenance.enabled) {
+        console.log(chalk.bgRed.white(' MAINTENANCE MODE ACTIVE '));
+        return res.status(503).sendFile(path.join(__dirname, 'api-page', 'maintenance.html'));
     }
     next();
 });
 
+// Static files
+app.use('/', express.static(path.join(__dirname, 'api-page')));
+app.use('/src', express.static(path.join(__dirname, 'src')));
+
+// Response formatter
 app.use((req, res, next) => {
     const originalJson = res.json;
     res.json = function (data) {
@@ -78,26 +67,29 @@ fs.readdirSync(apiFolder).forEach((subfolder) => {
 console.log(chalk.bgHex('#90EE90').hex('#333').bold(' Load Complete! ✓ '));
 console.log(chalk.bgHex('#90EE90').hex('#333').bold(` Total Routes Loaded: ${totalRoutes} `));
 
-// Rute utama
+// Routes
 app.get('/', (req, res) => {
-    const maintenancePath = path.join(__dirname, 'api-page', 'maintenance.html');
-    if (settings.maintenance && settings.maintenance.enabled === true && fs.existsSync(maintenancePath)) {
-        return res.status(503).sendFile(maintenancePath);
-    }
     res.sendFile(path.join(__dirname, 'api-page', 'index.html'));
 });
 
+// Error handlers
 app.use((req, res, next) => {
     res.status(404).sendFile(path.join(__dirname, 'api-page', '404.html'));
 });
 
 app.use((err, req, res, next) => {
-    console.error(chalk.bgRed.hex('#FFF').bold(err.stack));
+    console.error(err.stack);
     res.status(500).sendFile(path.join(__dirname, 'api-page', '500.html'));
 });
 
 app.listen(PORT, () => {
     console.log(chalk.bgHex('#90EE90').hex('#333').bold(` Server is running on port ${PORT} `));
+    
+    // Log maintenance status on startup
+    if (settings.maintenance && settings.maintenance.enabled) {
+        console.log(chalk.bgRed.white(' MAINTENANCE MODE ENABLED '));
+        console.log(chalk.yellow(` Maintenance GIF: ${settings.maintenance.gifUrl} `));
+    }
 });
 
 module.exports = app;
