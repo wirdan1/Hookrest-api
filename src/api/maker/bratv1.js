@@ -1,106 +1,107 @@
 const { createCanvas, loadImage } = require('canvas');
 const twemoji = require('twemoji');
-const fetch = require('node-fetch');
+const axios = require('axios');
 
-module.exports = function (app) {
-  // Endpoint: /brat?text=Halo%20ganteng%20😎
-  app.get('/maker/brat', async (req, res) => {
-    const text = req.query.text;
-    if (!text) {
-      return res.status(400).json({
-        status: false,
-        message: 'Parameter ?text= harus diisi'
-      });
-    }
+module.exports = function(app) {
+    async function bratImage(text) {
+        try {
+            if (!text) throw new Error('Parameter "text" tidak boleh kosong');
 
-    try {
-      const canvas = createCanvas(512, 512);
-      const ctx = canvas.getContext('2d');
+            const canvas = createCanvas(512, 512);
+            const ctx = canvas.getContext('2d');
 
-      // Background putih
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Background putih
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Font setup
-      let fontSize = 70;
-      const maxWidth = canvas.width - 50;
-      let lineHeight = 85;
+            // Font setup
+            let fontSize = 70;
+            const maxWidth = canvas.width - 50;
+            let lineHeight = 85;
 
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillStyle = '#000000';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#000000';
 
-      // Fungsi wrap text
-      function wrapText(ctx, text, maxWidth) {
-        const words = text.split(' ');
-        const lines = [];
-        let line = '';
+            function wrapText(ctx, text, maxWidth) {
+                const words = text.split(' ');
+                const lines = [];
+                let line = '';
 
-        for (let i = 0; i < words.length; i++) {
-          const testLine = line + words[i] + ' ';
-          const metrics = ctx.measureText(testLine);
-          if (metrics.width > maxWidth && i > 0) {
-            lines.push(line.trim());
-            line = words[i] + ' ';
-          } else {
-            line = testLine;
-          }
-        }
-        lines.push(line.trim());
-        return lines;
-      }
-
-      // Sesuaikan font size
-      let lines;
-      do {
-        ctx.font = `bold ${fontSize}px Arial`;
-        lines = wrapText(ctx, text, maxWidth);
-        if (lines.length * lineHeight > canvas.height - 40) {
-          fontSize -= 2;
-          lineHeight -= 1;
-        } else {
-          break;
-        }
-      } while (fontSize > 20);
-
-      // Render text + emoji
-      let y = 30;
-      for (let line of lines) {
-        let x = 25;
-        for (const char of [...line]) {
-          if (twemoji.test(char)) {
-            const emojiUrl = twemoji.parse(char, {
-              folder: 'svg',
-              ext: '.svg'
-            }).match(/src="(.*?)"/)?.[1];
-
-            if (emojiUrl) {
-              const emojiPngUrl = emojiUrl.replace('/svg/', '/72x72/').replace('.svg', '.png');
-              const resEmoji = await fetch(emojiPngUrl);
-              const buf = await resEmoji.arrayBuffer();
-              const img = await loadImage(Buffer.from(buf));
-              ctx.drawImage(img, x, y, fontSize, fontSize);
-              x += fontSize;
-              continue;
+                for (let i = 0; i < words.length; i++) {
+                    const testLine = line + words[i] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && i > 0) {
+                        lines.push(line.trim());
+                        line = words[i] + ' ';
+                    } else {
+                        line = testLine;
+                    }
+                }
+                lines.push(line.trim());
+                return lines;
             }
-          }
-          ctx.fillText(char, x, y);
-          x += ctx.measureText(char).width;
+
+            // Sesuaikan font size agar muat
+            let lines;
+            do {
+                ctx.font = `bold ${fontSize}px Arial`;
+                lines = wrapText(ctx, text, maxWidth);
+                if (lines.length * lineHeight > canvas.height - 40) {
+                    fontSize -= 2;
+                    lineHeight -= 1;
+                } else {
+                    break;
+                }
+            } while (fontSize > 20);
+
+            // Render text + emoji
+            let y = 30;
+            for (let line of lines) {
+                let x = 25;
+                for (const char of [...line]) {
+                    if (twemoji.test(char)) {
+                        const emojiUrl = twemoji.parse(char, {
+                            folder: 'svg',
+                            ext: '.svg'
+                        }).match(/src="(.*?)"/)?.[1];
+
+                        if (emojiUrl) {
+                            const emojiPngUrl = emojiUrl
+                                .replace('/svg/', '/72x72/')
+                                .replace('.svg', '.png');
+                            const res = await axios.get(emojiPngUrl, { responseType: 'arraybuffer' });
+                            const img = await loadImage(Buffer.from(res.data));
+                            ctx.drawImage(img, x, y, fontSize, fontSize);
+                            x += fontSize;
+                            continue;
+                        }
+                    }
+                    ctx.fillText(char, x, y);
+                    x += ctx.measureText(char).width;
+                }
+                y += lineHeight;
+            }
+
+            return canvas.toBuffer('image/png');
+
+        } catch (error) {
+            throw error;
         }
-        y += lineHeight;
-      }
-
-      // Output PNG langsung
-      res.setHeader('Content-Type', 'image/png');
-      res.send(canvas.toBuffer('image/png'));
-
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        status: false,
-        message: 'Terjadi kesalahan saat membuat gambar',
-        error: error.message
-      });
     }
-  });
+
+    // Endpoint HTTP
+    app.get('/maker/brat', async (req, res) => {
+        try {
+            const text = req.query.text;
+            const imageBuffer = await bratImage(text);
+            res.writeHead(200, {
+                'Content-Type': 'image/png',
+                'Content-Length': imageBuffer.length
+            });
+            res.end(imageBuffer);
+        } catch (error) {
+            res.status(500).send(`Error: ${error.message}`);
+        }
+    });
 };
