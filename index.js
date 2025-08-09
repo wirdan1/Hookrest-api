@@ -19,6 +19,15 @@ app.use('/src', express.static(path.join(__dirname, 'src')));
 const settingsPath = path.join(__dirname, './src/settings.json');
 const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
 
+// Middleware untuk cek maintenance mode
+app.use((req, res, next) => {
+    if (settings.maintenance && settings.maintenance.enabled === true) {
+        // Jika maintenance mode aktif, kirim file maintenance.html untuk semua request
+        return res.status(503).sendFile(path.join(__dirname, 'api-page', 'maintenance.html'));
+    }
+    next();
+});
+
 app.use((req, res, next) => {
     const originalJson = res.json;
     res.json = function (data) {
