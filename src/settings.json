@@ -79,6 +79,11 @@
           "name": "YouTube",
           "desc": "Youtube search",
           "path": "/search/youtube?q="
+        },
+        {
+          "name": "Douyin",
+          "desc": "Douyin search",
+          "path": "/douyin/search?keyword="
         }
       ]
     },
