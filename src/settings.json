@@ -76,6 +76,11 @@
           "path": "/search/youtube?q="
         },
         {
+          "name": "Resep",
+          "desc": "Get resep makanan by cookpad",
+          "path": "/search/resep?q="
+        },
+        {
           "name": "Lyrics",
           "desc": "Lirik search",
           "path": "/search/lyrics?title="
@@ -94,11 +99,6 @@
           "name": "Jadwal tv",
           "desc": "Cari Jadwal Tv",
           "path": "/info/jadwaltv?channel="
-        },
-        {
-          "name": "Samehadaku",
-          "desc": "Info anime new",
-          "path": "/info/samehadaku"
         },
         {
           "name": "Jadwal Bola",
