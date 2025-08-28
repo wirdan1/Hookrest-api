@@ -139,7 +139,11 @@
                                 <div id="responseDetailsTab" class="response-tab-pane">
                                     <div class="response-header-details">
                                         <span>Response body</span>
-                                        <button id="downloadResponse" class="copy-btn"><i class="fas fa-download"></i> Download</button>
+                                        <div>
+                                            <!-- Added copy button for response body -->
+                                            <button id="copyResponseBody" class="copy-btn me-2"><i class="fas fa-copy"></i> Copy</button>
+                                            <button id="downloadResponse" class="copy-btn"><i class="fas fa-download"></i> Download</button>
+                                        </div>
                                     </div>
                                     <pre id="apiResponseBody" class="code-block"></pre>
                                     <div class="response-header-details mt-3">
