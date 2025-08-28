@@ -1,9 +1,8 @@
-const axios = require('axios');
-const Jimp = require('jimp');
+const { Jimp } = require('jimp');
 
 module.exports = function (app) {
     app.get('/maker/pixelate', async (req, res) => {
-        const { url } = req.query;
+        const { url, size1, size2 } = req.query;
 
         if (!url) {
             return res.status(400).json({
@@ -12,13 +11,16 @@ module.exports = function (app) {
             });
         }
 
+        let s1 = parseInt(size1) || 64;
+        let s2 = parseInt(size2) || 256;
+
         try {
             const image = await Jimp.read(url);
             image
-                .resize(64, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR)
-                .resize(256, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR);
+                .resize(s1, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR)
+                .resize(s2, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR);
 
-            const buffer = await image.getBufferAsync(Jimp.MIME_PNG);
+            const buffer = await image.getBuffer(Jimp.MIME_PNG);
 
             res.set('Content-Type', 'image/png');
             res.send(buffer);
