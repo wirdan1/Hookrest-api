@@ -13,78 +13,71 @@ module.exports = function (app) {
         }
 
         try {
-            // 🔍 Cari resep
-            const { data } = await axios.get(`https://cookpad.com/id/cari/${encodeURIComponent(q)}`);
-            const $ = cheerio.load(data);
-            const recipes = [];
+            // ambil halaman pencarian
+            const { data: html } = await axios.get(`https://cookpad.com/id/cari/${encodeURIComponent(q)}`);
+            const $ = cheerio.load(html);
 
-            const recipeLinks = [];
-
-            $('li[id^="recipe_"]').each((index, element) => {
-                const recipeId = $(element).attr('id').replace('recipe_', '');
-                const url = `https://cookpad.com/id/resep/${recipeId}`;
-                recipeLinks.push(url);
-            });
-
-            // 📄 Ambil detail tiap resep
-            for (const url of recipeLinks) {
-                try {
-                    const { data: html } = await axios.get(url);
-                    const $detail = cheerio.load(html);
-
-                    const ldJsonScript = $detail('script[type="application/ld+json"]').toArray()
-                        .map(el => {
-                            try {
-                                return JSON.parse($detail(el).text());
-                            } catch {
-                                return null;
-                            }
-                        })
-                        .filter(json => json && json['@type'] === 'Recipe');
-
-                    if (ldJsonScript.length === 0) continue;
-
-                    const recipeLd = ldJsonScript[0];
-                    let recipeData = {};
-
-                    recipeData.id = recipeLd.url ? recipeLd.url.split('/').pop() : null;
-                    recipeData.title = recipeLd.name || $detail('h1.break-words').text().trim();
-
-                    if (recipeLd.author && recipeLd.author['@type'] === 'Person') {
-                        recipeData.author = {
-                            name: recipeLd.author.name,
-                            username: $detail('a[href*="/pengguna/"] span[dir="ltr"]').first().text().trim() || null,
-                            url: recipeLd.author.url
-                        };
-                    }
-
-                    recipeData.imageUrl = recipeLd.image || $detail('meta[property="og:image"]').attr('content');
-                    recipeData.description = recipeLd.description || $detail('meta[name="description"]').attr('content');
-                    recipeData.servings = recipeLd.recipeYield || null;
-                    recipeData.prepTime = $detail('div[id*="cooking_time_recipe_"] span.mise-icon-text').first().text().trim() || null;
-                    recipeData.ingredients = recipeLd.recipeIngredient || [];
-                    recipeData.steps = (recipeLd.recipeInstructions || []).map(step => ({
-                        text: step.text,
-                        images: step.image || []
-                    }));
-                    recipeData.datePublished = recipeLd.datePublished;
-                    recipeData.dateModified = recipeLd.dateModified;
-
-                    recipes.push(recipeData);
-                } catch (err) {
-                    console.error(`Gagal ambil detail: ${url}`, err.message);
-                }
+            // ambil resep pertama
+            const firstRecipe = $('li[id^="recipe_"]').first();
+            if (!firstRecipe.length) {
+                return res.status(404).json({
+                    status: false,
+                    error: 'Resep tidak ditemukan.'
+                });
             }
+
+            const recipeId = firstRecipe.attr('id').replace('recipe_', '');
+            const title = firstRecipe.find('a.block-link__main').text().trim();
+            const url = `https://cookpad.com/id/resep/${recipeId}`;
+
+            // ambil detail resep
+            const { data: detailHtml } = await axios.get(url);
+            const $detail = cheerio.load(detailHtml);
+
+            const ldJsonScript = $detail('script[type="application/ld+json"]').toArray().map(el => {
+                try {
+                    return JSON.parse($detail(el).text());
+                } catch {
+                    return null;
+                }
+            }).filter(json => json && json['@type'] === 'Recipe');
+
+            if (!ldJsonScript.length) {
+                return res.status(404).json({
+                    status: false,
+                    error: 'Detail resep tidak ditemukan.'
+                });
+            }
+
+            const recipeLd = ldJsonScript[0];
+
+            const result = {
+                id: recipeId,
+                title: recipeLd.name || title,
+                author: recipeLd.author?.name || null,
+                imageUrl: recipeLd.image || $detail('meta[property="og:image"]').attr('content'),
+                description: recipeLd.description || null,
+                servings: recipeLd.recipeYield || null,
+                prepTime: $detail('div[id*="cooking_time_recipe_"] span.mise-icon-text').first().text().trim() || null,
+                ingredients: recipeLd.recipeIngredient || [],
+                steps: (recipeLd.recipeInstructions || []).map(step => ({
+                    text: step.text,
+                    images: step.image || []
+                })),
+                url
+            };
 
             res.json({
                 status: true,
-                query: q,
-                results: recipes
+                creator: 'Danz-dev',
+                result
             });
+
         } catch (err) {
+            console.error(err);
             res.status(500).json({
                 status: false,
-                error: 'Gagal mengambil data dari Cookpad.',
+                error: 'Gagal mengambil data',
                 message: err.message
             });
         }
