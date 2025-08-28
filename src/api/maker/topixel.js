@@ -2,7 +2,7 @@ const { Jimp } = require('jimp');
 
 module.exports = function (app) {
     app.get('/maker/pixelate', async (req, res) => {
-        const { url, size1, size2 } = req.query;
+        const { url } = req.query;
 
         if (!url) {
             return res.status(400).json({
@@ -11,16 +11,13 @@ module.exports = function (app) {
             });
         }
 
-        let s1 = parseInt(size1) || 64;
-        let s2 = parseInt(size2) || 256;
-
         try {
             const image = await Jimp.read(url);
             image
-                .resize(s1, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR)
-                .resize(s2, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR);
+                .resize(64, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR) // kecilin
+                .resize(256, Jimp.AUTO, Jimp.RESIZE_NEAREST_NEIGHBOR); // besarin lagi → pixelate otomatis
 
-            const buffer = await image.getBuffer(Jimp.MIME_PNG);
+            const buffer = await image.getBuffer("image/png");
 
             res.set('Content-Type', 'image/png');
             res.send(buffer);
@@ -28,6 +25,7 @@ module.exports = function (app) {
             console.error(err);
             res.status(500).json({
                 status: false,
+                creator: "Danz-dev",
                 error: 'Gagal memproses gambar, pastikan link valid!',
                 message: err.message
             });
