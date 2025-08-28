@@ -31,9 +31,9 @@
       "name": "AI (Artificial Intelligence)",
       "items": [
         {
-          "name": "Lumin AI",
-          "desc": "Talk with luminai",
-          "path": "/ai/luminai?text="
+          "name": "Chatgpt",
+          "desc": "Talk with Chatgpt",
+          "path": "/ai/chatgpt?question="
         }
       ]
     },
