@@ -267,6 +267,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       .addEventListener("click", () =>
         copyToClipboard(document.getElementById("apiRequestUrlContent").textContent, "Request URL copied!"),
       )
+    document.getElementById("copyResponseBody").addEventListener("click", () => {
+      const responseBodyElement = document.getElementById("apiResponseBody")
+      let textToCopy = ""
+
+      // Handle different content types
+      if (responseBodyElement.querySelector("img, audio, video")) {
+        // For media content, copy the API response as text
+        textToCopy = "Media content - use download button to save the file"
+      } else {
+        // For text/JSON content, copy the actual content
+        textToCopy = responseBodyElement.textContent || responseBodyElement.innerText
+      }
+
+      copyToClipboard(textToCopy, "Response body copied!")
+    })
     document.getElementById("downloadResponse").addEventListener("click", () => {
       const responseText = document.getElementById("apiResponseBody").textContent
       const blob = new Blob([responseText], { type: "application/json" })
