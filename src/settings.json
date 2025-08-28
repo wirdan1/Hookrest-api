@@ -61,11 +61,6 @@
           "path": "/random/loli"
         },
         {
-          "name": "Random Meme",
-          "desc": "Loli Random Memes",
-          "path": "/random/meme?count="
-        },
-        {
           "name": "Blue Archive",
           "desc": "Blue Archive Random Images",
           "path": "/random/ba"
