@@ -88,16 +88,6 @@
       ]
     },
     {
-      "name": "Maker",
-      "items": [
-        {
-          "name": "To-pixel",
-          "desc": "Convert url image to pixel styles",
-          "path": "/maker/pixelate?url="
-        }
-      ]
-    },
-    {
       "name": "Info",
       "items": [
         {
