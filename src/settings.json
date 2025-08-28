@@ -81,6 +81,11 @@
           "path": "/search/youtube?q="
         },
         {
+          "name": "Lyrics",
+          "desc": "Lirik search",
+          "path": "/search/lyrics?title="
+        },
+        {
           "name": "Douyin",
           "desc": "Douyin search",
           "path": "/douyin/search?keyword="
