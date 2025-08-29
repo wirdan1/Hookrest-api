@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 const paramContainer = document.createElement("div")
 paramContainer.className = "param-container"
 
-// mapping hint biar penjelasan singkat & gampang ditambah
+// mapping hint biar singkat
 const paramHints = {
   q: "Ketik query yang kamu inginkan",
   query: "Ketik query yang kamu inginkan",
@@ -198,11 +198,28 @@ const paramHints = {
   no: "Gunakan angka/nomor"
 }
 
+// mapping contoh (bisa diperluas)
+const paramExamples = {
+  q: "query",
+  query: "query",
+  text: "text",
+  prompt: "prompy",
+  url: "https://example.com",
+  imageurl: "https://example.my.id/gambar.jpg",
+  city: "city",
+  kota: "kota",
+  id: "12345678",
+  uid: "abcde-12345",
+  nomor: "number",
+  no: "number"
+}
+
 params.forEach((_, param) => {
   const paramGroup = document.createElement("div")
   paramGroup.className = "param-group"
 
   const hint = paramHints[param.toLowerCase()] || `Masukkan ${param}...`
+  const example = paramExamples[param.toLowerCase()] || `contoh-${param}`
 
   paramGroup.innerHTML = `
     <label>
@@ -218,6 +235,7 @@ params.forEach((_, param) => {
       required
     >
     <p class="param-description">${hint}</p>
+    <p class="param-example">Contoh: ${example}</p>
   `
 
   paramGroup.querySelector("input").addEventListener("input", (e) => {
