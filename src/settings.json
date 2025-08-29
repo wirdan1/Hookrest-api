@@ -97,7 +97,7 @@
       "items": [
         {
           "name": "Youtube",
-          "desc": "Download youtube format mp3/mp4",
+          "desc": "Download youtube format mp3/320p,720p,1080p",
           "path": "/api/ytdl?url=&format="
         }
       ]
