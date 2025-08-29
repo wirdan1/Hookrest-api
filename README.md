@@ -99,9 +99,6 @@ Config (AI Only)
   }
 }
 
-
----
-
 API Information
 
 Key	Value	Description
@@ -114,8 +111,6 @@ Version	UI	Versi saat ini dari API, bisa berubah sesuai update.
 
 
 
----
-
 Links
 
 WhatsApp Channel
@@ -123,10 +118,6 @@ WhatsApp Channel
 YouTube @danz-dev
 
 
-
----
-
 <p align="center">
   <b>© 2025 Hookrest API — by Danz-dev</b>
 </p>
-```
