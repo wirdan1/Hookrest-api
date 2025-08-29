@@ -192,66 +192,52 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Tampilkan tombol Clear
         modalRefs.clearBtn.style.display = "inline-block"
 
-const paramContainer = document.createElement("div")
-paramContainer.className = "param-container"
+        const paramContainer = document.createElement("div")
+        paramContainer.className = "param-container"
+        params.forEach((_, param) => {
+          const paramGroup = document.createElement("div")
+          paramGroup.className = "param-group"
+          paramGroup.innerHTML = `<label>${param.charAt(0).toUpperCase() + param.slice(1)} <span class="required-star">*</span> <span class="param-type">string (query)</span></label><input type="text" class="form-control" placeholder="Enter ${param}..." data-param="${param}" required><p class="param-description">The query for ${param}</p><p class="param-example">Example: ${param === "text" ? "Hello world" : "sᴇsᴜᴀɪᴋᴀɴ q/query/text/prompt ʙᴇʀᴀʀᴛɪ ᴍᴇɴɢɢᴜɴᴀᴋᴀɴ ᴛᴜʟɪsᴀɴ/ᴋᴀᴛᴀ, ᴋᴀʟᴀᴜ uid/id ʜᴀʀᴜs ᴍᴇɴɢɢᴜɴᴀᴋᴀɴ id,ᴋᴀʟᴀᴜ url/imageurl ɪᴛᴜ ʟɪɴᴋ, ᴋᴀʟᴀᴜ city/kota ɴᴀᴍᴀ ᴋᴏᴛᴀ ᴛᴇᴍᴘᴀᴛ ᴋᴀᴍᴜ ᴛɪɴɢɢᴀʟ, ᴋᴀʟᴀᴜ nomor/no ᴘᴀᴋᴀɪ nomor"}</p>`
+          paramGroup.querySelector("input").addEventListener("input", (e) => {
+            currentParams[param] = e.target.value.trim()
+            updateCurlAndRequestUrl(baseApiUrl, currentParams)
+          })
+          paramContainer.appendChild(paramGroup)
+        })
 
-// mapping hint biar penjelasan singkat & gampang ditambah
-const paramHints = {
-  q: "Ketik query yang kamu inginkan",
-  query: "Ketik query yang kamu inginkan",
-  text: "Ketik teks yang kamu inginkan",
-  prompt: "Ketik teks prompt",
-  url: "Masukkan link",
-  imageurl: "Masukkan link gambar",
-  city: "Nama kota tempat tinggalmu",
-  kota: "Nama kota tempat tinggalmu",
-  id: "Masukkan ID",
-  uid: "Masukkan ID",
-  nomor: "Gunakan angka/nomor",
-  no: "Gunakan angka/nomor"
-}
+        if (apiInnerDesc) {
+          const innerDescDiv = document.createElement("div")
+          innerDescDiv.className = "text-muted mt-3"
+          innerDescDiv.style.fontSize = "0.875rem"
+          innerDescDiv.innerHTML = apiInnerDesc.replace(/\n/g, "<br>")
+          paramContainer.appendChild(innerDescDiv)
+        }
 
-params.forEach((_, param) => {
-  const paramGroup = document.createElement("div")
-  paramGroup.className = "param-group"
+        modalRefs.queryInputContainer.appendChild(paramContainer)
+        updateCurlAndRequestUrl(baseApiUrl, currentParams)
 
-  const hint = paramHints[param.toLowerCase()] || `Masukkan ${param}...`
+        // Onclick untuk Execute dengan validasi
+        modalRefs.submitBtn.onclick = async () => {
+          const newParams = new URLSearchParams()
+          let isValid = true
+          modalRefs.queryInputContainer.querySelectorAll("input").forEach((input) => {
+            if (!input.value.trim()) {
+              isValid = false
+              input.classList.add("is-invalid")
+            } else {
+              input.classList.remove("is-invalid")
+              newParams.append(input.dataset.param, input.value.trim())
+            }
+          })
+          if (isValid) {
+            handleApiRequest(`${baseApiUrl}?${newParams.toString()}`, apiName)
+          }
+        }
 
-  paramGroup.innerHTML = `
-    <label>
-      ${param.charAt(0).toUpperCase() + param.slice(1)} 
-      <span class="required-star">*</span> 
-      <span class="param-type">string</span>
-    </label>
-    <input 
-      type="text" 
-      class="form-control" 
-      placeholder="${hint}" 
-      data-param="${param}" 
-      required
-    >
-    <p class="param-description">${hint}</p>
-  `
-
-  paramGroup.querySelector("input").addEventListener("input", (e) => {
-    currentParams[param] = e.target.value.trim()
-    updateCurlAndRequestUrl(baseApiUrl, currentParams)
-  })
-
-  paramContainer.appendChild(paramGroup)
-})
-
-if (apiInnerDesc) {
-  const innerDescDiv = document.createElement("div")
-  innerDescDiv.className = "text-muted mt-3"
-  innerDescDiv.style.fontSize = "0.875rem"
-  innerDescDiv.innerHTML = apiInnerDesc.replace(/\n/g, "<br>")
-  paramContainer.appendChild(innerDescDiv)
-}
-
-modalRefs.queryInputContainer.appendChild(paramContainer)
-updateCurlAndRequestUrl(baseApiUrl, currentParams)
-
+        modalRefs.clearBtn.onclick = () => {
+          modalRefs.queryInputContainer.querySelectorAll("input").forEach((input) => (input.value = ""))
+          currentParams = {}
+          updateCurlAndRequestUrl(baseApiUrl, currentParams)
         }
       } else {
         // KASUS 2: JIKA ENDPOINT TIDAK PUNYA PARAMETER
