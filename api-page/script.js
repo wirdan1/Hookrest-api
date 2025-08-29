@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         params.forEach((_, param) => {
           const paramGroup = document.createElement("div")
           paramGroup.className = "param-group"
-          paramGroup.innerHTML = `<label>${param.charAt(0).toUpperCase() + param.slice(1)} <span class="required-star">*</span> <span class="param-type">string (query)</span></label><input type="text" class="form-control" placeholder="Enter ${param}..." data-param="${param}" required><p class="param-description">The query for ${param}</p><p class="param-example">Example: ${param === "text" ? "Hello world" : "sᴇsᴜᴀɪᴋᴀɴ q/query/text/prompt ʙᴇʀᴀʀᴛɪ ᴍᴇɴɢɢᴜɴᴀᴋᴀɴ ᴛᴜʟɪsᴀɴ/ᴋᴀᴛᴀ, ᴋᴀʟᴀᴜ uid/id ʜᴀʀᴜs ᴍᴇɴɢɢᴜɴᴀᴋᴀɴ id,ᴋᴀʟᴀᴜ url/imageurl ɪᴛᴜ ʟɪɴᴋ, ᴋᴀʟᴀᴜ city/kota ɴᴀᴍᴀ ᴋᴏᴛᴀ ᴛᴇᴍᴘᴀᴛ ᴋᴀᴍᴜ ᴛɪɴɢɢᴀʟ, ᴋᴀʟᴀᴜ nomor/no ᴘᴀᴋᴀɪ nomor"}</p>`
+          paramGroup.innerHTML = `<label>${param.charAt(0).toUpperCase() + param.slice(1)} <span class="required-star">*</span> <span class="param-type">string (query)</span></label><input type="text" class="form-control" placeholder="Enter ${param}..." data-param="${param}" required><p class="param-description">Masukkan ${param}</p>`
           paramGroup.querySelector("input").addEventListener("input", (e) => {
             currentParams[param] = e.target.value.trim()
             updateCurlAndRequestUrl(baseApiUrl, currentParams)
