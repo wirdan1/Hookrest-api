@@ -24,7 +24,7 @@ Fitur mencakup AI, Islami, Random Images, Search Tools, Downloader, hingga infor
 ## Status Endpoint
 Cek status API dengan endpoint berikut:
 
-http
+```http
 GET /api/status
 
 Example Code
@@ -129,4 +129,3 @@ YouTube @danz-dev
 <p align="center">
   <b>© 2025 Hookrest API — by Danz-dev</b>
 </p>
-```
