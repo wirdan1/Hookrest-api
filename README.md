@@ -1,4 +1,3 @@
-
 <h1 align="center">Hookrest API</h1>
 
 <p align="center">
@@ -6,8 +5,10 @@
 </p>
 
 <p align="center">
-  <b>Simple & Modern REST API built by <a href="https://wa.me/62895323195263">Danz-dev</a></b><br><br>
-  <img src="https://img.shields.io/badge/Status-Online-brightgreen?style=for-the-badge" />
+  <b>Simple & Modern REST API built by Danz-dev</b><br><br>
+  <a href="https://hookrest.my.id">
+    <img src="https://img.shields.io/badge/Status-Online-brightgreen?style=for-the-badge" />
+  </a>
   <img src="https://img.shields.io/badge/Maintenance-Disabled-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Version-UI-orange?style=for-the-badge" />
 </p>
@@ -103,13 +104,13 @@ Config (AI Only)
 
 API Information
 
-Key	false
+Key	Value	Description
 
-Domain	hookrest.my.id
-Creator	Danz-dev
-Status	Online
-Maintenance	Enable/Disable ( true/false )
-Version	UI
+Domain	hookrest.my.id	Domain utama API.
+Creator	Danz-dev	Pengembang dari Hookrest API.
+Status	Online	Status API saat ini.
+Maintenance	Disabled	Status pemeliharaan: true = enable, false = disable.
+Version	UI	Versi saat ini dari API, bisa berubah sesuai update.
 
 
 
@@ -120,8 +121,6 @@ Links
 WhatsApp Channel
 
 YouTube @danz-dev
-
-Contact Me
 
 
 
