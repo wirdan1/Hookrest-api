@@ -57,29 +57,9 @@ Example Response
   }
 }
 
-
 ---
 
-AI Example
-
-Endpoint
-
-/ai/chatgpt?question=Halo+apa+kabar
-
-Response
-
-{
-  "status": true,
-  "creator": "Danz-dev",
-  "result": {
-    "answer": "Halo! Saya baik, bagaimana denganmu?"
-  }
-}
-
-
----
-
-Config (AI Only)
+settings.json
 
 {
   "categories": [
@@ -99,9 +79,6 @@ Config (AI Only)
   }
 }
 
-
----
-
 API Information
 
 Key	Value	Description
@@ -113,19 +90,7 @@ Maintenance	Disabled	Status pemeliharaan: true = enable, false = disable.
 Version	UI	Versi saat ini dari API, bisa berubah sesuai update.
 
 
-
----
-
-Links
-
-WhatsApp Channel
-
-YouTube @danz-dev
-
-
-
----
-
 <p align="center">
   <b>© 2025 Hookrest API — by Danz-dev</b>
 </p>
+```
