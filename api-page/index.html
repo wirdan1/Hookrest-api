@@ -52,10 +52,16 @@
         <div class="search-auth-container animate" style="animation-delay: 0.4s;">
             <div class="search-box">
                 <input type="text" id="searchInput" class="form-control" placeholder="Cari endpoint.">
+                <!-- Added total endpoints counter badge -->
+                <div class="endpoints-counter" id="endpointsCounter" style="display: none;">
+                    <i class="fas fa-code"></i>
+                    <span id="totalEndpoints">0</span> endpoints
+                </div>
             </div>
             <button class="btn btn-authorize" onclick="window.location.href='https://my-owner.vercel.app/'">
   Author <i class="fas fa-fire"></i>
 </button>
+        </div>
         
         <div id="apiContent" class="mt-4"></div>
     </main>
@@ -142,6 +148,7 @@
                                         <div>
                                             <!-- Added copy button for response body -->
                                             <button id="copyResponseBody" class="copy-btn me-2"><i class="fas fa-copy"></i> Copy</button>
+                                            <button id="downloadResponse" class="copy-btn"><i class="fas fa-download"></i> Download</button>
                                         </div>
                                     </div>
                                     <pre id="apiResponseBody" class="code-block"></pre>
