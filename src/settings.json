@@ -93,6 +93,16 @@
       ]
     },
     {
+      "name": "Downloader",
+      "items": [
+        {
+          "name": "Youtube",
+          "desc": "Download youtube format mp3/mp4",
+          "path": "/api/ytdl?url=&format="
+        }
+      ]
+    },
+    {
       "name": "Info",
       "items": [
         {
