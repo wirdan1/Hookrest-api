@@ -13,10 +13,13 @@
   <img src="https://img.shields.io/badge/Version-UI-orange?style=for-the-badge" />
 </p>
 
+---
+
 ## Overview
 Hookrest adalah REST API modern yang menyediakan berbagai fitur siap pakai untuk developer.  
 Fitur mencakup AI, Islami, Random Images, Search Tools, Downloader, hingga informasi harian.  
 
+---
 
 ## Status Endpoint
 Cek status API dengan endpoint berikut:
@@ -96,6 +99,9 @@ Config (AI Only)
   }
 }
 
+
+---
+
 API Information
 
 Key	Value	Description
@@ -108,6 +114,8 @@ Version	UI	Versi saat ini dari API, bisa berubah sesuai update.
 
 
 
+---
+
 Links
 
 WhatsApp Channel
@@ -115,6 +123,10 @@ WhatsApp Channel
 YouTube @danz-dev
 
 
+
+---
+
 <p align="center">
   <b>© 2025 Hookrest API — by Danz-dev</b>
 </p>
+```
