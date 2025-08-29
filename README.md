@@ -13,18 +13,15 @@
   <img src="https://img.shields.io/badge/Version-UI-orange?style=for-the-badge" />
 </p>
 
----
-
 ## Overview
 Hookrest adalah REST API modern yang menyediakan berbagai fitur siap pakai untuk developer.  
 Fitur mencakup AI, Islami, Random Images, Search Tools, Downloader, hingga informasi harian.  
 
----
 
 ## Status Endpoint
 Cek status API dengan endpoint berikut:
 
-```http
+http
 GET /api/status
 
 Example Code
