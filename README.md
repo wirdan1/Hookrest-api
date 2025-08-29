@@ -90,7 +90,5 @@ Maintenance	Disabled	Status pemeliharaan: true = enable, false = disable.
 Version	UI	Versi saat ini dari API, bisa berubah sesuai update.
 
 
-<p align="center">
-  <b>© 2025 Hookrest API — by Danz-dev</b>
-</p>
+© 2025 Hookrest API — by Danz-dev
 ```
