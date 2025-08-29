@@ -199,6 +199,38 @@ body.no-scroll {
   transform: translateY(-2px);
 }
 
+.endpoints-counter {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: var(--transition);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.endpoints-counter i {
+  color: var(--primary-color);
+  font-size: 0.7rem;
+}
+
+.endpoints-counter:hover {
+  background: rgba(108, 92, 231, 0.1);
+  border-color: var(--primary-color);
+  color: var(--text-color);
+}
+
 .btn-authorize {
   background: var(--gradient);
   border: none;
@@ -386,6 +418,23 @@ body.no-scroll {
   font-size: 0.9rem;
   margin-left: 0.5rem;
   flex-shrink: 0;
+}
+
+.api-status-error {
+  position: absolute;
+  top: 10px;
+  right: 35px; /* Sesuaikan posisi agar tidak menimpa ikon chevron */
+  color: #ffc107; /* Warna kuning peringatan */
+  font-size: 1rem;
+  cursor: help;
+}
+
+.api-status-error .fa-exclamation-triangle {
+  transition: transform 0.2s ease-in-out;
+}
+
+.api-status-error:hover .fa-exclamation-triangle {
+  transform: scale(1.2);
 }
 
 /* Footer */
@@ -920,28 +969,6 @@ footer::before {
   .api-endpoint-card .fas.fa-chevron-down {
     margin-left: auto; /* Push to the right */
   }
-}
-
-/* Styling untuk ikon status error pada endpoint */
-.api-endpoint-card {
-  position: relative; /* Diperlukan agar positioning absolut bekerja */
-}
-
-.api-status-error {
-  position: absolute;
-  top: 10px;
-  right: 35px; /* Sesuaikan posisi agar tidak menimpa ikon chevron */
-  color: #ffc107; /* Warna kuning peringatan */
-  font-size: 1rem;
-  cursor: help;
-}
-
-.api-status-error .fa-exclamation-triangle {
-  transition: transform 0.2s ease-in-out;
-}
-
-.api-status-error:hover .fa-exclamation-triangle {
-  transform: scale(1.2);
 }
 
 /* Sedikit penyesuaian agar response body tidak terlalu kecil saat loading */
