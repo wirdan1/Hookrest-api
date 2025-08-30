@@ -320,8 +320,53 @@ document.addEventListener("DOMContentLoaded", async () => {
 function copyToClipboard(text, successMessage) {
   navigator.clipboard
     .writeText(text)
-    .then(() => alert(successMessage))
-    .catch((err) => console.error("Could not copy text: ", err))
+    .then(() => showToast(successMessage, "success"))
+    .catch((err) => {
+      console.error("Could not copy text: ", err)
+      showToast("Failed to copy to clipboard", "error")
+    })
+}
+
+function showToast(message, type = "success") {
+  // Create toast container if it doesn't exist
+  let toastContainer = document.querySelector(".toast-container")
+  if (!toastContainer) {
+    toastContainer = document.createElement("div")
+    toastContainer.className = "toast-container"
+    document.body.appendChild(toastContainer)
+  }
+
+  // Create toast element
+  const toast = document.createElement("div")
+  toast.className = `toast ${type}`
+
+  const icon = type === "success" ? "fas fa-check-circle" : "fas fa-exclamation-circle"
+
+  toast.innerHTML = `
+    <i class="${icon} toast-icon"></i>
+    <span class="toast-message">${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">
+      <i class="fas fa-times"></i>
+    </button>
+  `
+
+  // Add toast to container
+  toastContainer.appendChild(toast)
+
+  // Trigger show animation
+  setTimeout(() => {
+    toast.classList.add("show")
+  }, 10)
+
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove("show")
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.remove()
+      }
+    }, 400)
+  }, 3000)
 }
 
 function updateCurlAndRequestUrl(baseApiUrl, params) {
