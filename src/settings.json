@@ -99,6 +99,16 @@
           "name": "Youtube",
           "desc": "Download youtube format mp3/320p,720p,1080p",
           "path": "/api/ytdl?url=&format="
+        },
+        {
+          "name": "Ytmp3",
+          "desc": "Download youtube format mp3",
+          "path": "/download/mp3?url="
+        },
+        {
+          "name": "Ytmp4",
+          "desc": "Download youtube format mp4",
+          "path": "/download/mp4?url="
         }
       ]
     },
