@@ -63,7 +63,7 @@
         {
           "name": "Text2img",
           "desc": "Prompt to img style",
-          "path": "/tools/text2img?prompt=&model=&width=&height="
+          "path": "/tools/text2img?prompt="
         }
       ]
     },
