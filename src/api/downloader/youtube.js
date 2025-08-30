@@ -13,7 +13,6 @@ module.exports = function (app) {
             'user-agent': 'Postify/1.0.0'
         },
         formats: ['360', '480', '720', '1080', '1440', '2160', 'mp3', 'm4a', 'wav', 'aac', 'flac', 'opus', 'ogg'],
-
         silent: process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === 'production',
 
         isUrl: str => {
