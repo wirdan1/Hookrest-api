@@ -12,7 +12,6 @@ module.exports = function (app) {
             'referer': 'https://y2down.cc/',
             'user-agent': 'Postify/1.0.0'
         },
-        formats: ['360', '480', '720', '1080', '1440', '2160', 'mp3', 'm4a', 'wav', 'aac', 'flac', 'opus', 'ogg'],
         silent: process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === 'production',
 
         isUrl: str => {
@@ -39,15 +38,15 @@ module.exports = function (app) {
             const { data } = await axios.get(`${ytdown.api.base}${endpoint}`, {
                 params,
                 headers: ytdown.headers,
-                withCredentials: true
+                withCredentials: true,
+                responseType: 'json'
             });
             return data;
         },
 
         download: async (link, format) => {
-            if (!link) throw new Error("Linknya mana? 🗿");
+            if (!link) throw new Error("Parameter 'url' diperlukan 🗿");
             if (!ytdown.isUrl(link)) throw new Error("Link bukan YouTube 🗿");
-            if (!format || !ytdown.formats.includes(format)) throw new Error("Format tidak tersedia 🗿");
 
             const id = ytdown.youtube(link);
             if (!id) throw new Error("Gagal ekstrak ID YouTube 😂");
@@ -56,6 +55,7 @@ module.exports = function (app) {
                 format,
                 url: `https://www.youtube.com/watch?v=${id}`
             });
+
             return await ytdown.handler(response, format, id);
         },
 
@@ -71,12 +71,20 @@ module.exports = function (app) {
         checkProgress: async (id) => {
             let attempts = 0;
             while (attempts < 100) {
-                const { data } = await axios.get(ytdown.api.progress, {
-                    params: { id },
-                    headers: ytdown.headers,
-                    withCredentials: true
-                });
-                if (data.success && data.download_url) return { success: true, ...data };
+                try {
+                    const res = await axios.get(ytdown.api.progress, {
+                        params: { id },
+                        headers: ytdown.headers,
+                        withCredentials: true,
+                        responseType: 'json'
+                    });
+                    const data = res.data;
+
+                    if (data.success && data.download_url) return { success: true, ...data };
+                } catch (e) {
+                    // ignore error, retry
+                }
+
                 await new Promise(r => setTimeout(r, 1000));
                 attempts++;
             }
@@ -86,7 +94,7 @@ module.exports = function (app) {
         final: (init, pro, format, id) => ({
             success: true,
             title: init.title || "Unknown 🤷🏻",
-            type: ['360','480','720','1080','1440','2160'].includes(format) ? 'video' : 'audio',
+            type: format === 'mp3' ? 'audio' : 'video',
             format,
             thumbnail: init.info?.image || `https://img.youtube.com/vi/${id}/hqdefault.jpg`,
             download: pro.download_url || null,
@@ -113,7 +121,7 @@ module.exports = function (app) {
         if (!url) return res.status(400).json({ status: false, error: 'Parameter "url" diperlukan' });
 
         try {
-            const result = await ytdown.download(url, '720');
+            const result = await ytdown.download(url, '720'); // fix 720p
             res.json({ status: true, creator: 'Danz-dev', result });
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
