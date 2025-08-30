@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hookrest API's - Owners</title>
+  <link id="icon" rel="icon" href="https://qu.ax/rGkeW.jpg" type="image/png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+JP:wght@400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      overflow-x: hidden;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 15px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #58a6ff;
+      text-align: center;
+      animation: fadeDown 1s ease;
+    }
+    
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 30px 0 15px;
+      color: white;
+      text-align: center;
+      animation: fadeDown 1s ease;
+    }
+
+    p.desc {
+      max-width: 700px;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      animation: fadeUp 1s ease;
+      padding: 0 10px;
+    }
+
+    @keyframes fadeDown {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes fadeUp {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .owner {
+      background: rgba(255,255,255,0.05);
+      padding: 20px 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      text-align: center;
+      transform: translateY(30px);
+      opacity: 0;
+      animation: fadeUpCard 0.8s ease forwards;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .owner:nth-child(1) { animation-delay: 0.2s; }
+    .owner:nth-child(2) { animation-delay: 0.4s; }
+    .owner:nth-child(3) { animation-delay: 0.6s; }
+
+    @keyframes fadeUpCard {
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .owner-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      border: 3px solid #58a6ff;
+      transition: transform 0.3s ease;
+      object-fit: cover;
+      background: linear-gradient(45deg, #58a6ff, #2ea);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+
+    .owner:hover .owner-img {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .owner h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #e6edf3;
+      margin: 0;
+    }
+
+    .owner-role {
+      font-size: 0.9rem;
+      color: #8b949e;
+      margin-top: 5px;
+    }
+
+    /* Media queries untuk responsivitas */
+    @media (min-width: 768px) {
+      .content {
+        padding: 60px 20px;
+      }
+      
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+      
+      .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+      }
+      
+      p.desc {
+        font-size: 1.1rem;
+        margin-bottom: 50px;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        max-width: 1000px;
+      }
+      
+      .owner {
+        padding: 25px;
+        border-radius: 18px;
+      }
+      
+      .owner-img {
+        width: 100px;
+        height: 100px;
+        font-size: 2rem;
+      }
+      
+      .owner h2 {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+  <div class="content">
+    <h1>Hookrest API's</h1>
+    <p class="desc">
+      <strong>Bahasa Indonesia:</strong> Hookrest API's adalah layanan REST API modern yang membantu developer mengakses data secara cepat, aman, dan mudah. <br>
+      <strong>Bahasa Jepang:</strong> Hookrest API's は、開発者が迅速かつ安全にデータへアクセスできるモダンな REST API サービスです。
+    </p>
+
+    <h2 class="section-title">SUMBER</h2>
+    <div class="grid">
+      <div class="owner">
+        <div class="owner-img">D</div>
+        <h2>Danz-dev</h2>
+        <div class="owner-role">Owner Only</div>
+      </div>
+      <div class="owner">
+        <div class="owner-img">I</div>
+        <h2>Izumi</h2>
+        <div class="owner-role">Support/Scraper</div>
+      </div>
+      <div class="owner">
+        <div class="owner-img">R</div>
+        <h2>Ryyn</h2>
+        <div class="owner-role">Penyedia Base</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Optimasi partikel untuk mobile
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particlesArray = [];
+    let animationId;
+
+    function setupCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor(x, y, dx, dy, size) {
+        this.x = x;
+        this.y = y;
+        this.dx = dx;
+        this.dy = dy;
+        this.size = size;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+        ctx.fillStyle = '#58a6ff';
+        ctx.fill();
+      }
+
+      update() {
+        if (this.x > canvas.width || this.x < 0) this.dx = -this.dx;
+        if (this.y > canvas.height || this.y < 0) this.dy = -this.dy;
+        this.x += this.dx;
+        this.y += this.dy;
+        this.draw();
+      }
+    }
+
+    function init() {
+      particlesArray = [];
+      // Mengurangi jumlah partikel untuk perangkat mobile
+      let numberOfParticles = Math.min(
+        (canvas.height * canvas.width) / 15000, 
+        window.innerWidth < 768 ? 30 : 100
+      );
+      
+      for (let i = 0; i < numberOfParticles; i++) {
+        let size = window.innerWidth < 768 ? 1.5 : 2;
+        let x = Math.random() * (innerWidth - size * 2);
+        let y = Math.random() * (innerHeight - size * 2);
+        let dx = (Math.random() - 0.5) * (window.innerWidth < 768 ? 0.8 : 1);
+        let dy = (Math.random() - 0.5) * (window.innerWidth < 768 ? 0.8 : 1);
+        particlesArray.push(new Particle(x, y, dx, dy, size));
+      }
+    }
+
+    function connect() {
+      for (let a = 0; a < particlesArray.length; a++) {
+        for (let b = a; b < particlesArray.length; b++) {
+          let distance = ((particlesArray[a].x - particlesArray[b].x) ** 2) 
+                       + ((particlesArray[a].y - particlesArray[b].y) ** 2);
+          if (distance < (canvas.width/7) * (canvas.height/7)) {
+            ctx.strokeStyle = 'rgba(88,166,255,0.2)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      for (let i = 0; i < particlesArray.length; i++) {
+        particlesArray[i].update();
+      }
+      connect();
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function startAnimation() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      setupCanvas();
+      init();
+      animate();
+    }
+
+    // Inisialisasi
+    setupCanvas();
+    init();
+    animate();
+
+    // Event listeners
+    window.addEventListener('resize', function() {
+      startAnimation();
+    });
+
+    // Hentikan animasi saat tab tidak aktif untuk menghemat resources
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        cancelAnimationFrame(animationId);
+      } else {
+        animate();
+      }
+    });
+  </script>
+</body>
+</html>
