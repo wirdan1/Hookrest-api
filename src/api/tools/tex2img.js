@@ -2,15 +2,14 @@ const axios = require("axios");
 
 module.exports = function (app) {
     const pollinations = {
-        async generate(prompt, model = "flux", opts = {}) {
-            const {
-                width = 960,
-                height = 1280,
-                seed = Math.floor(Math.random() * 999999),
-                nologo = true,
-                enhance = true,
-                hidewatermark = true,
-            } = opts;
+        async generate(prompt) {
+            const model = "flux"; // default model
+            const width = 960;
+            const height = 1280;
+            const seed = Math.floor(Math.random() * 999999);
+            const nologo = true;
+            const enhance = true;
+            const hidewatermark = true;
 
             try {
                 const query = new URLSearchParams({
@@ -39,9 +38,9 @@ module.exports = function (app) {
         },
     };
 
-    // Endpoint API Pollinations
+    // Endpoint API Pollinations (hanya prompt bisa diubah)
     app.get("/tools/text2img", async (req, res) => {
-        const { prompt, model = "flux", width, height, seed } = req.query;
+        const { prompt } = req.query;
 
         if (!prompt) {
             return res.status(400).json({
@@ -51,11 +50,7 @@ module.exports = function (app) {
         }
 
         try {
-            const buffer = await pollinations.generate(prompt, model, {
-                width,
-                height,
-                seed,
-            });
+            const buffer = await pollinations.generate(prompt);
 
             res.set("Content-Type", "image/png");
             res.send(buffer);
