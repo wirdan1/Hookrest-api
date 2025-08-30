@@ -6,13 +6,13 @@ module.exports = function (app) {
         baseHeaders: {
             'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'origin': 'https://ssvid.net',
-            'referer': 'https://ssvid.net/youtube-to-mp3'
+            'referer': 'https://ssvid.net/youtube-to-mp3',
         },
-        validFormat: ['mp3', '360p', '720p', '1080p'],
 
-        validateFormat(format) {
-            if (!this.validFormat.includes(format)) {
-                throw new Error(`Invalid format! Available: ${this.validFormat.join(', ')}`);
+        validateFormat(userFormat) {
+            const validFormat = ['mp3', '360p', '720p', '1080p'];
+            if (!validFormat.includes(userFormat)) {
+                throw Error(`invalid format!. available formats: ${validFormat.join(', ')}`);
             }
         },
 
@@ -25,52 +25,54 @@ module.exports = function (app) {
             } else {
                 const allFormats = Object.entries(searchJson.links.mp4 || {});
                 let selectedFormat = userFormat;
+
                 const quality = allFormats
                     .map(v => v[1].q)
                     .filter(v => /\d+p/.test(v))
                     .map(v => parseInt(v))
                     .sort((a, b) => b - a)
                     .map(v => v + 'p');
+
                 if (!quality.includes(userFormat)) selectedFormat = quality[0];
                 const find = allFormats.find(v => v[1].q === selectedFormat);
                 result = find?.[1]?.k;
             }
 
-            if (!result) throw new Error(`${userFormat} tidak ada`);
+            if (!result) throw Error(`${userFormat} gak ada`);
             return result;
         },
 
         async hit(path, payload) {
             try {
-                const body = new URLSearchParams(payload);
-                const r = await fetch(`${this.baseUrl}${path}`, {
-                    method: 'POST',
-                    headers: this.baseHeaders,
-                    body
-                });
-
-                const text = await r.text();
-
-                if (!r.ok) {
-                    throw new Error(`${r.status} ${r.statusText}\n${text}`);
-                }
-
-                return JSON.parse(text);
+                const { data } = await axios.post(
+                    `${this.baseUrl}${path}`,
+                    new URLSearchParams(payload),
+                    { headers: this.baseHeaders }
+                );
+                return data;
             } catch (e) {
-                throw new Error(`${path}\n${e.message}`);
+                throw Error(`${path}\n${e.message}`);
             }
         },
 
-        async download(url, userFormat = 'mp3') {
+        async download(queryOrYtUrl, userFormat = 'mp3') {
             this.validateFormat(userFormat);
 
-            let search = await this.hit('/api/ajax/search', { query: url, cf_token: '', vt: 'youtube' });
+            let search = await this.hit('/api/ajax/search', {
+                query: queryOrYtUrl,
+                cf_token: '',
+                vt: 'youtube',
+            });
 
             if (search.p === 'search') {
-                if (!search?.items?.length) throw new Error(`Hasil pencarian ${url} tidak ada`);
+                if (!search?.items?.length) throw Error(`hasil pencarian ${queryOrYtUrl} tidak ada`);
                 const { v } = search.items[0];
                 const videoUrl = 'https://www.youtube.com/watch?v=' + v;
-                search = await this.hit('/api/ajax/search', { query: videoUrl, cf_token: '', vt: 'youtube' });
+                search = await this.hit('/api/ajax/search', {
+                    query: videoUrl,
+                    cf_token: '',
+                    vt: 'youtube',
+                });
             }
 
             const vid = search.vid;
@@ -82,58 +84,49 @@ module.exports = function (app) {
                 let convert2;
                 const limit = 5;
                 let attempt = 0;
+
                 do {
                     attempt++;
-                    convert2 = await this.hit('/api/convert/check?hl=en', { vid, b_id: convert.b_id });
+                    const { data } = await axios.post(
+                        `${this.baseUrl}/api/convert/check?hl=en`,
+                        new URLSearchParams({ vid, b_id: convert.b_id }),
+                        { headers: this.baseHeaders }
+                    );
+                    convert2 = data;
                     if (convert2.c_status === 'CONVERTED') return convert2;
                     await new Promise(r => setTimeout(r, 5000));
                 } while (attempt < limit && convert2.c_status === 'CONVERTING');
-                throw new Error('File belum siap / status belum diketahui');
+
+                throw Error('file belum siap / status belum diketahui');
             } else {
                 return convert;
             }
-        }
+        },
     };
 
-    // API Endpoint
+    // endpoint API
     app.get('/api/ytdl', async (req, res) => {
-        const { url, format } = req.query;
+        const { format, url } = req.query;
 
-        if (!url || !format) {
+        if (!format || !url) {
             return res.status(400).json({
                 status: false,
-                error: 'Parameter "url" dan "format" diperlukan. format: mp3/mp4'
+                error: 'Parameter "format" dan "url" diperlukan',
             });
         }
 
         try {
-            let selectedFormat = format === 'mp4' ? '720p' : 'mp3'; // default mp4 = 720p
-            if (format !== 'mp3' && format !== 'mp4') {
-                return res.status(400).json({
-                    status: false,
-                    error: 'Format harus "mp3" atau "mp4".'
-                });
-            }
-
-            const result = await yt.download(url, selectedFormat);
-
+            const result = await yt.download(url, format);
             res.json({
                 status: true,
                 creator: 'Danz-dev',
-                format: format,
-                result: {
-                    title: result.title || null,
-                    dlink: result.dlink,
-                    filesize: result.fsize || null,
-                    ext: result.ext || null,
-                }
+                result,
             });
         } catch (err) {
             console.error(err);
             res.status(500).json({
                 status: false,
-                error: 'Gagal mengambil data',
-                message: err.message
+                error: err.message,
             });
         }
     });
