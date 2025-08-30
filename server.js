@@ -2,10 +2,10 @@ const express = require("express");
 const path = require("path");
 const app = express();
 
-// serve semua file di folder api-page
-app.use(express.static(path.join(__dirname, "api-page")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "api-page", "index.html"));
+});
 
-// route khusus /owner
 app.get("/owner", (req, res) => {
   res.sendFile(path.join(__dirname, "api-page", "author.html"));
 });
