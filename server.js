@@ -2,15 +2,10 @@ const express = require("express");
 const path = require("path");
 const app = express();
 
-// serve static file (misalnya index.html di folder public)
-app.use(express.static(path.join(__dirname, "public")));
+// serve semua file di folder api-page
+app.use(express.static(path.join(__dirname, "api-page")));
 
-// contoh endpoint API biasa
-app.get("/api/test", (req, res) => {
-  res.json({ message: "API jalan!" });
-});
-
-// endpoint untuk menampilkan halaman author
+// route khusus /owner
 app.get("/owner", (req, res) => {
   res.sendFile(path.join(__dirname, "api-page", "author.html"));
 });
