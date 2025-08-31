@@ -1,19 +1,15 @@
 const axios = require("axios");
+const fs = require("fs");
 const FormData = require("form-data");
 
-const Keyy = "-mY6Nh3EWwV1JihHxpZEGV1hTxe2M_zDyT0i8WNeDV4buW9l02UteD6ZZrlAIO0qf6NhYA";
+module.exports = function (app) {
+  const Keyy = "-mY6Nh3EWwV1JihHxpZEGV1hTxe2M_zDyT0i8WNeDV4buW9l02UteD6ZZrlAIO0qf6NhYA";
 
-async function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+  async function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
-async function processImageFromUrl(imageUrl) {
-  try {
-    // Download image dari URL
-    const response = await axios.get(imageUrl, { responseType: "arraybuffer" });
-    const buffer = Buffer.from(response.data);
-
-    // Upload ke API
+  async function processImageBuffer(buffer) {
     const form = new FormData();
     form.append("file", buffer, { filename: "upload.jpg" });
 
@@ -66,22 +62,44 @@ async function processImageFromUrl(imageUrl) {
     }
 
     throw new Error("Gagal dapat hasil setelah banyak percobaan.");
-  } catch (err) {
-    throw err;
   }
-}
 
-module.exports = function (app) {
+  async function processImageFromUrl(url) {
+    const imgRes = await axios.get(url, { responseType: "arraybuffer" });
+    return processImageBuffer(Buffer.from(imgRes.data));
+  }
+
+  // endpoint API
   app.get("/api/enhance", async (req, res) => {
-    const { url } = req.query;
-    if (!url) return res.status(400).json({ status: false, error: 'Parameter "url" diperlukan' });
+    const { url, json } = req.query;
+
+    if (!url) {
+      return res
+        .status(400)
+        .json({ status: false, error: 'Parameter "url" diperlukan' });
+    }
 
     try {
       const buffer = await processImageFromUrl(url);
+
+      if (json === "true") {
+        // kirim base64 JSON
+        const base64 = buffer.toString("base64");
+        return res.json({
+          status: true,
+          creator: "Danz-dev",
+          image: `data:image/jpeg;base64,${base64}`,
+        });
+      }
+
+      // default kirim langsung image
       res.setHeader("Content-Type", "image/jpeg");
       res.send(buffer);
     } catch (err) {
-      res.status(500).json({ status: false, error: err.message });
+      res.status(500).json({
+        status: false,
+        error: err.message,
+      });
     }
   });
 };
