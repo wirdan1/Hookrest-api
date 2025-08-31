@@ -3,7 +3,8 @@ const fs = require("fs");
 const FormData = require("form-data");
 
 module.exports = function (app) {
-  const Keyy = "-mY6Nh3EWwV1JihHxpZEGV1hTxe2M_zDyT0i8WNeDV4buW9l02UteD6ZZrlAIO0qf6NhYA";
+  const Keyy =
+    "-mY6Nh3EWwV1JihHxpZEGV1hTxe2M_zDyT0i8WNeDV4buW9l02UteD6ZZrlAIO0qf6NhYA";
 
   async function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -71,7 +72,7 @@ module.exports = function (app) {
 
   // endpoint API
   app.get("/api/enhance", async (req, res) => {
-    const { url, json } = req.query;
+    const { url } = req.query;
 
     if (!url) {
       return res
@@ -82,19 +83,13 @@ module.exports = function (app) {
     try {
       const buffer = await processImageFromUrl(url);
 
-      if (json === "true") {
-        // kirim base64 JSON
-        const base64 = buffer.toString("base64");
-        return res.json({
-          status: true,
-          creator: "Danz-dev",
-          image: `data:image/jpeg;base64,${base64}`,
-        });
-      }
-
-      // default kirim langsung image
-      res.setHeader("Content-Type", "image/jpeg");
-      res.send(buffer);
+      // selalu kirim JSON base64 agar client bisa pakai res.json()
+      const base64 = buffer.toString("base64");
+      res.json({
+        status: true,
+        creator: "Danz-dev",
+        image: `data:image/jpeg;base64,${base64}`,
+      });
     } catch (err) {
       res.status(500).json({
         status: false,
