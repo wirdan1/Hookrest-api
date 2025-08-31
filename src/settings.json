@@ -64,6 +64,11 @@
           "name": "Text2img",
           "desc": "Prompt to img style",
           "path": "/tools/text2img?prompt="
+        },
+        {
+          "name": "Hd",
+          "desc": "Enhance image",
+          "path": "/api/enhance?url="
         }
       ]
     },
