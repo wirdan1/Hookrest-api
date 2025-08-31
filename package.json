@@ -21,6 +21,7 @@
     "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
     "express": "^4.19.2",
+    "fake-useragent": "^1.0.1",
     "form-data": "^4.0.4",
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
