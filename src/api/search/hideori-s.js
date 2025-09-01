@@ -8,6 +8,7 @@ module.exports = function (app) {
       "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
     Referer: "https://hidoristream.com/",
   };
+  const creatorName = "Danz-dev";
 
   async function searchAnime(query) {
     const searchUrl = `${baseUrl}/?s=${encodeURIComponent(query)}`;
@@ -37,14 +38,19 @@ module.exports = function (app) {
 
   app.get("/api/hidori/search", async (req, res) => {
     const { query } = req.query;
-    if (!query)
-      return res.status(400).json({ status: false, error: "Query diperlukan" });
+    if (!query) {
+      return res
+        .status(400)
+        .json({ status: false, creator: creatorName, results: [], error: "Query diperlukan" });
+    }
 
     try {
       const data = await searchAnime(query);
-      res.json({ status: true, results: data });
+      res.json({ status: true, creator: creatorName, results: data });
     } catch (err) {
-      res.status(500).json({ status: false, error: err.message });
+      res
+        .status(500)
+        .json({ status: false, creator: creatorName, results: [], error: err.message });
     }
   });
 };
