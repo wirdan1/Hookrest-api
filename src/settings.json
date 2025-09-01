@@ -1,6 +1,6 @@
 {
   "name": "Hookrest Api's",
-  "version": "Hookrest UI",
+  "version": "v2",
   "description": "Simple rest api by Hookrest.",
   "header": {
     "status": "Online!",
@@ -64,6 +64,11 @@
           "name": "Text2img",
           "desc": "Prompt to img style",
           "path": "/tools/text2img?prompt="
+        },
+        {
+          "name": "Ssweb",
+          "desc": "Screenshot website",
+          "path": "/tools/screenshot?url="
         }
       ]
     },
