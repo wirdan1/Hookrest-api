@@ -64,11 +64,6 @@
           "name": "Text2img",
           "desc": "Prompt to img style",
           "path": "/tools/text2img?prompt="
-        },
-        {
-          "name": "Remini",
-          "desc": "Enhance image by remini",
-          "path": "/tools/remini?url="
         }
       ]
     },
