@@ -75,7 +75,9 @@ module.exports = function (app) {
       const appId = createRes.body.appId;
 
       const uploadedIcon = await this.uploadFile(iconUrl, appId);
-      const uploadedSplash = await this.uploadFile(splashUrl, appId);
+      const uploadedSplash = splashUrl
+        ? await this.uploadFile(splashUrl, appId)
+        : uploadedIcon;
 
       const buildConfig = {
         appId,
@@ -92,10 +94,10 @@ module.exports = function (app) {
 
       let status;
       let attempts = 0;
-      const maxAttempts = 30;
+      const maxAttempts = 15; // maksimal 15 kali (30 detik)
 
       do {
-        await new Promise((r) => setTimeout(r, 10000));
+        await new Promise((r) => setTimeout(r, 2000)); // tunggu 2 detik
         status = await this.checkStatus(appId);
         attempts++;
         if (status.body.status === "success") break;
@@ -111,10 +113,11 @@ module.exports = function (app) {
 
   app.get("/tools/appmaker", async (req, res) => {
     const { url, email, appName, iconUrl, splashUrl } = req.query;
-    if (!url || !email || !appName || !iconUrl || !splashUrl) {
+    if (!url || !email || !appName || !iconUrl) {
       return res.status(400).json({
         status: false,
-        error: "Parameter url, email, appName, iconUrl, splashUrl wajib diisi",
+        error:
+          "Parameter url, email, appName, iconUrl wajib diisi (splashUrl opsional)",
       });
     }
 
