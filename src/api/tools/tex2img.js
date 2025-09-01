@@ -1,58 +1,52 @@
 const axios = require("axios");
 
 module.exports = function (app) {
-    const pollinations = {
-        async generate(prompt) {
-            const model = "flux"; // default model
-            const width = 960;
-            const height = 1280;
-            const seed = Math.floor(Math.random() * 999999);
-            const nologo = true;
-            const enhance = true;
-            const hidewatermark = true;
+    const service = {
+        async screenshot(targetUrl) {
+            const res = await axios.post(
+                "https://gcp.imagy.app/screenshot/createscreenshot",
+                {
+                    url: targetUrl,
+                    browserWidth: 1280,
+                    browserHeight: 720,
+                    fullPage: true,
+                    deviceScaleFactor: 1,
+                    format: "png"
+                },
+                {
+                    headers: {
+                        accept: "*/*",
+                        "content-type": "application/json",
+                        origin: "https://imagy.app",
+                        referer: "https://imagy.app/",
+                        "user-agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"
+                    },
+                    validateStatus: () => true
+                }
+            );
 
-            try {
-                const query = new URLSearchParams({
-                    model,
-                    width,
-                    height,
-                    seed,
-                });
-
-                if (nologo) query.set("nologo", "true");
-                if (enhance) query.set("enhance", "true");
-                if (hidewatermark) query.set("hidewatermark", "true");
-
-                const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(
-                    prompt
-                )}?${query.toString()}`;
-
-                const res = await axios.get(url, {
-                    responseType: "arraybuffer",
-                });
-
-                return Buffer.from(res.data, "binary");
-            } catch (err) {
-                throw new Error("Gagal generate image: " + err.message);
+            if (res.status !== 200) {
+                throw new Error(
+                    `API error ${res.status}: ${JSON.stringify(res.data)}`
+                );
             }
-        },
+
+            if (!res.data?.fileUrl) throw new Error("Gagal ambil screenshot URL");
+
+            const imgRes = await axios.get(res.data.fileUrl, { responseType: "arraybuffer" });
+            return Buffer.from(imgRes.data);
+        }
     };
 
-    // Endpoint API Pollinations (hanya prompt bisa diubah)
-    app.get("/tools/text2img", async (req, res) => {
-        const { prompt } = req.query;
-
-        if (!prompt) {
-            return res.status(400).json({
-                status: false,
-                error: 'Parameter "prompt" wajib diisi',
-            });
+    app.get("/tools/screenshot", async (req, res) => {
+        const { url } = req.query;
+        if (!url) {
+            return res.status(400).json({ status: false, error: 'Parameter "url" wajib diisi' });
         }
 
         try {
-            const buffer = await pollinations.generate(prompt);
-
-            res.set("Content-Type", "image/png");
+            const buffer = await service.screenshot(url);
+            res.setHeader("Content-Type", "image/png");
             res.send(buffer);
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
