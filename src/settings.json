@@ -68,7 +68,7 @@
         {
           "name": "Web2apk",
           "desc": "Convert your website to apk",
-          "path": "/tools/appmaker?url=&email=&appName=&iconPath=&splashPath="
+          "path": "/tools/appmaker?url=&email=&appName=&iconUrl=&splashUrl="
         },
         {
           "name": "Ssweb",
