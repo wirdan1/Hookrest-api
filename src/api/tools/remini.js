@@ -15,6 +15,7 @@ module.exports = function (app) {
                     responseType: "arraybuffer", 
                     maxRedirects: 5 
                 });
+
                 const form = new FormData();
                 form.append("file", Buffer.from(imgRes.data), { filename: "image.jpg" });
 
@@ -81,8 +82,8 @@ module.exports = function (app) {
 
         try {
             const buffer = await service.processImage(url);
-            res.set("Content-Type", "image/png");
-            res.send(buffer);
+            res.setHeader("Content-Type", "image/png");
+            res.end(buffer);
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
         }
