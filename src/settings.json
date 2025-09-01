@@ -66,6 +66,11 @@
           "path": "/tools/text2img?prompt="
         },
         {
+          "name": "Web2apk",
+          "desc": "Convert your website to apk",
+          "path": "/tools/appmaker?url=&email=&appName=&iconPath=&splashPath="
+        },
+        {
           "name": "Ssweb",
           "desc": "Screenshot website",
           "path": "/tools/screenshot?url="
