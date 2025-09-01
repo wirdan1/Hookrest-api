@@ -36,6 +36,11 @@
           "path": "/ai/chatgpt?question="
         },
         {
+          "name": "Chatbot",
+          "desc": "Talk with Chatbot ai",
+          "path": "/api/ai?question="
+        },
+        {
           "name": "Kimi",
           "desc": "Talk with Kimi-ai",
           "path": "/ai/kimi?q="
