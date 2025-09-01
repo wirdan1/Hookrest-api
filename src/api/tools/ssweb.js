@@ -11,7 +11,7 @@ module.exports = function (app) {
                     browserHeight: 720,
                     fullPage: true,
                     deviceScaleFactor: 1,
-                    format: "png"
+                    format: "jpeg"
                 },
                 {
                     headers: {
@@ -39,7 +39,7 @@ module.exports = function (app) {
 
         try {
             const buffer = await service.screenshot(url);
-            res.setHeader("Content-Type", "image/png");
+            res.setHeader("Content-Type", "image/jpeg");
             res.send(buffer);
         } catch (err) {
             res.status(500).json({ status: false, error: err.message });
