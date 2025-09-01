@@ -134,6 +134,11 @@
           "name": "Ytmp4",
           "desc": "Download youtube format mp4",
           "path": "/api/ytmp4?url="
+        },
+        {
+          "name": "Play",
+          "desc": "Play youtube format mp3",
+          "path": "/dl/yt/play?query="
         }
       ]
     },
