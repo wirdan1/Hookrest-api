@@ -11,8 +11,9 @@ module.exports = function (app) {
     const service = {
         async processImage(imageUrl) {
             try {
+                const imgRes = await axios.get(imageUrl, { responseType: "arraybuffer" });
                 const form = new FormData();
-                form.append("url", imageUrl);
+                form.append("file", Buffer.from(imgRes.data), { filename: "image.jpg" });
 
                 const uploadRes = await axios.post(
                     "https://reaimagine.zipoapps.com/enhance/autoenhance/",
