@@ -8,10 +8,14 @@ module.exports = function (app) {
       "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
     Referer: "https://hidoristream.com/",
   };
-  const creatorName = "Danz-dev";
 
+  // Fungsi search anime
   async function searchAnime(query) {
+    if (!query) return [];
+
     const searchUrl = `${baseUrl}/?s=${encodeURIComponent(query)}`;
+    console.log("Fetching URL:", searchUrl); // Debug URL
+
     const response = await axios.get(searchUrl, { headers });
     const $ = cheerio.load(response.data);
 
@@ -33,24 +37,24 @@ module.exports = function (app) {
         isHot: $item.find(".hotbadge").length > 0,
       });
     });
+
     return results;
   }
 
+  // Endpoint REST API
   app.get("/api/hidori/search", async (req, res) => {
-    const { query } = req.query;
-    if (!query) {
+    const query = req.query.query; // pastikan frontend kirim ?query=
+    if (!query)
       return res
         .status(400)
-        .json({ status: false, creator: creatorName, results: [], error: "Query diperlukan" });
-    }
+        .json({ status: false, creator: "Danz-dev", error: "Query diperlukan" });
 
     try {
       const data = await searchAnime(query);
-      res.json({ status: true, creator: creatorName, results: data });
+      res.json({ status: true, creator: "Danz-dev", results: data });
     } catch (err) {
-      res
-        .status(500)
-        .json({ status: false, creator: creatorName, results: [], error: err.message });
+      console.error("Error fetching search:", err.message);
+      res.status(500).json({ status: false, creator: "Danz-dev", error: err.message });
     }
   });
 };
