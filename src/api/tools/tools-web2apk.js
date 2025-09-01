@@ -42,7 +42,7 @@ module.exports = function (app) {
         form,
         { headers: { ...this.defaultHeaders, ...form.getHeaders() } }
       );
-      return res.data;
+      return res.data.cloudStoragePublicUrl;
     },
 
     async buildApp(config) {
@@ -74,18 +74,18 @@ module.exports = function (app) {
       const createRes = await this.createApp(url, email);
       const appId = createRes.body.appId;
 
-      await this.uploadFile(iconUrl, appId);
-      await this.uploadFile(splashUrl, appId);
+      const uploadedIcon = await this.uploadFile(iconUrl, appId);
+      const uploadedSplash = await this.uploadFile(splashUrl, appId);
 
       const buildConfig = {
         appId,
-        appIcon: iconUrl,
+        appIcon: uploadedIcon,
         appName,
         isPaymentInProgress: false,
         enableShowToolBar: true,
         toolbarColor: "#03A9F4",
         toolbarTitleColor: "#FFFFFF",
-        splashIcon: splashUrl,
+        splashIcon: uploadedSplash,
       };
 
       await this.buildApp(buildConfig);
@@ -99,8 +99,9 @@ module.exports = function (app) {
         status = await this.checkStatus(appId);
         attempts++;
         if (status.body.status === "success") break;
-        if (status.body.status === "failed")
+        if (status.body.status === "failed") {
           throw new Error("Build failed");
+        }
       } while (attempts < maxAttempts);
 
       const downloadInfo = await this.getDownloadUrl(appId);
