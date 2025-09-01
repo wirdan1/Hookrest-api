@@ -11,7 +11,10 @@ module.exports = function (app) {
     const service = {
         async processImage(imageUrl) {
             try {
-                const imgRes = await axios.get(imageUrl, { responseType: "arraybuffer" });
+                const imgRes = await axios.get(imageUrl, { 
+                    responseType: "arraybuffer", 
+                    maxRedirects: 5 
+                });
                 const form = new FormData();
                 form.append("file", Buffer.from(imgRes.data), { filename: "image.jpg" });
 
