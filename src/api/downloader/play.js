@@ -94,12 +94,10 @@ module.exports = function(app) {
                 creator: "Danz-dev",
                 result: {
                     video: {
-                        title: video.title,
                         url: video.url,
                         description: video.description,
                         duration: video.timestamp,
                         views: video.views,
-                        thumbnail: video.thumbnail
                     },
                     mp3
                 }
