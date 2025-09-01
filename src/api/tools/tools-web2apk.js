@@ -22,51 +22,89 @@ module.exports = function (app) {
       priority: "u=1, i",
     },
 
-    createApp: async (url, email) => {
-      const data = JSON.stringify({ url, email });
+    async createApp(url, email) {
       const res = await axios.post(
         "https://standalone-app-api.appmaker.xyz/webapp/build",
-        data,
-        { headers: { ...appmaker.defaultHeaders, "Content-Type": "application/json" } }
+        { url, email },
+        { headers: this.defaultHeaders }
       );
       return res.data;
     },
 
-    uploadFile: async (fileUrl, appId) => {
+    async uploadFile(fileUrl, appId) {
+      const fileRes = await axios.get(fileUrl, { responseType: "stream" });
       const form = new FormData();
-      form.append("file", fileUrl);
+      form.append("file", fileRes.data, { filename: "upload.png" });
       form.append("id", appId);
+
       const res = await axios.post(
         "https://standalone-app-api.appmaker.xyz/webapp/build/file-upload",
         form,
-        { headers: { ...appmaker.defaultHeaders, ...form.getHeaders() } }
+        { headers: { ...this.defaultHeaders, ...form.getHeaders() } }
       );
       return res.data;
     },
 
-    buildApp: async (config) => {
+    async buildApp(config) {
       const res = await axios.post(
         "https://standalone-app-api.appmaker.xyz/webapp/build/build",
-        JSON.stringify(config),
-        { headers: { ...appmaker.defaultHeaders, "Content-Type": "application/json" } }
+        config,
+        { headers: this.defaultHeaders }
       );
       return res.data;
     },
 
-    checkStatus: async (appId) => {
+    async checkStatus(appId) {
       const res = await axios.get(
         `https://standalone-app-api.appmaker.xyz/webapp/build/status?appId=${appId}`,
-        { headers: appmaker.defaultHeaders }
+        { headers: this.defaultHeaders }
       );
       return res.data;
     },
 
-    getDownloadUrl: async (appId) => {
+    async getDownloadUrl(appId) {
       const res = await axios.get(
         `https://standalone-app-api.appmaker.xyz/webapp/complete/download?appId=${appId}`,
-        { headers: appmaker.defaultHeaders }
+        { headers: this.defaultHeaders }
       );
       return res.data;
+    },
+
+    async create(url, email, appName, iconUrl, splashUrl) {
+      const createRes = await this.createApp(url, email);
+      const appId = createRes.body.appId;
+
+      await this.uploadFile(iconUrl, appId);
+      await this.uploadFile(splashUrl, appId);
+
+      const buildConfig = {
+        appId,
+        appIcon: iconUrl,
+        appName,
+        isPaymentInProgress: false,
+        enableShowToolBar: true,
+        toolbarColor: "#03A9F4",
+        toolbarTitleColor: "#FFFFFF",
+        splashIcon: splashUrl,
+      };
+
+      await this.buildApp(buildConfig);
+
+      let status;
+      let attempts = 0;
+      const maxAttempts = 30;
+
+      do {
+        await new Promise((r) => setTimeout(r, 10000));
+        status = await this.checkStatus(appId);
+        attempts++;
+        if (status.body.status === "success") break;
+        if (status.body.status === "failed")
+          throw new Error("Build failed");
+      } while (attempts < maxAttempts);
+
+      const downloadInfo = await this.getDownloadUrl(appId);
+      return downloadInfo.body.buildFile;
     },
   };
 
@@ -75,54 +113,22 @@ module.exports = function (app) {
     if (!url || !email || !appName || !iconUrl || !splashUrl) {
       return res.status(400).json({
         status: false,
-        creator: "Danz-dev",
         error: "Parameter url, email, appName, iconUrl, splashUrl wajib diisi",
       });
     }
 
     try {
-      const createRes = await appmaker.createApp(url, email);
-      const appId = createRes.body.appId;
-
-      const iconUpload = await appmaker.uploadFile(iconUrl, appId);
-      const splashUpload = await appmaker.uploadFile(splashUrl, appId);
-
-      const buildConfig = {
-        appId,
-        appIcon: iconUpload.cloudStoragePublicUrl,
+      const downloadUrl = await appmaker.create(
+        url,
+        email,
         appName,
-        splashIcon: splashUpload.cloudStoragePublicUrl,
-        enableShowToolBar: true,
-        toolbarColor: "#03A9F4",
-        toolbarTitleColor: "#FFFFFF",
-      };
-
-      await appmaker.buildApp(buildConfig);
-
-      let status, attempts = 0;
-      while (attempts < 30) {
-        await new Promise((r) => setTimeout(r, 10000));
-        status = await appmaker.checkStatus(appId);
-        if (status.body.status === "success") break;
-        if (status.body.status === "failed") throw new Error("App build failed");
-        attempts++;
-      }
-
-      if (status.body.status !== "success") {
-        throw new Error("Build timeout - exceeded maximum wait time");
-      }
-
-      const downloadInfo = await appmaker.getDownloadUrl(appId);
-
+        iconUrl,
+        splashUrl
+      );
       res.json({
         status: true,
         creator: "Danz-dev",
-        appId,
-        appName: downloadInfo.body.appName,
-        packageName: downloadInfo.body.package_name,
-        downloadUrl: downloadInfo.body.buildFile,
-        aabFile: downloadInfo.body.aabFile,
-        icon: downloadInfo.body.appIcon,
+        downloadUrl,
       });
     } catch (err) {
       res.status(500).json({
