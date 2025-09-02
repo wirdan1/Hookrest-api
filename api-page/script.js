@@ -422,24 +422,23 @@ async function handleApiRequest(apiUrl, apiName) {
 
     const contentType = response.headers.get("Content-Type") || ""
 
-    const responseArrayBuffer = await response.arrayBuffer()
-    const responseBlob = new Blob([responseArrayBuffer], { type: contentType })
+    const responseBlob = await response.blob()
 
     // Handle error responses
     if (!response.ok) {
       try {
-        // Create a new blob for text reading to avoid stream issues
-        const textBlob = new Blob([responseArrayBuffer], { type: "text/plain" })
-        const textContent = await blobToText(textBlob)
-
+        // Try to parse as JSON first
+        const textContent = await blobToText(responseBlob)
+        const errorData = JSON.parse(textContent)
+        apiResponseBody.textContent = JSON.stringify(errorData, null, 2)
+      } catch (jsonError) {
+        // If JSON parsing fails, display as text
         try {
-          const errorData = JSON.parse(textContent)
-          apiResponseBody.textContent = JSON.stringify(errorData, null, 2)
-        } catch (jsonError) {
+          const textContent = await blobToText(responseBlob)
           apiResponseBody.textContent = textContent
+        } catch (textError) {
+          apiResponseBody.textContent = `Error reading response: ${textError.message}`
         }
-      } catch (textError) {
-        apiResponseBody.textContent = `Error reading response: ${textError.message}`
       }
       return
     }
@@ -487,19 +486,18 @@ async function handleApiRequest(apiUrl, apiName) {
       }
       // Handle JSON responses
       else if (contentType.includes("application/json") || contentType.includes("text/json")) {
-        const textBlob = new Blob([responseArrayBuffer], { type: "text/plain" })
-        const textContent = await blobToText(textBlob)
+        const textContent = await blobToText(responseBlob)
         try {
           const jsonData = JSON.parse(textContent)
           apiResponseBody.textContent = JSON.stringify(jsonData, null, 2)
         } catch (jsonError) {
+          // If JSON parsing fails, display as text
           apiResponseBody.textContent = textContent
         }
       }
       // Handle text responses (HTML, plain text, XML, etc.)
       else if (contentType.startsWith("text/")) {
-        const textBlob = new Blob([responseArrayBuffer], { type: "text/plain" })
-        const textContent = await blobToText(textBlob)
+        const textContent = await blobToText(responseBlob)
         apiResponseBody.textContent = textContent
       }
       // Handle PDF files
@@ -534,14 +532,15 @@ async function handleApiRequest(apiUrl, apiName) {
       // Fallback for unknown content types
       else {
         try {
-          const textBlob = new Blob([responseArrayBuffer], { type: "text/plain" })
-          const textContent = await blobToText(textBlob)
+          // Try to read as text first
+          const textContent = await blobToText(responseBlob)
           if (textContent.trim()) {
             apiResponseBody.textContent = textContent
           } else {
             throw new Error("Empty content")
           }
         } catch (textError) {
+          // If text reading fails, show file info
           apiResponseBody.innerHTML = `
             <div class="media-container">
               <div class="binary-file-info">
