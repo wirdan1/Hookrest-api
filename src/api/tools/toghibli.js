@@ -64,21 +64,23 @@ module.exports = function (app) {
       try {
         const tokenData = await ghibli.getToken();
         if (!tokenData.success) return tokenData;
-        const { token } = tokenData.result;
+        const { token, encryptionKey } = tokenData.result;
 
-        // 🔥 Download image dari URL
+        // download image ke buffer
         const imgRes = await axios.get(imageUrl, { responseType: 'arraybuffer' });
         const buffer = Buffer.from(imgRes.data, 'binary');
 
-        // 🔥 Upload sebagai file
         const form = new FormData();
         form.append('studio', ghibli.defaultStudio);
         form.append('file', buffer, {
           filename: 'image.jpg',
           contentType: 'image/jpeg',
         });
+        // tambahkan encryptionKey & uuid
+        form.append('encryptionKey', encryptionKey);
+        form.append('uuid', '1212');
 
-        const url = `${ghibli.api.base}${ghibli.api.endpoints.ghibli('/edit-theme')}?uuid=1212`;
+        const url = `${ghibli.api.base}${ghibli.api.endpoints.ghibli('/edit-theme')}`;
         const res = await axios.post(url, form, {
           headers: { ...form.getHeaders(), ...ghibli.headers, authorization: `Bearer ${token}` },
           validateStatus: () => true,
@@ -87,7 +89,11 @@ module.exports = function (app) {
         });
 
         if (res.status !== 200 || res.data?.status?.code !== '200')
-          return { success: false, code: res.status || 500, result: { error: res.data?.status?.message || res.data?.message || `${res.status}` } };
+          return {
+            success: false,
+            code: res.status || 500,
+            result: { error: res.data?.status?.message || res.data?.message || `${res.status}` },
+          };
 
         const { imageId, imageUrl: resultUrl, imageOriginalLink } = res.data.data;
         return { success: true, code: 200, result: { imageId, imageUrl: resultUrl, imageOriginalLink } };
@@ -97,7 +103,7 @@ module.exports = function (app) {
     },
   };
 
-  // Endpoint
+  // endpoint
   app.get('/api/ghibli', async (req, res) => {
     const { imageUrl } = req.query;
     if (!imageUrl) return res.status(400).json({ status: false, error: 'Parameter "imageUrl" diperlukan' });
