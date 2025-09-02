@@ -1,7 +1,5 @@
 const axios = require("axios");
-const fs = require("fs");
 const FormData = require("form-data");
-const path = require("path");
 
 const Keyy =
   "-mY6Nh3EWwV1JihHxpZEGV1hTxe2M_zDyT0i8WNeDV4buW9l02UteD6ZZrlAIO0qf6NhYA";
@@ -11,10 +9,10 @@ module.exports = function (app) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  async function processImage(inputPath) {
+  async function processImage(buffer) {
     try {
       const form = new FormData();
-      form.append("file", fs.createReadStream(inputPath));
+      form.append("file", buffer, { filename: "image.jpg" });
 
       const uploadRes = await axios.post(
         "https://reaimagine.zipoapps.com/enhance/autoenhance/",
@@ -80,17 +78,10 @@ module.exports = function (app) {
     }
 
     try {
-      // unduh gambar sementara
-      const tempPath = path.join(__dirname, "temp_upload.jpg");
-      const img = await axios.get(imageUrl, {
-        responseType: "arraybuffer",
-      });
-      fs.writeFileSync(tempPath, img.data);
+      // download gambar ke buffer
+      const img = await axios.get(imageUrl, { responseType: "arraybuffer" });
 
-      const resultBuffer = await processImage(tempPath);
-
-      // hapus file sementara
-      fs.unlinkSync(tempPath);
+      const resultBuffer = await processImage(Buffer.from(img.data));
 
       res.json({
         status: true,
@@ -102,6 +93,7 @@ module.exports = function (app) {
     } catch (err) {
       res.status(500).json({
         status: false,
+        creator: "Danz-dev",
         error: err.message || "Terjadi kesalahan",
       });
     }
