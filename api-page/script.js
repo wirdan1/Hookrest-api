@@ -2,6 +2,13 @@ const BASEURL = window.location.origin
 const particlesJS = window.particlesJS // Declare particlesJS variable
 const bootstrap = window.bootstrap // Declare bootstrap variable
 
+function updateCurlAndRequestUrl(baseApiUrl, currentParams) {
+  const curlCommand = `curl -X GET "${baseApiUrl}"${Object.keys(currentParams).length > 0 ? `?${new URLSearchParams(currentParams).toString()}` : ""}`
+  const requestUrl = `${baseApiUrl}${Object.keys(currentParams).length > 0 ? `?${new URLSearchParams(currentParams).toString()}` : ""}`
+  document.getElementById("apiCurlContent").textContent = curlCommand
+  document.getElementById("apiRequestUrlContent").textContent = requestUrl
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const loadingScreen = document.getElementById("loadingScreen")
   const body = document.body
@@ -369,21 +376,21 @@ function showToast(message, type = "success") {
   }, 3000)
 }
 
-function updateCurlAndRequestUrl(baseApiUrl, params) {
-  const newParams = new URLSearchParams(params)
-  const fullRequestUrl = `${baseApiUrl}${newParams.toString() ? "?" + newParams.toString() : ""}`
-  document.getElementById("apiRequestUrlContent").textContent = fullRequestUrl
-  document.getElementById("apiCurlContent").textContent =
-    `curl -X 'GET' \\\n  '${fullRequestUrl}' \\\n  -H 'accept: */*'`
-}
-
-// Fungsi untuk mengubah Blob menjadi Base64
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onloadend = () => resolve(reader.result)
     reader.onerror = reject
     reader.readAsDataURL(blob)
+  })
+}
+
+function blobToText(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsText(blob)
   })
 }
 
@@ -401,10 +408,13 @@ async function handleApiRequest(apiUrl, apiName) {
 
   try {
     const response = await fetch(apiUrl)
+
+    // Extract headers
     const headers = {}
     response.headers.forEach((value, name) => {
       headers[name] = value
     })
+
     apiResponseCode.textContent = response.status
     apiResponseHeaders.textContent = Object.entries(headers)
       .map(([k, v]) => `${k}: ${v}`)
@@ -412,35 +422,143 @@ async function handleApiRequest(apiUrl, apiName) {
 
     const contentType = response.headers.get("Content-Type") || ""
 
+    const responseArrayBuffer = await response.arrayBuffer()
+    const responseBlob = new Blob([responseArrayBuffer], { type: contentType })
+
+    // Handle error responses
     if (!response.ok) {
       try {
-        const errorData = await response.json()
-        apiResponseBody.textContent = JSON.stringify(errorData, null, 2)
-      } catch (e) {
-        apiResponseBody.textContent = await response.text()
+        // Create a new blob for text reading to avoid stream issues
+        const textBlob = new Blob([responseArrayBuffer], { type: "text/plain" })
+        const textContent = await blobToText(textBlob)
+
+        try {
+          const errorData = JSON.parse(textContent)
+          apiResponseBody.textContent = JSON.stringify(errorData, null, 2)
+        } catch (jsonError) {
+          apiResponseBody.textContent = textContent
+        }
+      } catch (textError) {
+        apiResponseBody.textContent = `Error reading response: ${textError.message}`
       }
       return
     }
 
-    // --- PERUBAHAN LOGIKA PREVIEW MEDIA ---
-    if (contentType.startsWith("image/") || contentType.startsWith("audio/") || contentType.startsWith("video/")) {
-      const blob = await response.blob()
-      const base64data = await blobToBase64(blob)
-
+    try {
+      // Handle images (PNG, JPG, JPEG, GIF, WebP, SVG, etc.)
       if (contentType.startsWith("image/")) {
-        apiResponseBody.innerHTML = `<img src="${base64data}" alt="${apiName}" style="max-width: 100%; border-radius: 8px;">`
-      } else if (contentType.startsWith("audio/")) {
-        apiResponseBody.innerHTML = `<audio controls src="${base64data}" style="width: 100%;"></audio>`
-      } else if (contentType.startsWith("video/")) {
-        apiResponseBody.innerHTML = `<video controls src="${base64data}" style="max-width: 100%; border-radius: 8px;"></video>`
+        const base64data = await blobToBase64(responseBlob)
+        apiResponseBody.innerHTML = `
+          <div class="media-container">
+            <img src="${base64data}" alt="${apiName}" style="max-width: 100%; max-height: 400px; border-radius: 8px; object-fit: contain;">
+            <div class="media-info">
+              <small class="text-muted">Image • ${(responseBlob.size / 1024).toFixed(2)} KB • ${contentType}</small>
+            </div>
+          </div>
+        `
       }
-    } else if (contentType.includes("application/json")) {
-      const data = await response.json()
-      apiResponseBody.textContent = JSON.stringify(data, null, 2)
-    } else if (contentType.startsWith("text/")) {
-      apiResponseBody.textContent = await response.text()
-    } else {
-      apiResponseBody.textContent = "Preview for this content type is not available."
+      // Handle audio files (MP3, WAV, OGG, etc.)
+      else if (contentType.startsWith("audio/")) {
+        const base64data = await blobToBase64(responseBlob)
+        apiResponseBody.innerHTML = `
+          <div class="media-container">
+            <audio controls src="${base64data}" style="width: 100%; max-width: 400px;">
+              Your browser does not support the audio element.
+            </audio>
+            <div class="media-info">
+              <small class="text-muted">Audio • ${(responseBlob.size / 1024).toFixed(2)} KB • ${contentType}</small>
+            </div>
+          </div>
+        `
+      }
+      // Handle video files (MP4, WebM, etc.)
+      else if (contentType.startsWith("video/")) {
+        const base64data = await blobToBase64(responseBlob)
+        apiResponseBody.innerHTML = `
+          <div class="media-container">
+            <video controls src="${base64data}" style="max-width: 100%; max-height: 400px; border-radius: 8px;">
+              Your browser does not support the video element.
+            </video>
+            <div class="media-info">
+              <small class="text-muted">Video • ${(responseBlob.size / 1024).toFixed(2)} KB • ${contentType}</small>
+            </div>
+          </div>
+        `
+      }
+      // Handle JSON responses
+      else if (contentType.includes("application/json") || contentType.includes("text/json")) {
+        const textBlob = new Blob([responseArrayBuffer], { type: "text/plain" })
+        const textContent = await blobToText(textBlob)
+        try {
+          const jsonData = JSON.parse(textContent)
+          apiResponseBody.textContent = JSON.stringify(jsonData, null, 2)
+        } catch (jsonError) {
+          apiResponseBody.textContent = textContent
+        }
+      }
+      // Handle text responses (HTML, plain text, XML, etc.)
+      else if (contentType.startsWith("text/")) {
+        const textBlob = new Blob([responseArrayBuffer], { type: "text/plain" })
+        const textContent = await blobToText(textBlob)
+        apiResponseBody.textContent = textContent
+      }
+      // Handle PDF files
+      else if (contentType.includes("application/pdf")) {
+        const base64data = await blobToBase64(responseBlob)
+        apiResponseBody.innerHTML = `
+          <div class="media-container">
+            <embed src="${base64data}" type="application/pdf" style="width: 100%; height: 400px; border-radius: 8px;">
+            <div class="media-info">
+              <small class="text-muted">PDF Document • ${(responseBlob.size / 1024).toFixed(2)} KB</small>
+              <br><small class="text-muted">Use download button to save the file</small>
+            </div>
+          </div>
+        `
+      }
+      // Handle other binary files
+      else if (contentType.includes("application/") || contentType.includes("binary")) {
+        apiResponseBody.innerHTML = `
+          <div class="media-container">
+            <div class="binary-file-info">
+              <i class="fas fa-file fa-3x text-muted mb-3"></i>
+              <h6>Binary File</h6>
+              <div class="media-info">
+                <small class="text-muted">Size: ${(responseBlob.size / 1024).toFixed(2)} KB</small><br>
+                <small class="text-muted">Type: ${contentType}</small><br>
+                <small class="text-muted">Use download button to save the file</small>
+              </div>
+            </div>
+          </div>
+        `
+      }
+      // Fallback for unknown content types
+      else {
+        try {
+          const textBlob = new Blob([responseArrayBuffer], { type: "text/plain" })
+          const textContent = await blobToText(textBlob)
+          if (textContent.trim()) {
+            apiResponseBody.textContent = textContent
+          } else {
+            throw new Error("Empty content")
+          }
+        } catch (textError) {
+          apiResponseBody.innerHTML = `
+            <div class="media-container">
+              <div class="binary-file-info">
+                <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+                <h6>Unknown Content Type</h6>
+                <div class="media-info">
+                  <small class="text-muted">Size: ${(responseBlob.size / 1024).toFixed(2)} KB</small><br>
+                  <small class="text-muted">Type: ${contentType || "Unknown"}</small><br>
+                  <small class="text-muted">Preview not available for this content type</small>
+                </div>
+              </div>
+            </div>
+          `
+        }
+      }
+    } catch (processingError) {
+      apiResponseBody.textContent = `Error processing response: ${processingError.message}`
     }
   } catch (error) {
     apiResponseCode.textContent = "Error"
