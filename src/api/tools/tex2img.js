@@ -28,8 +28,22 @@ module.exports = function (app) {
                 )}?${query.toString()}`;
 
                 const res = await axios.get(url, {
-                    responseType: "arraybuffer",
+                    responseType: "arraybuffer", // ambil sebagai binary
+                    timeout: 15000, // 15 detik timeout
+                    validateStatus: () => true, // tangani semua status
                 });
+
+                const contentType = res.headers["content-type"] || "";
+
+                if (contentType.includes("application/json")) {
+                    // Jika server mengembalikan JSON error
+                    const errorData = JSON.parse(Buffer.from(res.data).toString());
+                    throw new Error(errorData?.error || "Unknown error from Pollinations");
+                }
+
+                if (!contentType.includes("image")) {
+                    throw new Error("Response bukan gambar");
+                }
 
                 return Buffer.from(res.data, "binary");
             } catch (err) {
@@ -38,7 +52,6 @@ module.exports = function (app) {
         },
     };
 
-    // Endpoint API Pollinations (hanya prompt bisa diubah)
     app.get("/tools/text2img", async (req, res) => {
         const { prompt } = req.query;
 
@@ -55,7 +68,11 @@ module.exports = function (app) {
             res.set("Content-Type", "image/png");
             res.send(buffer);
         } catch (err) {
-            res.status(500).json({ status: false, error: err.message });
+            // Selalu kirim JSON error jika gagal
+            res.status(500).json({
+                status: false,
+                error: err.message,
+            });
         }
     });
 };
