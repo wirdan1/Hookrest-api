@@ -71,6 +71,11 @@
           "path": "/tools/text2img?prompt="
         },
         {
+          "name": "To Ghibli",
+          "desc": "Note : dapat down sewaktu-waktu",
+          "path": "/api/ghibli?imageUrl="
+        },
+        {
           "name": "Ssweb",
           "desc": "Screenshot website",
           "path": "/tools/screenshot?url="
