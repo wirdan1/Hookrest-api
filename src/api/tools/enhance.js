@@ -1,18 +1,22 @@
 const axios = require("axios");
 const FormData = require("form-data");
 
-const Keyy =
-  "-mY6Nh3EWwV1JihHxpZEGV1hTxe2M_zDyT0i8WNeDV4buW9l02UteD6ZZrlAIO0qf6NhYA";
-
 module.exports = function (app) {
-  async function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  const Keyy =
+    "-mY6Nh3EWwV1JihHxpZEGV1hTxe2M_zDyT0i8WNeDV4buW9l02UteD6ZZrlAIO0qf6NhYA";
 
-  async function processImage(buffer) {
+  // 🔹 START: upload gambar ke API, return jobId
+  app.get("/api/enhance/start", async (req, res) => {
     try {
+      const { imageUrl } = req.query;
+      if (!imageUrl)
+        return res
+          .status(400)
+          .json({ status: false, error: 'Parameter "imageUrl" diperlukan' });
+
+      // pakai form-data tapi kirim URL bukan file
       const form = new FormData();
-      form.append("file", buffer, { filename: "image.jpg" });
+      form.append("url", imageUrl);
 
       const uploadRes = await axios.post(
         "https://reaimagine.zipoapps.com/enhance/autoenhance/",
@@ -24,77 +28,81 @@ module.exports = function (app) {
             "User-Agent":
               "Dalvik/2.1.0 (Linux; U; Android 10; Redmi Note 5 Pro Build/QQ3A.200805.001)",
           },
+          validateStatus: () => true,
         }
       );
 
       const name = uploadRes.headers["name"] || uploadRes.data?.name;
-      if (!name) throw new Error("Gagal ambil 'name' dari upload response");
-
-      let attempts = 0;
-      const maxAttempts = 20;
-
-      while (attempts < maxAttempts) {
-        attempts++;
-        try {
-          const res = await axios.post(
-            "https://reaimagine.zipoapps.com/enhance/request_res/",
-            null,
-            {
-              headers: {
-                name,
-                app: "enhanceit",
-                ad: "0",
-                Authorization: Keyy,
-                "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent":
-                  "Dalvik/2.1.0 (Linux; U; Android 10; Redmi Note 5 Pro Build/QQ3A.200805.001)",
-              },
-              responseType: "arraybuffer",
-              validateStatus: () => true,
-            }
-          );
-
-          if (res.status === 200 && res.data && res.data.length > 0) {
-            return Buffer.from(res.data);
-          }
-        } catch {}
-
-        await sleep(5000);
-      }
-
-      throw new Error("Gagal dapat hasil setelah banyak percobaan.");
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  // Endpoint API
-  app.get("/api/enhance", async (req, res) => {
-    const { imageUrl } = req.query;
-    if (!imageUrl) {
-      return res
-        .status(400)
-        .json({ status: false, error: 'Parameter "imageUrl" diperlukan' });
-    }
-
-    try {
-      // download gambar ke buffer
-      const img = await axios.get(imageUrl, { responseType: "arraybuffer" });
-
-      const resultBuffer = await processImage(Buffer.from(img.data));
+      if (!name)
+        return res.status(500).json({
+          status: false,
+          creator: "Danz-dev",
+          error: "Gagal ambil jobId dari upload response",
+        });
 
       res.json({
         status: true,
         creator: "Danz-dev",
-        result: {
-          imageBase64: resultBuffer.toString("base64"),
-        },
+        result: { jobId: name },
       });
     } catch (err) {
       res.status(500).json({
         status: false,
         creator: "Danz-dev",
-        error: err.message || "Terjadi kesalahan",
+        error: err.message,
+      });
+    }
+  });
+
+  // 🔹 RESULT: cek hasil enhancement pakai jobId
+  app.get("/api/enhance/result", async (req, res) => {
+    try {
+      const { jobId } = req.query;
+      if (!jobId)
+        return res
+          .status(400)
+          .json({ status: false, error: 'Parameter "jobId" diperlukan' });
+
+      const resultRes = await axios.post(
+        "https://reaimagine.zipoapps.com/enhance/request_res/",
+        null,
+        {
+          headers: {
+            name: jobId,
+            app: "enhanceit",
+            ad: "0",
+            Authorization: Keyy,
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent":
+              "Dalvik/2.1.0 (Linux; U; Android 10; Redmi Note 5 Pro Build/QQ3A.200805.001)",
+          },
+          responseType: "arraybuffer",
+          validateStatus: () => true,
+        }
+      );
+
+      if (resultRes.status === 200 && resultRes.data && resultRes.data.length) {
+        const base64Image = Buffer.from(resultRes.data).toString("base64");
+        return res.json({
+          status: true,
+          creator: "Danz-dev",
+          result: {
+            jobId,
+            image: `data:image/jpeg;base64,${base64Image}`,
+          },
+        });
+      }
+
+      res.json({
+        status: true,
+        creator: "Danz-dev",
+        result: { jobId, ready: false },
+      });
+    } catch (err) {
+      res.status(500).json({
+        status: false,
+        creator: "Danz-dev",
+        error: err.message,
       });
     }
   });
