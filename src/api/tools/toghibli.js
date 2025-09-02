@@ -23,7 +23,6 @@ module.exports = function (app) {
       'accept-encoding': 'gzip',
     },
 
-    // cache token in memory
     cache: {
       token: null,
       tokenExpire: 0,
@@ -67,9 +66,17 @@ module.exports = function (app) {
         if (!tokenData.success) return tokenData;
         const { token } = tokenData.result;
 
+        // 🔥 Download image dari URL
+        const imgRes = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        const buffer = Buffer.from(imgRes.data, 'binary');
+
+        // 🔥 Upload sebagai file
         const form = new FormData();
         form.append('studio', ghibli.defaultStudio);
-        form.append('url', imageUrl);
+        form.append('file', buffer, {
+          filename: 'image.jpg',
+          contentType: 'image/jpeg',
+        });
 
         const url = `${ghibli.api.base}${ghibli.api.endpoints.ghibli('/edit-theme')}?uuid=1212`;
         const res = await axios.post(url, form, {
@@ -90,7 +97,7 @@ module.exports = function (app) {
     },
   };
 
-  // Endpoint Express
+  // Endpoint
   app.get('/api/ghibli', async (req, res) => {
     const { imageUrl } = req.query;
     if (!imageUrl) return res.status(400).json({ status: false, error: 'Parameter "imageUrl" diperlukan' });
