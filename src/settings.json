@@ -71,11 +71,6 @@
           "path": "/tools/text2img?prompt="
         },
         {
-          "name": "Enhance",
-          "desc": "Enhance your iage",
-          "path": "/api/enhance?imageUrl="
-        },
-        {
           "name": "To Ghibli",
           "desc": "Note : dapat down sewaktu-waktu",
           "path": "/api/ghibli?imageUrl="
